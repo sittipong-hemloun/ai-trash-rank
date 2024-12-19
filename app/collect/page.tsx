@@ -1,13 +1,21 @@
-// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/app/collect/page.tsx
 /* eslint-disable @next/next/no-img-element */
 'use client'
+
 import { useState, useEffect } from 'react'
 import { Trash2, MapPin, Upload, Loader, Calendar, Weight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'react-hot-toast'
-import { getTrashCollectionTasks, updateTaskStatus, updateUserPoints, updateUserScore, getUserByEmail, createNotification } from '@/utils/db/actions'
+import {
+  getTrashCollectionTasks,
+  updateTaskStatus,
+  updateUserPoints,
+  updateUserScore,
+  getUserByEmail,
+  createNotification,
+} from '@/utils/db/actions'
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { useRouter } from 'next/navigation'
 
 // Make sure to set your Gemini API key in your environment variables
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
@@ -28,10 +36,17 @@ const ITEMS_PER_PAGE = 5
 export default function CollectPage() {
   const [tasks, setTasks] = useState<CollectionTask[]>([])
   const [loading, setLoading] = useState(true)
-  const [hoveredTrashType, setHoveredTrashType] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null)
+  const [user, setUser] = useState<{
+    id: number
+    email: string
+    name: string
+    point: number
+    score: number
+  } | null>(null)
+
+  const router = useRouter()
 
   useEffect(() => {
     const fetchUserAndTasks = async () => {
@@ -49,7 +64,7 @@ export default function CollectPage() {
           }
         } else {
           toast.error('User not logged in. Please log in.')
-          // Redirect to login page or handle this case appropriately
+          router.push('/');
         }
 
         // Fetch tasks
@@ -64,18 +79,23 @@ export default function CollectPage() {
     }
 
     fetchUserAndTasks()
-  }, [])
+  }, [router])
 
   const [selectedTask, setSelectedTask] = useState<CollectionTask | null>(null)
   const [verificationImage, setVerificationImage] = useState<string | null>(null)
-  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'failure'>('idle')
+  const [verificationStatus, setVerificationStatus] = useState<
+    'idle' | 'verifying' | 'success' | 'failure'
+  >('idle')
   const [verificationResult, setVerificationResult] = useState<{
-    trashTypeMatch: boolean;
-    quantityMatch: boolean;
-    confidence: number;
+    trashTypeMatch: boolean
+    quantityMatch: boolean
+    confidence: number
   } | null>(null)
 
-  const handleStatusChange = async (taskId: number, newStatus: CollectionTask['status']) => {
+  const handleStatusChange = async (
+    taskId: number,
+    newStatus: CollectionTask['status']
+  ) => {
     if (!user) {
       toast.error('Please log in to collect trash.')
       return
@@ -85,7 +105,9 @@ export default function CollectPage() {
       const updatedTask = await updateTaskStatus(taskId, newStatus, user.id)
       if (updatedTask) {
         setTasks(tasks.map(task =>
-          task.id === taskId ? { ...task, status: newStatus, collectorId: user.id } : task
+          task.id === taskId
+            ? { ...task, status: newStatus, collectorId: user.id }
+            : task
         ))
         toast.success('Task status updated successfully')
       } else {
@@ -114,14 +136,14 @@ export default function CollectPage() {
 
   const convertToJSONFormat = (text: string) => {
     // Remove code block markers and extract JSON string
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}');
+    const jsonStart = text.indexOf('{')
+    const jsonEnd = text.lastIndexOf('}')
     if (jsonStart !== -1 && jsonEnd !== -1) {
-      const jsonString = text.slice(jsonStart, jsonEnd + 1);
-      return jsonString;
+      const jsonString = text.slice(jsonStart, jsonEnd + 1)
+      return jsonString
     }
-    throw new Error('Invalid JSON format');
-  };
+    throw new Error('Invalid JSON format')
+  }
 
   const handleVerify = async () => {
     if (!selectedTask || !verificationImage || !user) {
@@ -147,42 +169,45 @@ export default function CollectPage() {
       ]
 
       const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
-        1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${selectedTask.trashType}
-        2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง ใกล้เคียงกับ: ${selectedTask.amount}
-        3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
-        ตอบกลับในรูปแบบ JSON เช่นนี้:
-        {
-          "trashTypeMatch": true/false,
-          "quantityMatch": true/false,
-          "confidence": confidence level as a number between 0 and 1
-        }
-        ตัวอย่าง:
-        {
-          "trashTypeMatch": true,
-          "quantityMatch": true,
-          "confidence": 0.9
-        }
-        `
+1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${selectedTask.trashType}
+2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง ใกล้เคียงกับ: ${selectedTask.amount}
+3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
+ตอบกลับในรูปแบบ JSON เช่นนี้:
+{
+  "trashTypeMatch": true/false,
+  "quantityMatch": true/false,
+  "confidence": confidence level as a number between 0 and 1
+}
+ตัวอย่าง:
+{
+  "trashTypeMatch": true,
+  "quantityMatch": true,
+  "confidence": 0.9
+}`
 
       const result = await model.generateContent([prompt, ...imageParts])
       const response = await result.response
       const text = await response.text()
 
       try {
-        const parsedText = convertToJSONFormat(text);
+        const parsedText = convertToJSONFormat(text)
         const parsedResult = JSON.parse(parsedText)
         console.log('Parsed verification result:', parsedResult)
         setVerificationResult({
           trashTypeMatch: parsedResult.trashTypeMatch,
           quantityMatch: parsedResult.quantityMatch,
-          confidence: parsedResult.confidence
+          confidence: parsedResult.confidence,
         })
         setVerificationStatus('success')
 
-        if (parsedResult.trashTypeMatch && parsedResult.quantityMatch && parsedResult.confidence > 0.7) {
+        if (
+          parsedResult.trashTypeMatch &&
+          parsedResult.quantityMatch &&
+          parsedResult.confidence > 0.7
+        ) {
           await handleStatusChange(selectedTask.id, 'verified')
-          const earnedPoints = 50 // Assign points as per your logic
-          const earnedScore = 20 // Assign score as per your logic
+          const earnedPoints = 50
+          const earnedScore = 20
 
           // Update user's points and score
           await updateUserPoints(user.id, earnedPoints)
@@ -195,19 +220,24 @@ export default function CollectPage() {
             'reward'
           )
 
-          toast.success(`Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`, {
-            duration: 5000,
-            position: 'top-center',
-          })
+          toast.success(
+            `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+            {
+              duration: 5000,
+              position: 'top-center',
+            }
+          )
         } else {
-          toast.error('Verification failed. The collected trash does not match the reported trash.', {
-            duration: 5000,
-            position: 'top-center',
-          })
+          toast.error(
+            'Verification failed. The collected trash does not match the reported trash.',
+            {
+              duration: 5000,
+              position: 'top-center',
+            }
+          )
         }
       } catch (error) {
-        console.log(error);
-
+        console.log(error)
         console.error('Failed to parse JSON response:', text)
         setVerificationStatus('failure')
       }
@@ -236,7 +266,7 @@ export default function CollectPage() {
           type="text"
           placeholder="ค้นหาตามพื้นที่"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
 
@@ -248,7 +278,10 @@ export default function CollectPage() {
         <>
           <div className="space-y-4">
             {paginatedTasks.map(task => (
-              <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div
+                key={task.id}
+                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <h2 className="text-lg font-medium text-gray-800 flex items-center">
                     <MapPin className="w-5 h-5 mr-2 text-gray-500" />
@@ -256,52 +289,58 @@ export default function CollectPage() {
                   </h2>
                   <StatusBadge status={task.status} />
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 mb-3">
+                <div className="flex justify-between gap-2 text-sm text-gray-600 mb-3">
                   <div className="flex items-center relative">
                     <Trash2 className="w-4 h-4 mr-2 text-gray-500" />
-                    <span
-                      onMouseEnter={() => setHoveredTrashType(task.trashType)}
-                      onMouseLeave={() => setHoveredTrashType(null)}
-                      className="cursor-pointer"
-                    >
-                      {/* {task.trashType.length > 8 ? `${task.trashType.slice(0, 8)}...` : task.trashType} */}
-                      {task.trashType}
-                    </span>
-                    {hoveredTrashType === task.trashType && (
-                      <div className="absolute left-0 top-full mt-1 p-2 bg-gray-800 text-white text-xs rounded shadow-lg z-10">
-                        {task.trashType}
-                      </div>
-                    )}
+                    <span>{task.trashType}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Weight className="w-4 h-4 mr-2 text-gray-500" />
-                    {task.amount}
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                    {task.date}
-                  </div>
-                  {/* Image */}
-                  <div className="flex items-center col-span-3">
-                    <img src={task.imageUrl} alt="Trash" className="w-full h-80 object-cover rounded-md" />
+                  <div className="flex gap-5">
+                    <div className="flex items-center">
+                      <Weight className="w-4 h-4 mr-2 text-gray-500" />
+                      {task.amount}
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                      {task.date}
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-end">
+                {/* Image */}
+                <div className="flex items-center">
+                  <img
+                    src={task.imageUrl}
+                    alt="Trash"
+                    className="w-full h-80 object-cover rounded-md"
+                  />
+                </div>
+                <div className="flex justify-end mt-3">
                   {task.status === 'pending' && (
-                    <Button onClick={() => handleStatusChange(task.id, 'in_progress')} variant="outline" size="sm">
+                    <Button
+                      onClick={() => handleStatusChange(task.id, 'in_progress')}
+                      variant="outline"
+                      size="sm"
+                    >
                       เริ่มเก็บขยะ
                     </Button>
                   )}
                   {task.status === 'in_progress' && task.collectorId === user?.id && (
-                    <Button onClick={() => setSelectedTask(task)} variant="outline" size="sm">
+                    <Button
+                      onClick={() => setSelectedTask(task)}
+                      variant="outline"
+                      size="sm"
+                    >
                       เก็บเสร็จสิ้นและตรวจสอบ
                     </Button>
                   )}
                   {task.status === 'in_progress' && task.collectorId !== user?.id && (
-                    <span className="text-yellow-600 text-sm font-medium">คนอื่นกำลังดำเนินการ</span>
+                    <span className="text-yellow-600 text-sm font-medium">
+                      คนอื่นกำลังดำเนินการ
+                    </span>
                   )}
                   {task.status === 'verified' && (
-                    <span className="text-green-600 text-sm font-medium">จัดเก็บแล้ว</span>
+                    <span className="text-green-600 text-sm font-medium">
+                      จัดเก็บแล้ว
+                    </span>
                   )}
                 </div>
               </div>
@@ -334,9 +373,14 @@ export default function CollectPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold mb-4">ตรวจสอบการเก็บขยะ</h3>
-            <p className="mb-4 text-sm text-gray-600">อัปโหลดรูปขยะที่เก็บเพื่อให้เราตรวจสอบและรอรับ point และ score ของคุณ</p>
+            <p className="mb-4 text-sm text-gray-600">
+              อัปโหลดรูปขยะที่เก็บเพื่อให้เราตรวจสอบและรอรับ point และ score ของคุณ
+            </p>
             <div className="mb-4">
-              <label htmlFor="verification-image" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="verification-image"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 อัปโหลดรูปขยะที่เก็บ
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -348,7 +392,14 @@ export default function CollectPage() {
                       className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
                     >
                       <span>อัปโหลดรูป</span>
-                      <input id="verification-image" name="verification-image" type="file" className="sr-only" onChange={handleImageUpload} accept="image/*" />
+                      <input
+                        id="verification-image"
+                        name="verification-image"
+                        type="file"
+                        className="sr-only"
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                      />
                     </label>
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF ไปจนถึง 10MB</p>
@@ -356,7 +407,11 @@ export default function CollectPage() {
               </div>
             </div>
             {verificationImage && (
-              <img src={verificationImage} alt="Verification" className="mb-4 rounded-md w-full" />
+              <img
+                src={verificationImage}
+                alt="Verification"
+                className="mb-4 rounded-md w-full"
+              />
             )}
             <Button
               onClick={handleVerify}
@@ -368,17 +423,25 @@ export default function CollectPage() {
                   <Loader className="animate-spin -ml-1 mr-3 h-5 w-5" />
                   กำลังตรวจสอบ...
                 </>
-              ) : 'Verify Collection'}
+              ) : (
+                'Verify Collection'
+              )}
             </Button>
             {verificationStatus === 'success' && verificationResult && (
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <p>Trash Type Match: {verificationResult.trashTypeMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}</p>
-                <p>Quantity Match: {verificationResult.quantityMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}</p>
+                <p>
+                  Trash Type Match: {verificationResult.trashTypeMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}
+                </p>
+                <p>
+                  Quantity Match: {verificationResult.quantityMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}
+                </p>
                 <p>Confidence: {(verificationResult.confidence * 100).toFixed(2)}%</p>
               </div>
             )}
             {verificationStatus === 'failure' && (
-              <p className="mt-2 text-red-600 text-center text-sm">การตรวจสอบล้มเหลว ลองอีกครั้ง</p>
+              <p className="mt-2 text-red-600 text-center text-sm">
+                การตรวจสอบล้มเหลว ลองอีกครั้ง
+              </p>
             )}
             <Button onClick={() => setSelectedTask(null)} variant="outline" className="w-full mt-2">
               Close
@@ -391,7 +454,10 @@ export default function CollectPage() {
 }
 
 function StatusBadge({ status }: { status: CollectionTask['status'] }) {
-  const statusConfig = {
+  const statusConfig: Record<
+    CollectionTask['status'],
+    { color: string }
+  > = {
     pending: { color: 'bg-yellow-100 text-yellow-800' },
     in_progress: { color: 'bg-blue-100 text-blue-800' },
     completed: { color: 'bg-green-100 text-green-800' },
@@ -400,18 +466,19 @@ function StatusBadge({ status }: { status: CollectionTask['status'] }) {
 
   const { color } = statusConfig[status]
 
-  const statusInThai = {
+  const statusInThai: Record<CollectionTask['status'], string> = {
     pending: 'รอดำเนินการ',
     in_progress: 'กำลังดำเนินการ',
     completed: 'เสร็จสิ้น',
     verified: 'ตรวจสอบแล้ว',
-  }[status]
-
+  }
 
   return (
-    <div className='w-36 flex justify-end'>
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${color} flex w-fit items-center`}>
-        {statusInThai.replace('_', ' ')}
+    <div className="w-36 flex justify-end">
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${color} flex w-fit items-center`}
+      >
+        {statusInThai[status].replace('_', ' ')}
       </span>
     </div>
   )

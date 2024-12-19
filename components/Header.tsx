@@ -284,7 +284,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   <Link href="/settings">โปรไฟล์</Link>
                 </DropdownMenuItem>
                 {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
-                <DropdownMenuItem onClick={logout}>อกกจากระบบ</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>ออกจากระบบ</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

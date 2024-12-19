@@ -22,7 +22,7 @@ export default function Sidebar({ open }: SidebarProps) {
             <Link key={item.href} href={item.href} passHref>
               <Button 
                 variant={pathname === item.href ? "secondary" : "ghost"}
-                className={`w-full justify-start py-3 ${
+                className={`w-full justify-start py-3 mb-2 ${
                   pathname === item.href 
                     ? "text-green-800" 
                     : "text-gray-600"
