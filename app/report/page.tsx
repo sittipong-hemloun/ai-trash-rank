@@ -201,7 +201,7 @@ export default function ReportPage() {
         }));
         setReports(recentReports);
       } else {
-        router.push('/login');
+        router.push('/');
       }
     })();
   }, [router]);

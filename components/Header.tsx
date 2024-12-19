@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Coins, Search, Bell, Menu } from "lucide-react"
+import { Search, Bell, Menu, Star } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -254,7 +254,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="mr-2 md:mr-4 flex items-center bg-gray-100 rounded-full px-2 md:px-3 py-1">
-            <Coins className="h-4 w-4 md:h-5 md:w-5 mr-1 text-green-500" />
+            <Star className="h-4 w-4 md:h-5 md:w-5 mr-1 text-green-500" />
             <span className="font-semibold text-sm md:text-base text-gray-800">
               {point.toFixed(2)}
             </span>
