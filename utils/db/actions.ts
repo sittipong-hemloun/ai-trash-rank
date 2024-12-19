@@ -1,5 +1,5 @@
 import { db } from './dbConfig';
-import { Users, Reports, CollectedWastes, Notifications } from './schema';
+import { Users, Reports, Notifications } from './schema';
 import { eq, sql, and, desc } from 'drizzle-orm';
 
 export async function createUser(email: string, profileImage: string, name: string) {
@@ -61,7 +61,7 @@ export async function updateUserScore(userId: number, scoreToAdd: number) {
 export async function createReport(
   userId: number,
   location: string,
-  wasteType: string,
+  trashType: string,
   amount: string,
   imageUrl?: string,
   verificationResult?: unknown
@@ -72,7 +72,7 @@ export async function createReport(
       .values({
         userId,
         location,
-        wasteType,
+        trashType,
         amount,
         imageUrl,
         verificationResult,
@@ -81,14 +81,14 @@ export async function createReport(
       .returning()
       .execute();
 
-    // Award points for reporting waste
+    // Award points for reporting trash
     const pointsEarned = 10;
     await updateUserPoints(userId, pointsEarned);
 
     // Create a notification for the user
     await createNotification(
       userId,
-      `You've earned ${pointsEarned} points for reporting waste!`,
+      `You've earned ${pointsEarned} points for reporting trash!`,
       'reward'
     );
 
@@ -124,13 +124,13 @@ export async function getRecentReports(limit: number = 10) {
   }
 }
 
-export async function getWasteCollectionTasks(limit: number = 20) {
+export async function getTrashCollectionTasks(limit: number = 20) {
   try {
     const tasks = await db
       .select({
         id: Reports.id,
         location: Reports.location,
-        wasteType: Reports.wasteType,
+        trashType: Reports.trashType,
         amount: Reports.amount,
         status: Reports.status,
         date: Reports.createdAt,
@@ -146,7 +146,7 @@ export async function getWasteCollectionTasks(limit: number = 20) {
       date: task.date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
     }));
   } catch (error) {
-    console.error("Error fetching waste collection tasks:", error);
+    console.error("Error fetching trash collection tasks:", error);
     return [];
   }
 }
@@ -170,38 +170,7 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
   }
 }
 
-// Collected Wastes functions
-
-export async function createCollectedWaste(reportId: number, collectorId: number) {
-  try {
-    const [collectedWaste] = await db
-      .insert(CollectedWastes)
-      .values({
-        reportId,
-        collectorId,
-        collectionDate: new Date(),
-        status: 'verified',
-      })
-      .returning()
-      .execute();
-    return collectedWaste;
-  } catch (error) {
-    console.error("Error creating collected waste:", error);
-    return null;
-  }
-}
-
-export async function getCollectedWastesByCollector(collectorId: number) {
-  try {
-    return await db.select().from(CollectedWastes).where(eq(CollectedWastes.collectorId, collectorId)).execute();
-  } catch (error) {
-    console.error("Error fetching collected wastes:", error);
-    return [];
-  }
-}
-
 // Notification functions
-
 export async function createNotification(userId: number, message: string, type: string) {
   try {
     const [notification] = await db

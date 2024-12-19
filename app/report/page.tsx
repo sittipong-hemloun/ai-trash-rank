@@ -23,12 +23,12 @@ export default function ReportPage() {
 
   // State
   const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null);
-  const [reports, setReports] = useState<Array<{ id: number; location: string; wasteType: string; amount: string; createdAt: string }>>([]);
+  const [reports, setReports] = useState<Array<{ id: number; location: string; trashType: string; amount: string; createdAt: string }>>([]);
   const [newReport, setNewReport] = useState({ location: '', type: '', amount: '' });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'failure'>('idle');
-  const [verificationResult, setVerificationResult] = useState<{ wasteType: string; quantity: string; confidence: number } | null>(null);
+  const [verificationResult, setVerificationResult] = useState<{ trashType: string; quantity: string; confidence: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
 
@@ -91,7 +91,7 @@ export default function ReportPage() {
     throw new Error('Invalid JSON format');
   };
 
-  // Handle waste verification using AI
+  // Handle trash verification using AI
   const handleVerify = async () => {
     if (!file) {
       toast.error('Please select a file to verify.');
@@ -113,11 +113,18 @@ export default function ReportPage() {
 
       ตอบกลับในรูปแบบ JSON เช่นนี้:
       {
-        "wasteType": "ประเภทของขยะ",
+        "trashType": "ประเภทของขยะ",
         "quantity": "ปริมาณโดยประมาณพร้อมหน่วย format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง",
         "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1,
         "suggest": "ข้อเสนอแนะเพิ่มเติม (ถ้ามี)"
-      }`;
+      }
+      ตัวอย่าง:
+      {
+        "trashType": "พลาสติก, กระดาษ",
+        "quantity": "1 กก.",
+        "confidence": 0.95
+      }
+      `;
 
       const result = await model.generateContent([{ inlineData: { data: base64Data.split(',')[1], mimeType: file.type } }, prompt]);
       const response = await result.response;
@@ -126,12 +133,12 @@ export default function ReportPage() {
         const parsedText = convertToJSONFormat(text);
         const parsedResult = JSON.parse(parsedText);
 
-        if (parsedResult.wasteType && parsedResult.quantity && parsedResult.confidence) {
+        if (parsedResult.trashType && parsedResult.quantity && parsedResult.confidence) {
           setVerificationResult(parsedResult);
           setVerificationStatus('success');
           setNewReport({
             ...newReport,
-            type: parsedResult.wasteType,
+            type: parsedResult.trashType,
             amount: parsedResult.quantity,
           });
           console.log('Verification result:', parsedResult);
@@ -144,17 +151,17 @@ export default function ReportPage() {
       }
 
     } catch (error) {
-      console.error('Error verifying waste:', error);
+      console.error('Error verifying trash:', error);
       setVerificationStatus('failure');
-      toast.error('Failed to verify the waste. Please try again.');
+      toast.error('Failed to verify the trash. Please try again.');
     }
   };
 
-  // Handle form submission for creating a new waste report
+  // Handle form submission for creating a new trash report
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || verificationStatus !== 'success') {
-      toast.error('Please verify the waste or log in before submitting.');
+      toast.error('Please verify the trash or log in before submitting.');
       return;
     }
 
@@ -166,7 +173,7 @@ export default function ReportPage() {
         setReports([{
           id: report.id,
           location: report.location,
-          wasteType: report.wasteType,
+          trashType: report.trashType,
           amount: report.amount,
           createdAt: report.createdAt.toISOString(),
         }, ...reports]);
@@ -203,11 +210,11 @@ export default function ReportPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะ</h1>
 
-      {/* Form for waste report submission */}
+      {/* Form for trash report submission */}
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl mb-12">
         {/* File upload section */}
         <div className="mb-8">
-          <label htmlFor="waste-image" className="block text-lg font-medium text-gray-700 mb-2">
+          <label htmlFor="trash-image" className="block text-lg font-medium text-gray-700 mb-2">
             อัปโหลดรูปภาพขยะ
           </label>
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed hover:border-green-500 transition-colors duration-300">
@@ -215,11 +222,11 @@ export default function ReportPage() {
               <Upload className="mx-auto h-12 w-12 text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="waste-image"
+                  htmlFor="trash-image"
                   className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
                 >
                   <span>คลิกเพื่ออัปโหลดรูปขยะ</span>
-                  <input id="waste-image" name="waste-image" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                  <input id="trash-image" name="trash-image" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
                 </label>
                 <p className="pl-1">หรือลากวางรูปจากโฟลเดอร์</p>
               </div>
@@ -231,10 +238,10 @@ export default function ReportPage() {
         </div>
 
         {preview && (
-          <Image src={preview} alt="Waste preview" className="max-w-full h-auto shadow-md mb-4" width={5000} height={500} />
+          <Image src={preview} alt="Trash preview" className="max-w-full h-auto shadow-md mb-4" width={5000} height={500} />
         )}
 
-        {/* Waste verification and form submission */}
+        {/* Trash verification and form submission */}
         <Button
           type="button"
           onClick={handleVerify}
@@ -257,7 +264,7 @@ export default function ReportPage() {
                   ตรวจสอบสำเร็จ
                 </h3>
                 <div className="mt-2 text-sm text-green-700">
-                  <p>ประเภทขยะ: {verificationResult.wasteType}</p>
+                  <p>ประเภทขยะ: {verificationResult.trashType}</p>
                   <p>ปริมาณขยะ: {verificationResult.quantity}</p>
                   <p>ความแม่นยำ: {(verificationResult.confidence * 100).toFixed(2)}%</p>
                 </div>
@@ -360,7 +367,7 @@ export default function ReportPage() {
                     <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
                     {report.location}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.wasteType}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.trashType}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.amount}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.createdAt}</td>
                 </tr>

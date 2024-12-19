@@ -6,7 +6,7 @@ import { Trash2, MapPin, CheckCircle, Clock, Upload, Loader, Calendar, Weight, S
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'react-hot-toast'
-import { getWasteCollectionTasks, updateTaskStatus, updateUserPoints, updateUserScore, createCollectedWaste, getUserByEmail, createNotification } from '@/utils/db/actions'
+import { getTrashCollectionTasks, updateTaskStatus, updateUserPoints, updateUserScore, getUserByEmail, createNotification } from '@/utils/db/actions'
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // Make sure to set your Gemini API key in your environment variables
@@ -15,7 +15,7 @@ const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
 type CollectionTask = {
   id: number
   location: string
-  wasteType: string
+  trashType: string
   amount: string
   status: 'pending' | 'in_progress' | 'completed' | 'verified'
   date: string
@@ -28,7 +28,7 @@ const ITEMS_PER_PAGE = 5
 export default function CollectPage() {
   const [tasks, setTasks] = useState<CollectionTask[]>([])
   const [loading, setLoading] = useState(true)
-  const [hoveredWasteType, setHoveredWasteType] = useState<string | null>(null)
+  const [hoveredTrashType, setHoveredTrashType] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null)
@@ -53,7 +53,7 @@ export default function CollectPage() {
         }
 
         // Fetch tasks
-        const fetchedTasks = await getWasteCollectionTasks()
+        const fetchedTasks = await getTrashCollectionTasks()
         setTasks(fetchedTasks as CollectionTask[])
       } catch (error) {
         console.error('Error fetching user and tasks:', error)
@@ -70,14 +70,14 @@ export default function CollectPage() {
   const [verificationImage, setVerificationImage] = useState<string | null>(null)
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'failure'>('idle')
   const [verificationResult, setVerificationResult] = useState<{
-    wasteTypeMatch: boolean;
+    trashTypeMatch: boolean;
     quantityMatch: boolean;
     confidence: number;
   } | null>(null)
 
   const handleStatusChange = async (taskId: number, newStatus: CollectionTask['status']) => {
     if (!user) {
-      toast.error('Please log in to collect waste.')
+      toast.error('Please log in to collect trash.')
       return
     }
 
@@ -147,18 +147,18 @@ export default function CollectPage() {
       ]
 
       const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
-        1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${selectedTask.wasteType}
+        1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${selectedTask.trashType}
         2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง ใกล้เคียงกับ: ${selectedTask.amount}
         3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
         ตอบกลับในรูปแบบ JSON เช่นนี้:
         {
-          "wasteTypeMatch": true/false,
+          "trashTypeMatch": true/false,
           "quantityMatch": true/false,
           "confidence": confidence level as a number between 0 and 1
         }
         ตัวอย่าง:
         {
-          "wasteTypeMatch": true,
+          "trashTypeMatch": true,
           "quantityMatch": true,
           "confidence": 0.9
         }
@@ -173,13 +173,13 @@ export default function CollectPage() {
         const parsedResult = JSON.parse(parsedText)
         console.log('Parsed verification result:', parsedResult)
         setVerificationResult({
-          wasteTypeMatch: parsedResult.wasteTypeMatch,
+          trashTypeMatch: parsedResult.trashTypeMatch,
           quantityMatch: parsedResult.quantityMatch,
           confidence: parsedResult.confidence
         })
         setVerificationStatus('success')
 
-        if (parsedResult.wasteTypeMatch && parsedResult.quantityMatch && parsedResult.confidence > 0.7) {
+        if (parsedResult.trashTypeMatch && parsedResult.quantityMatch && parsedResult.confidence > 0.7) {
           await handleStatusChange(selectedTask.id, 'verified')
           const earnedPoints = 50 // Assign points as per your logic
           const earnedScore = 20 // Assign score as per your logic
@@ -187,9 +187,6 @@ export default function CollectPage() {
           // Update user's points and score
           await updateUserPoints(user.id, earnedPoints)
           await updateUserScore(user.id, earnedScore)
-
-          // Save the collected waste
-          await createCollectedWaste(selectedTask.id, user.id)
 
           // Create a notification for the user
           await createNotification(
@@ -203,7 +200,7 @@ export default function CollectPage() {
             position: 'top-center',
           })
         } else {
-          toast.error('Verification failed. The collected waste does not match the reported waste.', {
+          toast.error('Verification failed. The collected trash does not match the reported trash.', {
             duration: 5000,
             position: 'top-center',
           })
@@ -215,7 +212,7 @@ export default function CollectPage() {
         setVerificationStatus('failure')
       }
     } catch (error) {
-      console.error('Error verifying waste:', error)
+      console.error('Error verifying trash:', error)
       setVerificationStatus('failure')
     }
   }
@@ -232,7 +229,7 @@ export default function CollectPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Waste Collection Tasks</h1>
+      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Trash Collection Tasks</h1>
 
       <div className="mb-4 flex items-center">
         <Input
@@ -267,15 +264,15 @@ export default function CollectPage() {
                   <div className="flex items-center relative">
                     <Trash2 className="w-4 h-4 mr-2 text-gray-500" />
                     <span
-                      onMouseEnter={() => setHoveredWasteType(task.wasteType)}
-                      onMouseLeave={() => setHoveredWasteType(null)}
+                      onMouseEnter={() => setHoveredTrashType(task.trashType)}
+                      onMouseLeave={() => setHoveredTrashType(null)}
                       className="cursor-pointer"
                     >
-                      {task.wasteType.length > 8 ? `${task.wasteType.slice(0, 8)}...` : task.wasteType}
+                      {task.trashType.length > 8 ? `${task.trashType.slice(0, 8)}...` : task.trashType}
                     </span>
-                    {hoveredWasteType === task.wasteType && (
+                    {hoveredTrashType === task.trashType && (
                       <div className="absolute left-0 top-full mt-1 p-2 bg-gray-800 text-white text-xs rounded shadow-lg z-10">
-                        {task.wasteType}
+                        {task.trashType}
                       </div>
                     )}
                   </div>
@@ -289,7 +286,7 @@ export default function CollectPage() {
                   </div>
                   {/* Image */}
                   <div className="flex items-center col-span-3">
-                    <img src={task.imageUrl} alt="Waste" className="w-full h-80 object-cover rounded-md" />
+                    <img src={task.imageUrl} alt="Trash" className="w-full h-80 object-cover rounded-md" />
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -340,7 +337,7 @@ export default function CollectPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold mb-4">Verify Collection</h3>
-            <p className="mb-4 text-sm text-gray-600">Upload a photo of the collected waste to verify and earn your reward.</p>
+            <p className="mb-4 text-sm text-gray-600">Upload a photo of the collected trash to verify and earn your reward.</p>
             <div className="mb-4">
               <label htmlFor="verification-image" className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Image
@@ -378,7 +375,7 @@ export default function CollectPage() {
             </Button>
             {verificationStatus === 'success' && verificationResult && (
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <p>Waste Type Match: {verificationResult.wasteTypeMatch ? 'Yes' : 'No'}</p>
+                <p>Trash Type Match: {verificationResult.trashTypeMatch ? 'Yes' : 'No'}</p>
                 <p>Quantity Match: {verificationResult.quantityMatch ? 'Yes' : 'No'}</p>
                 <p>Confidence: {(verificationResult.confidence * 100).toFixed(2)}%</p>
               </div>
@@ -397,7 +394,7 @@ export default function CollectPage() {
       {/* {user ? (
         <p className="text-sm text-gray-600 mb-4">Logged in as: {user.name}</p>
       ) : (
-        <p className="text-sm text-red-600 mb-4">Please log in to collect waste and earn rewards.</p>
+        <p className="text-sm text-red-600 mb-4">Please log in to collect trash and earn rewards.</p>
       )} */}
     </div>
   )
