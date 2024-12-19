@@ -6,6 +6,8 @@ export const Users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   profileImage: text("profile_image"),
   name: varchar("name", { length: 255 }).notNull(),
+  point: integer("point").notNull().default(0), // New field for points
+  score: integer("score").notNull().default(0), // New field for score
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -21,20 +23,6 @@ export const Reports = pgTable("reports", {
   status: varchar("status", { length: 255 }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   collectorId: integer("collector_id").references(() => Users.id),
-});
-
-// Rewards table
-export const Rewards = pgTable("rewards", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => Users.id).notNull(),
-  points: integer("points").notNull().default(0),
-  level: integer("level").notNull().default(1),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  isAvailable: boolean("is_available").notNull().default(true),
-  description: text("description"),
-  name: varchar("name", { length: 255 }).notNull(),
-  collectionInfo: text("collection_info").notNull(),
 });
 
 // CollectedWastes table
@@ -54,14 +42,4 @@ export const Notifications = pgTable("notifications", {
   type: varchar("type", { length: 50 }).notNull(),
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// New Transactions table
-export const Transactions = pgTable("transactions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => Users.id).notNull(),
-  type: varchar("type", { length: 20 }).notNull(), // 'earned' or 'redeemed'
-  amount: integer("amount").notNull(),
-  description: text("description").notNull(),
-  date: timestamp("date").defaultNow().notNull(),
 });

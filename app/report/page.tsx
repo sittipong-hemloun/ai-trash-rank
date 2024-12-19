@@ -22,7 +22,7 @@ export default function ReportPage() {
   const router = useRouter();
 
   // State
-  const [user, setUser] = useState<{ id: number; email: string; name: string } | null>(null);
+  const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null);
   const [reports, setReports] = useState<Array<{ id: number; location: string; wasteType: string; amount: string; createdAt: string }>>([]);
   const [newReport, setNewReport] = useState({ location: '', type: '', amount: '' });
   const [file, setFile] = useState<File | null>(null);
@@ -91,7 +91,6 @@ export default function ReportPage() {
     throw new Error('Invalid JSON format');
   };
 
-
   // Handle waste verification using AI
   const handleVerify = async () => {
     if (!file) {
@@ -106,7 +105,6 @@ export default function ReportPage() {
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       // Converts the selected image file to a Base64-encoded string
       const base64Data = await readFileAsBase64(file);
-      // console.log('Base64 data:', base64Data);
 
       const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
       1. ประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้)
@@ -234,8 +232,6 @@ export default function ReportPage() {
 
         {preview && (
           <Image src={preview} alt="Waste preview" className="max-w-full h-auto shadow-md mb-4" width={5000} height={500} />
-          // <img src={preview} alt="Waste preview" className="max-w-full h-auto shadow-md" />
-          // </div>
         )}
 
         {/* Waste verification and form submission */}

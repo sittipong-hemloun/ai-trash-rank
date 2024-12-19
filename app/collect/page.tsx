@@ -1,3 +1,4 @@
+// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/app/collect/page.tsx
 /* eslint-disable @next/next/no-img-element */
 'use client'
 import { useState, useEffect } from 'react'
@@ -5,7 +6,7 @@ import { Trash2, MapPin, CheckCircle, Clock, Upload, Loader, Calendar, Weight, S
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'react-hot-toast'
-import { getWasteCollectionTasks, updateTaskStatus, saveReward, saveCollectedWaste, getUserByEmail } from '@/utils/db/actions'
+import { getWasteCollectionTasks, updateTaskStatus, updateUserPoints, updateUserScore, createCollectedWaste, getUserByEmail, createNotification } from '@/utils/db/actions'
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // Make sure to set your Gemini API key in your environment variables
@@ -30,7 +31,7 @@ export default function CollectPage() {
   const [hoveredWasteType, setHoveredWasteType] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [user, setUser] = useState<{ id: number; email: string; name: string } | null>(null)
+  const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null)
 
   useEffect(() => {
     const fetchUserAndTasks = async () => {
@@ -165,7 +166,7 @@ export default function CollectPage() {
 
       const result = await model.generateContent([prompt, ...imageParts])
       const response = await result.response
-      const text = response.text()
+      const text = await response.text()
 
       try {
         const parsedText = convertToJSONFormat(text);
@@ -180,15 +181,24 @@ export default function CollectPage() {
 
         if (parsedResult.wasteTypeMatch && parsedResult.quantityMatch && parsedResult.confidence > 0.7) {
           await handleStatusChange(selectedTask.id, 'verified')
-          const earnedReward = Math.floor(Math.random() * 50) + 10 // Random reward between 10 and 59
+          const earnedPoints = 50 // Assign points as per your logic
+          const earnedScore = 20 // Assign score as per your logic
 
-          // Save the reward
-          await saveReward(user.id, earnedReward)
+          // Update user's points and score
+          await updateUserPoints(user.id, earnedPoints)
+          await updateUserScore(user.id, earnedScore)
 
           // Save the collected waste
-          await saveCollectedWaste(selectedTask.id, user.id)
+          await createCollectedWaste(selectedTask.id, user.id)
 
-          toast.success(`Verification successful! You earned ${earnedReward} tokens!`, {
+          // Create a notification for the user
+          await createNotification(
+            user.id,
+            `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+            'reward'
+          )
+
+          toast.success(`Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`, {
             duration: 5000,
             position: 'top-center',
           })
@@ -277,9 +287,8 @@ export default function CollectPage() {
                     <Calendar className="w-4 h-4 mr-2 text-gray-500" />
                     {task.date}
                   </div>
-                  {/* image */}
+                  {/* Image */}
                   <div className="flex items-center col-span-3">
-                    {/* <Camera className="w-4 h-4 mr-2 text-gray-500" /> */}
                     <img src={task.imageUrl} alt="Waste" className="w-full h-80 object-cover rounded-md" />
                   </div>
                 </div>
