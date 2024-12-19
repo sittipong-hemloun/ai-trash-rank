@@ -7,7 +7,7 @@ import Header from "@/components/Header"
 import Sidebar from "@/components/Sidebar"
 // import 'leaflet/dist/leaflet.css'
 import { Toaster } from 'react-hot-toast'
-import { getAvailableRewards, getUserByEmail } from '@/utils/db/actions'
+import { getUserByEmail } from '@/utils/db/actions'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +17,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [totalEarnings, setTotalEarnings] = useState(0)
 
   useEffect(() => {
     const fetchTotalEarnings = async () => {
@@ -28,9 +27,9 @@ export default function RootLayout({
           console.log('user from layout', user);
           
           if (user) {
-            const availableRewards = await getAvailableRewards(user.id) as any
-            console.log('availableRewards from layout', availableRewards);
-                        setTotalEarnings(availableRewards)
+            // const availableRewards = await getAvailableRewards(user.id) as number
+            const userScore = user.score
+            console.log('userScore from layout', userScore);
           }
         }
       } catch (error) {
@@ -45,7 +44,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
-          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} totalEarnings={totalEarnings} />
+          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
           <div className="flex flex-1">
             <Sidebar open={sidebarOpen} />
             <main className="flex-1 p-4 lg:p-8 ml-0 lg:ml-64 transition-all duration-300">

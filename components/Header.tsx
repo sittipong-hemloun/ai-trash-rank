@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Coins, Search, Bell } from "lucide-react"
+import { Coins, Search, Bell, Menu } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import { Web3Auth } from "@web3auth/modal"
 import { CHAIN_NAMESPACES, UserInfo, WEB3AUTH_NETWORK } from "@web3auth/base"
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { createUser, getUnreadNotifications, getUserByEmail, getUserBalance, markNotificationAsRead } from "@/utils/db/actions"
+import { createUser, getUnreadNotifications, getUserByEmail, markNotificationAsRead } from "@/utils/db/actions"
 import Image from "next/image"
 import NotificationType from "@/app/types/noti"
 
@@ -43,7 +43,11 @@ const web3auth = new Web3Auth({
   privateKeyProvider,
 });
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -109,7 +113,7 @@ export default function Header() {
       if (userInfo && userInfo.email) {
         const user = await getUserByEmail(userInfo.email);
         if (user) {
-          const userBalance = await getUserBalance(user.id);
+          const userBalance = user.point;
           setBalance(userBalance);
         }
       }
@@ -204,6 +208,11 @@ export default function Header() {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center md:hidden">
+          <Button variant="ghost" size="icon" className="mr-2 md:mr-4" onClick={onMenuClick}>
+            <Menu className="h-6 w-6" />
+          </Button>
+        </div>
         {!isMobile && (
           <div className="flex-1 max-w-xl mx-4">
           </div>
