@@ -19,8 +19,7 @@ import { createUser, getUnreadNotifications, getUserByEmail, markNotificationAsR
 import Image from "next/image"
 import NotificationType from "@/app/types/noti"
 
-
-const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || "YOUR_CLIENT"
+const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || "";
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -53,7 +52,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const [balance, setBalance] = useState(0)
+  const [point, setPoint] = useState(0)
 
   console.log('user info', userInfo);
 
@@ -109,27 +108,27 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }, [userInfo]);
 
   useEffect(() => {
-    const fetchUserBalance = async () => {
+    const fetchUserPoint = async () => {
       if (userInfo && userInfo.email) {
         const user = await getUserByEmail(userInfo.email);
         if (user) {
-          const userBalance = user.point;
-          setBalance(userBalance);
+          const userPoint = user.point;
+          setPoint(userPoint);
         }
       }
     };
 
-    fetchUserBalance();
+    fetchUserPoint();
 
-    // Add an event listener for balance updates
-    const handleBalanceUpdate = (event: CustomEvent) => {
-      setBalance(event.detail);
+    // Add an event listener for point updates
+    const handlePointUpdate = (event: CustomEvent) => {
+      setPoint(event.detail);
     };
 
-    window.addEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    window.addEventListener('pointUpdated', handlePointUpdate as EventListener);
 
     return () => {
-      window.removeEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+      window.removeEventListener('pointUpdated', handlePointUpdate as EventListener);
     };
   }, [userInfo]);
 
@@ -139,7 +138,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
       return;
     }
     try {
+      await web3auth.connect();
       setLoggedIn(true);
+      console.log('login in');
       const user = await web3auth.getUserInfo();
       console.log("User info:", user);
       setUserInfo({
@@ -255,7 +256,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="mr-2 md:mr-4 flex items-center bg-gray-100 rounded-full px-2 md:px-3 py-1">
             <Coins className="h-4 w-4 md:h-5 md:w-5 mr-1 text-green-500" />
             <span className="font-semibold text-sm md:text-base text-gray-800">
-              {balance.toFixed(2)}
+              {point.toFixed(2)}
             </span>
           </div>
           {!loggedIn ? (
@@ -270,9 +271,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                       <AvatarImage src={userInfo ? userInfo.profileImage : 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg'} />
                       <AvatarFallback>{userInfo.profileImage}</AvatarFallback>
                   </Avatar> */}
-                    <Image src={userInfo?.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg'} alt="profile" className="w-8 h-8 rounded-full" width={50} height={50} />
-                    {/* <ChevronDown className="h-5 w-5" /> */}
-                    
+                  <Image src={userInfo?.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg'} alt="profile" className="w-8 h-8 rounded-full" width={50} height={50} />
+                  {/* <ChevronDown className="h-5 w-5" /> */}
+
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
