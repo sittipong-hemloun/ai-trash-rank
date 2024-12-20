@@ -1,97 +1,44 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Trash2, MapPin, Upload, Loader, Calendar, Weight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { Loader } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'react-hot-toast'
 import {
-  getTrashCollectionTasks,
   updateTaskStatus,
   updateUserPoints,
   updateUserScore,
-  getUserByEmail,
   createNotification,
 } from '@/utils/db/actions'
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { useRouter } from 'next/navigation'
+import CollectionTask from '../types/collectionTask'
+import Pagination from '@/components/Pagination'
+import TaskList from '@/components/TaskList'
+import VerificationModal from '@/components/VerificationModal'
+import useTasks from '@/hooks/useTasks'
+import useUser from '@/hooks/useUser'
+import VerificationResult from '../types/verificationResult'
 
 // Make sure to set your Gemini API key in your environment variables
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
 
-type CollectionTask = {
-  id: number
-  location: string
-  trashType: string
-  amount: string
-  status: 'pending' | 'in_progress' | 'completed' | 'verified'
-  date: string
-  collectorId: number | null
-  imageUrl: string
-}
-
 const ITEMS_PER_PAGE = 5
 
 export default function CollectPage() {
-  const [tasks, setTasks] = useState<CollectionTask[]>([])
-  const [loading, setLoading] = useState(true)
+  const { user, loading: userLoading } = useUser()
+  const { tasks, setTasks, loading: tasksLoading } = useTasks()
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [user, setUser] = useState<{
-    id: number
-    email: string
-    name: string
-    point: number
-    score: number
-  } | null>(null)
-
-  const router = useRouter()
-
-  useEffect(() => {
-    const fetchUserAndTasks = async () => {
-      setLoading(true)
-      try {
-        // Fetch user
-        const userEmail = localStorage.getItem('userEmail')
-        if (userEmail) {
-          const fetchedUser = await getUserByEmail(userEmail)
-          if (fetchedUser) {
-            setUser(fetchedUser)
-          } else {
-            toast.error('User not found. Please log in again.')
-            // Redirect to login page or handle this case appropriately
-          }
-        } else {
-          toast.error('User not logged in. Please log in.')
-          router.push('/');
-        }
-
-        // Fetch tasks
-        const fetchedTasks = await getTrashCollectionTasks()
-        setTasks(fetchedTasks as CollectionTask[])
-      } catch (error) {
-        console.error('Error fetching user and tasks:', error)
-        toast.error('Failed to load user data and tasks. Please try again.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUserAndTasks()
-  }, [router])
 
   const [selectedTask, setSelectedTask] = useState<CollectionTask | null>(null)
   const [verificationImage, setVerificationImage] = useState<string | null>(null)
   const [verificationStatus, setVerificationStatus] = useState<
     'idle' | 'verifying' | 'success' | 'failure'
   >('idle')
-  const [verificationResult, setVerificationResult] = useState<{
-    trashTypeMatch: boolean
-    quantityMatch: boolean
-    confidence: number
-  } | null>(null)
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null)
 
+  // Handle Task Status Change
   const handleStatusChange = async (
     taskId: number,
     newStatus: CollectionTask['status']
@@ -104,11 +51,13 @@ export default function CollectPage() {
     try {
       const updatedTask = await updateTaskStatus(taskId, newStatus, user.id)
       if (updatedTask) {
-        setTasks(tasks.map(task =>
-          task.id === taskId
-            ? { ...task, status: newStatus, collectorId: user.id }
-            : task
-        ))
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId
+              ? { ...task, status: newStatus, collectorId: user.id }
+              : task
+          )
+        )
         toast.success('Task status updated successfully')
       } else {
         toast.error('Failed to update task status. Please try again.')
@@ -119,6 +68,7 @@ export default function CollectPage() {
     }
   }
 
+  // Handle Image Upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -130,21 +80,19 @@ export default function CollectPage() {
     }
   }
 
-  const readFileAsBase64 = (dataUrl: string): string => {
-    return dataUrl.split(',')[1]
-  }
+  // Utility Functions
+  const readFileAsBase64 = (dataUrl: string): string => dataUrl.split(',')[1]
 
-  const convertToJSONFormat = (text: string) => {
-    // Remove code block markers and extract JSON string
+  const extractJSON = (text: string): string => {
     const jsonStart = text.indexOf('{')
     const jsonEnd = text.lastIndexOf('}')
     if (jsonStart !== -1 && jsonEnd !== -1) {
-      const jsonString = text.slice(jsonStart, jsonEnd + 1)
-      return jsonString
+      return text.slice(jsonStart, jsonEnd + 1)
     }
     throw new Error('Invalid JSON format')
   }
 
+  // Handle Verification Process
   const handleVerify = async () => {
     if (!selectedTask || !verificationImage || !user) {
       toast.error('Missing required information for verification.')
@@ -163,7 +111,7 @@ export default function CollectPage() {
         {
           inlineData: {
             data: base64Data,
-            mimeType: 'image/jpeg', // Adjust this if you know the exact type
+            mimeType: 'image/jpeg',
           },
         },
       ]
@@ -189,64 +137,61 @@ export default function CollectPage() {
       const response = await result.response
       const text = await response.text()
 
-      try {
-        const parsedText = convertToJSONFormat(text)
-        const parsedResult = JSON.parse(parsedText)
-        console.log('Parsed verification result:', parsedResult)
-        setVerificationResult({
-          trashTypeMatch: parsedResult.trashTypeMatch,
-          quantityMatch: parsedResult.quantityMatch,
-          confidence: parsedResult.confidence,
-        })
-        setVerificationStatus('success')
+      // Parse and validate the AI response
+      const parsedText = extractJSON(text)
+      const parsedResult: VerificationResult = JSON.parse(parsedText)
 
-        if (
-          parsedResult.trashTypeMatch &&
-          parsedResult.quantityMatch &&
-          parsedResult.confidence > 0.7
-        ) {
-          await handleStatusChange(selectedTask.id, 'verified')
-          const earnedPoints = 50
-          const earnedScore = 20
+      console.log('Parsed verification result:', parsedResult)
+      setVerificationResult(parsedResult)
+      setVerificationStatus('success')
 
-          // Update user's points and score
-          await updateUserPoints(user.id, earnedPoints)
-          await updateUserScore(user.id, earnedScore)
+      // Handle successful verification
+      if (
+        parsedResult.trashTypeMatch &&
+        parsedResult.quantityMatch &&
+        parsedResult.confidence > 0.7
+      ) {
+        await handleStatusChange(selectedTask.id, 'verified')
 
-          // Create a notification for the user
-          await createNotification(
-            user.id,
-            `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
-            'reward'
-          )
+        const earnedPoints = 50
+        const earnedScore = 20
 
-          toast.success(
-            `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
-            {
-              duration: 5000,
-              position: 'top-center',
-            }
-          )
-        } else {
-          toast.error(
-            'Verification failed. The collected trash does not match the reported trash.',
-            {
-              duration: 5000,
-              position: 'top-center',
-            }
-          )
-        }
-      } catch (error) {
-        console.log(error)
-        console.error('Failed to parse JSON response:', text)
-        setVerificationStatus('failure')
+        await updateUserPoints(user.id, earnedPoints)
+        await updateUserScore(user.id, earnedScore)
+
+        await createNotification(
+          user.id,
+          `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+          'reward'
+        )
+
+        toast.success(
+          `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+          {
+            duration: 5000,
+            position: 'top-center',
+          }
+        )
+      } else {
+        toast.error(
+          'Verification failed. The collected trash does not match the reported trash.',
+          {
+            duration: 5000,
+            position: 'top-center',
+          }
+        )
       }
     } catch (error) {
-      console.error('Error verifying trash:', error)
+      console.error('Error during verification:', error)
       setVerificationStatus('failure')
+      toast.error('Verification failed. Please try again.', {
+        duration: 5000,
+        position: 'top-center',
+      })
     }
   }
 
+  // Filter and Paginate Tasks
   const filteredTasks = tasks.filter(task =>
     task.location.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -256,6 +201,9 @@ export default function CollectPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
+
+  // Combine Loading States
+  const isLoading = userLoading || tasksLoading
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -270,216 +218,41 @@ export default function CollectPage() {
         />
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader className="animate-spin h-8 w-8 text-gray-500" />
         </div>
       ) : (
         <>
-          <div className="space-y-4">
-            {paginatedTasks.map(task => (
-              <div
-                key={task.id}
-                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-lg font-medium text-gray-800 flex items-center">
-                    <MapPin className="w-5 h-5 mr-2 text-gray-500" />
-                    {task.location}
-                  </h2>
-                  <StatusBadge status={task.status} />
-                </div>
-                <div className="flex justify-between gap-2 text-sm text-gray-600 mb-3">
-                  <div className="flex items-center relative">
-                    <Trash2 className="w-4 h-4 mr-2 text-gray-500" />
-                    <span>{task.trashType}</span>
-                  </div>
-                  <div className="flex gap-5">
-                    <div className="flex items-center">
-                      <Weight className="w-4 h-4 mr-2 text-gray-500" />
-                      {task.amount}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                      {task.date}
-                    </div>
-                  </div>
-                </div>
-                {/* Image */}
-                <div className="flex items-center">
-                  <img
-                    src={task.imageUrl}
-                    alt="Trash"
-                    className="w-full h-80 object-cover rounded-md"
-                  />
-                </div>
-                <div className="flex justify-end mt-3">
-                  {task.status === 'pending' && (
-                    <Button
-                      onClick={() => handleStatusChange(task.id, 'in_progress')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      เริ่มเก็บขยะ
-                    </Button>
-                  )}
-                  {task.status === 'in_progress' && task.collectorId === user?.id && (
-                    <Button
-                      onClick={() => setSelectedTask(task)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      เก็บเสร็จสิ้นและตรวจสอบ
-                    </Button>
-                  )}
-                  {task.status === 'in_progress' && task.collectorId !== user?.id && (
-                    <span className="text-yellow-600 text-sm font-medium">
-                      คนอื่นกำลังดำเนินการ
-                    </span>
-                  )}
-                  {task.status === 'verified' && (
-                    <span className="text-green-600 text-sm font-medium">
-                      จัดเก็บแล้ว
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <TaskList
+            tasks={paginatedTasks}
+            user={user}
+            onStartCollect={handleStatusChange}
+            onVerify={setSelectedTask}
+          />
 
-          <div className="mt-4 flex justify-center">
-            <Button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="mr-2"
-            >
-              ก่อนหน้า
-            </Button>
-            <span className="mx-2 self-center">
-              หน้า {currentPage} จาก {pageCount}
-            </span>
-            <Button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
-              disabled={currentPage === pageCount}
-              className="ml-2"
-            >
-              ถัดไป
-            </Button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pageCount}
+            onPrevious={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onNext={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
+          />
         </>
       )}
 
-      {selectedTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold mb-4">ตรวจสอบการเก็บขยะ</h3>
-            <p className="mb-4 text-sm text-gray-600">
-              อัปโหลดรูปขยะที่เก็บเพื่อให้เราตรวจสอบและรอรับ point และ score ของคุณ
-            </p>
-            <div className="mb-4">
-              <label
-                htmlFor="verification-image"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                อัปโหลดรูปขยะที่เก็บ
-              </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="verification-image"
-                      className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
-                    >
-                      <span>อัปโหลดรูป</span>
-                      <input
-                        id="verification-image"
-                        name="verification-image"
-                        type="file"
-                        className="sr-only"
-                        onChange={handleImageUpload}
-                        accept="image/*"
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF ไปจนถึง 10MB</p>
-                </div>
-              </div>
-            </div>
-            {verificationImage && (
-              <img
-                src={verificationImage}
-                alt="Verification"
-                className="mb-4 rounded-md w-full"
-              />
-            )}
-            <Button
-              onClick={handleVerify}
-              className="w-full"
-              disabled={!verificationImage || verificationStatus === 'verifying'}
-            >
-              {verificationStatus === 'verifying' ? (
-                <>
-                  <Loader className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                  กำลังตรวจสอบ...
-                </>
-              ) : (
-                'Verify Collection'
-              )}
-            </Button>
-            {verificationStatus === 'success' && verificationResult && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <p>
-                  Trash Type Match: {verificationResult.trashTypeMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}
-                </p>
-                <p>
-                  Quantity Match: {verificationResult.quantityMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}
-                </p>
-                <p>Confidence: {(verificationResult.confidence * 100).toFixed(2)}%</p>
-              </div>
-            )}
-            {verificationStatus === 'failure' && (
-              <p className="mt-2 text-red-600 text-center text-sm">
-                การตรวจสอบล้มเหลว ลองอีกครั้ง
-              </p>
-            )}
-            <Button onClick={() => setSelectedTask(null)} variant="outline" className="w-full mt-2">
-              Close
-            </Button>
-          </div>
-        </div>
+      {selectedTask && user && (
+        <VerificationModal
+          task={selectedTask}
+          user={user}
+          verificationImage={verificationImage}
+          setVerificationImage={setVerificationImage}
+          handleImageUpload={handleImageUpload}
+          handleVerify={handleVerify}
+          verificationStatus={verificationStatus}
+          verificationResult={verificationResult}
+          onClose={() => setSelectedTask(null)}
+        />
       )}
-    </div>
-  )
-}
-
-function StatusBadge({ status }: { status: CollectionTask['status'] }) {
-  const statusConfig: Record<
-    CollectionTask['status'],
-    { color: string }
-  > = {
-    pending: { color: 'bg-yellow-100 text-yellow-800' },
-    in_progress: { color: 'bg-blue-100 text-blue-800' },
-    completed: { color: 'bg-green-100 text-green-800' },
-    verified: { color: 'bg-purple-100 text-purple-800' },
-  }
-
-  const { color } = statusConfig[status]
-
-  const statusInThai: Record<CollectionTask['status'], string> = {
-    pending: 'รอดำเนินการ',
-    in_progress: 'กำลังดำเนินการ',
-    completed: 'เสร็จสิ้น',
-    verified: 'ตรวจสอบแล้ว',
-  }
-
-  return (
-    <div className="w-36 flex justify-end">
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${color} flex w-fit items-center`}
-      >
-        {statusInThai[status].replace('_', ' ')}
-      </span>
     </div>
   )
 }

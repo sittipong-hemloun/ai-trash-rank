@@ -1,5 +1,13 @@
 declare type UserInfo = AuthUserInfo;
 
+export interface User {
+  id: number
+  email: string
+  name: string
+  point: number
+  score: number
+}
+
 export type AuthUserInfo = {
   email?: string;
   name?: string;
