@@ -4,7 +4,6 @@ interface VerificationResult {
   trashType: string;
   quantity: string;
   confidence: number;
-  suggest?: string;
 }
 
 interface VerificationReportResultDisplayProps {
@@ -29,7 +28,6 @@ const VerificationReportResultDisplay: React.FC<VerificationReportResultDisplayP
             <p>ประเภทขยะ: {verificationResult.trashType}</p>
             <p>ปริมาณขยะ: {verificationResult.quantity}</p>
             <p>ความแม่นยำ: {(verificationResult.confidence * 100).toFixed(2)}%</p>
-            {verificationResult.suggest && <p>ข้อเสนอแนะ: {verificationResult.suggest}</p>}
           </div>
         </div>
       </div>

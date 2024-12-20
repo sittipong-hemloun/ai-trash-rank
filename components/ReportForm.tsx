@@ -11,7 +11,6 @@ interface VerificationResult {
   trashType: string;
   quantity: string;
   confidence: number;
-  suggest?: string;
 }
 
 interface ReportFormProps {
