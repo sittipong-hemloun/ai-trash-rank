@@ -5,7 +5,7 @@ interface CollectionTask {
   id: number
   location: string
   trashType: string
-  amount: string
+  quantity: string
   status: 'pending' | 'in_progress' | 'completed' | 'verified'
   date: string
   collectorId: number | null

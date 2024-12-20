@@ -1,13 +1,13 @@
 import VerificationResult from "@/app/types/verificationResult"
 
-interface VerificationResultDisplayProps {
+interface VerificationCollectResultDisplayProps {
   result: VerificationResult
 }
 
 /**
  * Displays the results of trash verification.
  */
-const VerificationResultDisplay: React.FC<VerificationResultDisplayProps> = ({ result }) => (
+const VerificationCollectResultDisplay: React.FC<VerificationCollectResultDisplayProps> = ({ result }) => (
   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
     <p>
       Trash Type Match: {result.trashTypeMatch ? 'ตรงกัน' : 'ไม่ตรงกัน'}
@@ -19,4 +19,4 @@ const VerificationResultDisplay: React.FC<VerificationResultDisplayProps> = ({ r
   </div>
 )
 
-export default VerificationResultDisplay
+export default VerificationCollectResultDisplay

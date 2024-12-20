@@ -32,7 +32,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerif
       <div className="flex gap-5">
         <div className="flex items-center">
           <Weight className="w-4 h-4 mr-2 text-gray-500" />
-          {task.amount}
+          {task.quantity}
         </div>
         <div className="flex items-center">
           <Calendar className="w-4 h-4 mr-2 text-gray-500" />

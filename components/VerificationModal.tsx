@@ -1,6 +1,6 @@
 import CollectionTask from "@/app/types/collectionTask"
 import VerificationResult from "@/app/types/verificationResult"
-import VerificationResultDisplay from "./VerificationResultDisplay"
+import VerificationCollectResultDisplay from "./VerificationCollectResultDisplay"
 import { Button } from "./ui/button"
 import { Loader, Upload } from "lucide-react"
 
@@ -94,7 +94,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
       </Button>
       {/* Verification Results */}
       {verificationStatus === 'success' && verificationResult && (
-        <VerificationResultDisplay result={verificationResult} />
+        <VerificationCollectResultDisplay result={verificationResult} />
       )}
       {/* Verification Failure Message */}
       {verificationStatus === 'failure' && (

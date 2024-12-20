@@ -35,7 +35,7 @@ export async function getUserByEmail(email: string) {
 }
 
 /**
- * Updates a user's points by adding the specified amount.
+ * Updates a user's points by adding the specified quantity.
  * @param userId - The ID of the user.
  * @param pointsToAdd - The number of points to add.
  * @returns The updated user or null if an error occurs.
@@ -58,7 +58,7 @@ export async function updateUserPoints(userId: number, pointsToAdd: number) {
 }
 
 /**
- * Updates a user's score by adding the specified amount.
+ * Updates a user's score by adding the specified quantity.
  * @param userId - The ID of the user.
  * @param scoreToAdd - The number of score points to add.
  * @returns The updated user or null if an error occurs.
@@ -85,7 +85,7 @@ export async function updateUserScore(userId: number, scoreToAdd: number) {
  * @param userId - The ID of the user creating the report.
  * @param location - Location of the trash.
  * @param trashType - Type of the trash.
- * @param amount - Amount of the trash.
+ * @param quantity - Amount of the trash.
  * @param imageUrl - URL to the trash image.
  * @param verificationResult - Result of the trash verification.
  * @returns The created report or null if an error occurs.
@@ -94,7 +94,7 @@ export async function createReport(
   userId: number,
   location: string,
   trashType: string,
-  amount: string,
+  quantity: string,
   imageUrl?: string,
   verificationResult?: unknown
 ) {
@@ -105,7 +105,7 @@ export async function createReport(
         userId,
         location,
         trashType,
-        amount,
+        quantity,
         imageUrl,
         verificationResult,
         status: "pending",
@@ -173,7 +173,7 @@ export async function getTrashCollectionTasks(limit: number = 20) {
         id: Reports.id,
         location: Reports.location,
         trashType: Reports.trashType,
-        amount: Reports.amount,
+        quantity: Reports.quantity,
         status: Reports.status,
         date: Reports.createdAt,
         collectorId: Reports.collectorId,

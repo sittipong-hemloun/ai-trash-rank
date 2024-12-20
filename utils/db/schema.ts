@@ -30,7 +30,7 @@ export const Reports = pgTable("reports", {
   userId: integer("user_id").references(() => Users.id).notNull(),
   location: text("location").notNull(),
   trashType: varchar("trash_type", { length: 255 }).notNull(),
-  amount: varchar("amount", { length: 255 }).notNull(),
+  quantity: varchar("quantity", { length: 255 }).notNull(),
   imageUrl: text("image_url"),
   verificationResult: jsonb("verification_result"),
   status: varchar("status", { length: 255 }).notNull().default("pending"),
