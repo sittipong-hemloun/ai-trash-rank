@@ -1,9 +1,12 @@
-import VerificationResult from "@/app/types/verificationResult";
+import VerificationResult from "@/app/types/verificationResult"
 
 interface VerificationResultDisplayProps {
   result: VerificationResult
 }
 
+/**
+ * Displays the results of trash verification.
+ */
 const VerificationResultDisplay: React.FC<VerificationResultDisplayProps> = ({ result }) => (
   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
     <p>
@@ -16,4 +19,4 @@ const VerificationResultDisplay: React.FC<VerificationResultDisplayProps> = ({ r
   </div>
 )
 
-export default VerificationResultDisplay;
+export default VerificationResultDisplay

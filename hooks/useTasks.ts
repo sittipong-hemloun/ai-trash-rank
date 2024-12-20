@@ -3,6 +3,9 @@ import { getTrashCollectionTasks } from "@/utils/db/actions"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
+/**
+ * Custom hook to fetch and manage trash collection tasks.
+ */
 const useTasks = () => {
   const [tasks, setTasks] = useState<CollectionTask[]>([])
   const [loading, setLoading] = useState(true)

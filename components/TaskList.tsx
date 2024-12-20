@@ -9,6 +9,9 @@ interface TaskListProps {
   onVerify: (task: CollectionTask) => void
 }
 
+/**
+ * Renders a list of trash collection tasks.
+ */
 const TaskList: React.FC<TaskListProps> = ({ tasks, user, onStartCollect, onVerify }) => (
   <div className="space-y-4">
     {tasks.map(task => (
@@ -23,4 +26,4 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, user, onStartCollect, onVeri
   </div>
 )
 
-export default TaskList;
+export default TaskList

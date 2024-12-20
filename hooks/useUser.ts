@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
+/**
+ * Custom hook to fetch and manage user information.
+ */
 const useUser = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)

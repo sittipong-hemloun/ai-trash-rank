@@ -1,3 +1,6 @@
+/**
+ * Represents a trash collection task.
+ */
 interface CollectionTask {
   id: number
   location: string

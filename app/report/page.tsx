@@ -7,30 +7,56 @@ import { Button } from '@/components/ui/button';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { StandaloneSearchBox, useJsApiLoader } from '@react-google-maps/api';
 import { Libraries } from '@react-google-maps/api';
-import { createUser, getUserByEmail, createReport, getRecentReports } from '@/utils/db/actions';
+import {
+  createUser,
+  getUserByEmail,
+  createReport,
+  getRecentReports,
+} from '@/utils/db/actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-// API keys for Google Maps and Generative AI
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 
-// Google Maps libraries to load
 const libraries: Libraries = ['places'];
+
+interface Report {
+  id: number
+  location: string
+  trashType: string
+  amount: string
+  createdAt: string
+}
+
+interface VerificationResult {
+  trashType: string
+  quantity: string
+  confidence: number
+  suggest?: string
+}
 
 export default function ReportPage() {
   const router = useRouter();
 
-  // State
-  const [user, setUser] = useState<{ id: number; email: string; name: string; point: number; score: number } | null>(null);
-  const [reports, setReports] = useState<Array<{ id: number; location: string; trashType: string; amount: string; createdAt: string }>>([]);
-  const [newReport, setNewReport] = useState({ location: '', type: '', amount: '' });
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'failure'>('idle');
-  const [verificationResult, setVerificationResult] = useState<{ trashType: string; quantity: string; confidence: number } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
+  // State Definitions
+  const [user, setUser] = useState<{
+    id: number
+    email: string
+    name: string
+    point: number
+    score: number
+  } | null>(null)
+  const [reports, setReports] = useState<Report[]>([])
+  const [newReport, setNewReport] = useState({ location: '', type: '', amount: '' })
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [verificationStatus, setVerificationStatus] = useState<
+    'idle' | 'verifying' | 'success' | 'failure'
+  >('idle')
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null)
 
   // Load Google Maps JavaScript API
   const { isLoaded } = useJsApiLoader({
@@ -39,180 +65,218 @@ export default function ReportPage() {
     libraries,
   });
 
-  // Handle Google Places Search Box
-  const onLoad = useCallback((ref: google.maps.places.SearchBox) => setSearchBox(ref), []);
+  /**
+   * Handles the loading of the Google Places SearchBox.
+   * @param ref - The SearchBox reference.
+   */
+  const onLoad = useCallback((ref: google.maps.places.SearchBox) => setSearchBox(ref), [])
 
-  // Handle changes when a place is selected from the search box
+  /**
+   * Handles the event when a place is selected from the SearchBox.
+   */
   const onPlacesChanged = useCallback(() => {
     if (searchBox) {
-      const places = searchBox.getPlaces();
+      const places = searchBox.getPlaces()
       if (places && places[0]) {
-        setNewReport(prev => ({ ...prev, location: places[0].formatted_address || '' }));
+        setNewReport(prev => ({
+          ...prev,
+          location: places[0].formatted_address || '',
+        }))
       }
     }
-  }, [searchBox]);
+  }, [searchBox])
 
-  // Handle input changes for text fields
+  /**
+   * Handles input changes for the report form.
+   * @param e - The change event from the input fields.
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setNewReport(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setNewReport(prev => ({ ...prev, [name]: value }))
+  }
 
-  // Handle file upload and set a preview for the image
+  /**
+   * Handles file selection and sets a preview image.
+   * @param e - The change event from the file input.
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFile(file);
-      const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      setFile(selectedFile)
+      const reader = new FileReader()
+      reader.onload = () => setPreview(reader.result as string)
+      reader.readAsDataURL(selectedFile)
     }
-  };
+  }
 
-  // Convert file to Base64 string
+  /**
+   * Converts a file to a Base64 string.
+   * @param file - The file to convert.
+   * @returns A promise that resolves to the Base64 string.
+   */
   const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
 
-  // Extract JSON data from a response string
-  const convertToJSONFormat = (text: string) => {
-    // Remove code block markers and extract JSON string
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}');
+  /**
+   * Extracts JSON data from a response string.
+   * @param text - The response text containing JSON.
+   * @returns The extracted JSON string.
+   * @throws Will throw an error if JSON format is invalid.
+   */
+  const convertToJSONFormat = (text: string): string => {
+    const jsonStart = text.indexOf('{')
+    const jsonEnd = text.lastIndexOf('}')
     if (jsonStart !== -1 && jsonEnd !== -1) {
-      const jsonString = text.slice(jsonStart, jsonEnd + 1);
-      return jsonString;
+      return text.slice(jsonStart, jsonEnd + 1)
     }
-    throw new Error('Invalid JSON format');
-  };
+    throw new Error('Invalid JSON format')
+  }
 
-  // Handle trash verification using AI
+  /**
+   * Handles the trash verification process using Generative AI.
+   */
   const handleVerify = async () => {
     if (!file) {
-      toast.error('Please select a file to verify.');
-      return;
+      toast.error('Please select a file to verify.')
+      return
     }
 
-    setVerificationStatus('verifying');
+    setVerificationStatus('verifying')
 
     try {
-      const genAI = new GoogleGenerativeAI(geminiApiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      // Converts the selected image file to a Base64-encoded string
-      const base64Data = await readFileAsBase64(file);
+      const genAI = new GoogleGenerativeAI(geminiApiKey)
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+
+      const base64Data = await readFileAsBase64(file)
 
       const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
-      1. ประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้)
-      2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง
-      3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
+1. ประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้)
+2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง
+3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
 
-      ตอบกลับในรูปแบบ JSON เช่นนี้:
-      {
-        "trashType": "ประเภทของขยะ",
-        "quantity": "ปริมาณโดยประมาณพร้อมหน่วย format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง",
-        "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1,
-        "suggest": "ข้อเสนอแนะเพิ่มเติม (ถ้ามี)"
-      }
-      ตัวอย่าง:
-      {
-        "trashType": "พลาสติก, กระดาษ",
-        "quantity": "1 กก.",
-        "confidence": 0.95
-      }
-      `;
+ตอบกลับในรูปแบบ JSON เช่นนี้:
+{
+  "trashType": "ประเภทของขยะ",
+  "quantity": "ปริมาณโดยประมาณพร้อมหน่วย format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง",
+  "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1,
+  "suggest": "ข้อเสนอแนะเพิ่มเติม (ถ้ามี)"
+}
+ตัวอย่าง:
+{
+  "trashType": "พลาสติก, กระดาษ",
+  "quantity": "1 กก.",
+  "confidence": 0.95
+}`
 
-      const result = await model.generateContent([{ inlineData: { data: base64Data.split(',')[1], mimeType: file.type } }, prompt]);
-      const response = await result.response;
-      const text = await response.text();
+      const result = await model.generateContent([
+        { inlineData: { data: base64Data.split(',')[1], mimeType: file.type } },
+        prompt,
+      ])
+      const response = await result.response
+      const text = await response.text()
+
       try {
-        const parsedText = convertToJSONFormat(text);
-        const parsedResult = JSON.parse(parsedText);
+        const parsedText = convertToJSONFormat(text)
+        const parsedResult: VerificationResult = JSON.parse(parsedText)
 
-        if (parsedResult.trashType && parsedResult.quantity && parsedResult.confidence) {
-          setVerificationResult(parsedResult);
-          setVerificationStatus('success');
-          setNewReport({
-            ...newReport,
+        if (parsedResult.trashType && parsedResult.quantity && parsedResult.confidence !== undefined) {
+          setVerificationResult(parsedResult)
+          setVerificationStatus('success')
+          setNewReport(prev => ({
+            ...prev,
             type: parsedResult.trashType,
             amount: parsedResult.quantity,
-          });
-          console.log('Verification result:', parsedResult);
+          }))
+          console.log('Verification result:', parsedResult)
         } else {
-          throw new Error('Missing fields in response');
+          throw new Error('Missing fields in response')
         }
       } catch (error) {
-        console.error('Failed to parse JSON response:', text, error);
-        setVerificationStatus('failure');
+        console.error('Failed to parse JSON response:', text, error)
+        setVerificationStatus('failure')
       }
 
     } catch (error) {
-      console.error('Error verifying trash:', error);
-      setVerificationStatus('failure');
-      toast.error('Failed to verify the trash. Please try again.');
+      console.error('Error verifying trash:', error)
+      setVerificationStatus('failure')
+      toast.error('Failed to verify the trash. Please try again.')
     }
-  };
+  }
 
-  // Handle form submission for creating a new trash report
+  /**
+   * Handles the submission of a new trash report.
+   * @param e - The form submission event.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!user || verificationStatus !== 'success') {
-      toast.error('Please verify the trash or log in before submitting.');
-      return;
+      toast.error('Please verify the trash or log in before submitting.')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
-      const report = await createReport(user.id, newReport.location, newReport.type, newReport.amount, preview || undefined);
+      const report = await createReport(
+        user.id,
+        newReport.location,
+        newReport.type,
+        newReport.amount,
+        preview || undefined
+      )
       if (report) {
-        setReports([{
+        setReports(prevReports => [{
           id: report.id,
           location: report.location,
           trashType: report.trashType,
           amount: report.amount,
           createdAt: report.createdAt.toISOString(),
-        }, ...reports]);
+        }, ...prevReports])
       }
-      toast.success('Report submitted successfully!');
+      toast.success('Report submitted successfully!')
     } catch (error) {
-      console.error('Error submitting report:', error);
-      toast.error('Failed to submit report.');
+      console.error('Error submitting report:', error)
+      toast.error('Failed to submit report.')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  // Fetch user data and recent reports when the component mounts
+  /**
+   * Fetches user data and recent reports when the component mounts.
+   */
   useEffect(() => {
     (async () => {
-      const email = localStorage.getItem('userEmail');
+      const email = localStorage.getItem('userEmail')
       if (email) {
-        const user = await getUserByEmail(email) || await createUser(email, 'default-avatar.jpg', 'Anonymous');
-        setUser(user);
+        const existingUser = await getUserByEmail(email)
+        const currentUser = existingUser || await createUser(email, 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Chill_guy_original_artwork.jpg/220px-Chill_guy_original_artwork.jpg', 'Anonymous')
+        setUser(currentUser)
 
         const recentReports = (await getRecentReports()).map(report => ({
           ...report,
           createdAt: report.createdAt.toISOString(),
-        }));
-        setReports(recentReports);
+        }))
+        setReports(recentReports)
       } else {
-        router.push('/');
+        router.push('/')
       }
-    })();
-  }, [router]);
+    })()
+  }, [router])
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะ</h1>
 
-      {/* Form for trash report submission */}
+      {/* Trash Report Submission Form */}
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl mb-12">
-        {/* File upload section */}
+        {/* File Upload Section */}
         <div className="mb-8">
           <label htmlFor="trash-image" className="block text-lg font-medium text-gray-700 mb-2">
             อัปโหลดรูปภาพขยะ
@@ -226,7 +290,14 @@ export default function ReportPage() {
                   className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
                 >
                   <span>คลิกเพื่ออัปโหลดรูปขยะ</span>
-                  <input id="trash-image" name="trash-image" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                  <input
+                    id="trash-image"
+                    name="trash-image"
+                    type="file"
+                    className="sr-only"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                  />
                 </label>
                 <p className="pl-1">หรือลากวางรูปจากโฟลเดอร์</p>
               </div>
@@ -237,15 +308,22 @@ export default function ReportPage() {
           </div>
         </div>
 
+        {/* Image Preview */}
         {preview && (
-          <Image src={preview} alt="Trash preview" className="max-w-full h-auto shadow-md mb-4" width={5000} height={500} />
+          <Image
+            src={preview}
+            alt="Trash preview"
+            className="max-w-full h-auto shadow-md mb-4"
+            width={5000}
+            height={500}
+          />
         )}
 
-        {/* Trash verification and form submission */}
+        {/* Verification Button */}
         <Button
           type="button"
           onClick={handleVerify}
-          className="w-full mb-8  text-white py-3 text-lg transition-colors duration-300"
+          className="w-full mb-8 text-white py-3 text-lg transition-colors duration-300"
           disabled={!file || verificationStatus === 'verifying'}
         >
           {verificationStatus === 'verifying' ? (
@@ -256,8 +334,9 @@ export default function ReportPage() {
           ) : 'ตรวจสอบขยะ'}
         </Button>
 
+        {/* Verification Result Display */}
         {verificationStatus === 'success' && verificationResult && (
-          <div className="bg-green-50  p-4 mb-8 rounded-r-xl">
+          <div className="bg-green-50 p-4 mb-8 rounded-r-xl">
             <div className="flex items-center">
               <div>
                 <h3 className="text-lg font-medium text-green-800">
@@ -273,8 +352,10 @@ export default function ReportPage() {
           </div>
         )}
 
+        {/* Report Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className=' col-span-2'>
+          {/* Location Field with Google Places SearchBox */}
+          <div className='col-span-2'>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">สถานที่</label>
             {isLoaded ? (
               <StandaloneSearchBox
@@ -305,6 +386,8 @@ export default function ReportPage() {
               />
             )}
           </div>
+
+          {/* Trash Type Field */}
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">ประเภทขยะ</label>
             <input
@@ -315,10 +398,11 @@ export default function ReportPage() {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300 bg-gray-100"
-              placeholder=""
               readOnly
             />
           </div>
+
+          {/* Trash Amount Field */}
           <div>
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">ปริมาณขยะ</label>
             <input
@@ -329,14 +413,15 @@ export default function ReportPage() {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300 bg-gray-100"
-              placeholder=""
               readOnly
             />
           </div>
         </div>
+
+        {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full  text-white py-3 text-lg transition-colors duration-300 flex items-center justify-center"
+          className="w-full text-white py-3 text-lg transition-colors duration-300 flex items-center justify-center"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -348,11 +433,12 @@ export default function ReportPage() {
         </Button>
       </form>
 
+      {/* Recent Reports Section */}
       <h2 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะล่าสุด</h2>
       <div className="bg-white overflow-hidden">
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className=" sticky top-0 border border-gray-200 bg-gray-50">
+            <thead className="sticky top-0 border border-gray-200 bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานที่</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภทขยะ</th>

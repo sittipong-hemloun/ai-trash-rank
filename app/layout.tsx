@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google'
 import "./globals.css"
 import Header from "@/components/Header"
 import Sidebar from "@/components/Sidebar"
-// import 'leaflet/dist/leaflet.css'
 import { Toaster } from 'react-hot-toast'
 import { getUserByEmail } from '@/utils/db/actions'
 
@@ -24,12 +23,12 @@ export default function RootLayout({
         const userEmail = localStorage.getItem('userEmail')
         if (userEmail) {
           const user = await getUserByEmail(userEmail)
-          console.log('user from layout', user);
-          
+          console.log('User from layout:', user)
+
           if (user) {
-            // const availableRewards = await getAvailableRewards(user.id) as number
             const userScore = user.score
-            console.log('userScore from layout', userScore);
+            console.log('User score from layout:', userScore)
+            // Additional logic can be added here if needed
           }
         }
       } catch (error) {
@@ -44,14 +43,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
+          {/* Header Component */}
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
           <div className="flex flex-1">
+            {/* Sidebar Component */}
             <Sidebar open={sidebarOpen} />
+
+            {/* Main Content Area */}
             <main className="flex-1 p-4 lg:p-8 ml-0 lg:ml-64 transition-all duration-300">
               {children}
             </main>
           </div>
         </div>
+        {/* Toast Notifications */}
         <Toaster />
       </body>
     </html>

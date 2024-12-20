@@ -3,11 +3,16 @@ import VerificationResult from "@/app/types/verificationResult"
 import VerificationResultDisplay from "./VerificationResultDisplay"
 import { Button } from "./ui/button"
 import { Loader, Upload } from "lucide-react"
-import { User } from "@/app/types/user"
 
 interface VerificationModalProps {
   task: CollectionTask
-  user: User
+  user: {
+    id: number
+    email: string
+    name: string
+    point: number
+    score: number
+  }
   verificationImage: string | null
   setVerificationImage: (image: string | null) => void
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -17,6 +22,9 @@ interface VerificationModalProps {
   onClose: () => void
 }
 
+/**
+ * Modal for verifying collected trash.
+ */
 const VerificationModal: React.FC<VerificationModalProps> = ({
   verificationImage,
   handleImageUpload,
@@ -61,14 +69,15 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
           </div>
         </div>
       </div>
+      {/* Image Preview */}
       {verificationImage && (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={verificationImage}
           alt="Verification"
           className="mb-4 rounded-md w-full"
         />
       )}
+      {/* Verify Button */}
       <Button
         onClick={handleVerify}
         className="w-full"
@@ -83,14 +92,17 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
           'Verify Collection'
         )}
       </Button>
+      {/* Verification Results */}
       {verificationStatus === 'success' && verificationResult && (
         <VerificationResultDisplay result={verificationResult} />
       )}
+      {/* Verification Failure Message */}
       {verificationStatus === 'failure' && (
         <p className="mt-2 text-red-600 text-center text-sm">
           การตรวจสอบล้มเหลว ลองอีกครั้ง
         </p>
       )}
+      {/* Close Button */}
       <Button onClick={onClose} variant="outline" className="w-full mt-2">
         Close
       </Button>

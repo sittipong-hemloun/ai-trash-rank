@@ -11,6 +11,9 @@ interface SidebarProps {
   open: boolean
 }
 
+/**
+ * Sidebar navigation component.
+ */
 export default function Sidebar({ open }: SidebarProps) {
   const pathname = usePathname()
 
@@ -20,13 +23,12 @@ export default function Sidebar({ open }: SidebarProps) {
         <div className="px-4 py-6 space-y-8">
           {sidebarItems.map((item) => (
             <Link key={item.href} href={item.href} passHref>
-              <Button 
+              <Button
                 variant={pathname === item.href ? "secondary" : "ghost"}
-                className={`w-full justify-start py-3 mb-2 ${
-                  pathname === item.href 
-                    ? "text-green-800" 
+                className={`w-full justify-start py-3 mb-2 ${pathname === item.href
+                    ? "text-green-800"
                     : "text-gray-600"
-                }`} 
+                  }`}
               >
                 <span className="text-base">{item.label}</span>
               </Button>

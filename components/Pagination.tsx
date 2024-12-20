@@ -7,6 +7,9 @@ interface PaginationProps {
   onNext: () => void
 }
 
+/**
+ * Pagination controls for navigating through pages.
+ */
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
@@ -34,4 +37,4 @@ const Pagination: React.FC<PaginationProps> = ({
   </div>
 )
 
-export default Pagination;
+export default Pagination

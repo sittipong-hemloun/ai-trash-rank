@@ -20,7 +20,6 @@ import useTasks from '@/hooks/useTasks'
 import useUser from '@/hooks/useUser'
 import VerificationResult from '../types/verificationResult'
 
-// Make sure to set your Gemini API key in your environment variables
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
 
 const ITEMS_PER_PAGE = 5
@@ -38,7 +37,11 @@ export default function CollectPage() {
   >('idle')
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null)
 
-  // Handle Task Status Change
+  /**
+   * Handles the status change of a collection task.
+   * @param taskId - The ID of the task to update.
+   * @param newStatus - The new status to set for the task.
+   */
   const handleStatusChange = async (
     taskId: number,
     newStatus: CollectionTask['status']
@@ -68,7 +71,10 @@ export default function CollectPage() {
     }
   }
 
-  // Handle Image Upload
+  /**
+   * Handles the image upload for verification.
+   * @param e - The change event from the file input.
+   */
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -80,9 +86,19 @@ export default function CollectPage() {
     }
   }
 
-  // Utility Functions
+  /**
+   * Extracts the Base64 string from a data URL.
+   * @param dataUrl - The data URL containing the Base64 string.
+   * @returns The Base64 string.
+   */
   const readFileAsBase64 = (dataUrl: string): string => dataUrl.split(',')[1]
 
+  /**
+   * Extracts JSON from a response string.
+   * @param text - The response text containing JSON.
+   * @returns The extracted JSON string.
+   * @throws Will throw an error if JSON format is invalid.
+   */
   const extractJSON = (text: string): string => {
     const jsonStart = text.indexOf('{')
     const jsonEnd = text.lastIndexOf('}')
@@ -92,7 +108,9 @@ export default function CollectPage() {
     throw new Error('Invalid JSON format')
   }
 
-  // Handle Verification Process
+  /**
+   * Handles the verification process using Generative AI.
+   */
   const handleVerify = async () => {
     if (!selectedTask || !verificationImage || !user) {
       toast.error('Missing required information for verification.')
@@ -191,24 +209,26 @@ export default function CollectPage() {
     }
   }
 
-  // Filter and Paginate Tasks
+  // Filter tasks based on the search term
   const filteredTasks = tasks.filter(task =>
     task.location.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Calculate pagination details
   const pageCount = Math.ceil(filteredTasks.length / ITEMS_PER_PAGE)
   const paginatedTasks = filteredTasks.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
 
-  // Combine Loading States
+  // Combine loading states for user and tasks
   const isLoading = userLoading || tasksLoading
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานการเก็บขยะ</h1>
 
+      {/* Search Input */}
       <div className="mb-4 flex items-center">
         <Input
           type="text"
@@ -218,12 +238,14 @@ export default function CollectPage() {
         />
       </div>
 
+      {/* Loading Indicator */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader className="animate-spin h-8 w-8 text-gray-500" />
         </div>
       ) : (
         <>
+          {/* Task List */}
           <TaskList
             tasks={paginatedTasks}
             user={user}
@@ -231,6 +253,7 @@ export default function CollectPage() {
             onVerify={setSelectedTask}
           />
 
+          {/* Pagination Controls */}
           <Pagination
             currentPage={currentPage}
             totalPages={pageCount}
@@ -240,6 +263,7 @@ export default function CollectPage() {
         </>
       )}
 
+      {/* Verification Modal */}
       {selectedTask && user && (
         <VerificationModal
           task={selectedTask}

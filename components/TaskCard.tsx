@@ -12,6 +12,9 @@ interface TaskCardProps {
   onVerify: (task: CollectionTask) => void
 }
 
+/**
+ * Displays individual trash collection task details.
+ */
 const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerify }) => (
   <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
     <div className="flex justify-between items-start mb-2">

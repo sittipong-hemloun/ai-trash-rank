@@ -1,9 +1,12 @@
-import CollectionTask from "@/app/types/collectionTask";
+import CollectionTask from "@/app/types/collectionTask"
 
 interface StatusBadgeProps {
   status: CollectionTask['status']
 }
 
+/**
+ * Displays a badge representing the status of a task.
+ */
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const statusConfig: Record<
     CollectionTask['status'],
@@ -28,4 +31,4 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   )
 }
 
-export default StatusBadge;
+export default StatusBadge
