@@ -1,8 +1,10 @@
 // File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/components/VerificationReportResultDisplay.tsx
 
 interface VerificationResult {
-  trashType: string;
-  quantity: string;
+  trashType?: string;
+  quantity?: string;
+  trashTypeMatch?: boolean;
+  quantityMatch?: boolean;
   confidence: number;
 }
 

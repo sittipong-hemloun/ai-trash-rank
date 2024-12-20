@@ -5,8 +5,10 @@ import VerificationReportResultDisplay from '@/components/VerificationReportResu
 import { Loader } from 'lucide-react';
 
 interface VerificationResult {
-  trashType: string;
-  quantity: string;
+  trashType?: string;
+  quantity?: string;
+  trashTypeMatch?: boolean;
+  quantityMatch?: boolean;
   confidence: number;
 }
 

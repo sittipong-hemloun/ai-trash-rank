@@ -1,29 +1,67 @@
-// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/hooks/useVerification.ts
-
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Verification modes
+export type VerificationMode = 'collect' | 'report';
+
+// Common verification status
+export type VerificationStatus = 'idle' | 'verifying' | 'success' | 'failure';
+
+// Base verification result interface
+// interface BaseVerificationResult {
+//   confidence: number;
+// }
+
+// // Collection-specific verification result
+// export interface CollectionVerificationResult extends BaseVerificationResult {
+//   trashTypeMatch: boolean;
+//   quantityMatch: boolean;
+// }
+
+// // Report-specific verification result
+// export interface ReportVerificationResult extends BaseVerificationResult {
+//   trashType: string;
+//   quantity: string;
+// }
+
 interface VerificationResult {
-  trashType: string;
-  quantity: string;
+  trashType?: string;
+  quantity?: string;
+  trashTypeMatch?: boolean;
+  quantityMatch?: boolean;
   confidence: number;
 }
 
-type VerificationStatus = 'idle' | 'verifying' | 'success' | 'failure';
+// Configuration for verification
+interface VerificationConfig {
+  mode: VerificationMode;
+  expectedTrashType?: string;
+  expectedQuantity?: string;
+}
 
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
 
-const useVerification = () => {
+/**
+ * Custom hook for handling trash verification
+ * @param config - Configuration object for the verification process
+ */
+const useVerification = (config: VerificationConfig) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>('idle');
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>({
+    confidence: 0,
+    trashTypeMatch: false,
+    quantityMatch: false,
+    trashType: '',
+    quantity: '',
+  });
   const [isVerifying, setIsVerifying] = useState(false);
 
   /**
-   * Handles file selection and sets a preview image.
-   * @param selectedFile - The selected file.
+   * Handles file selection and sets a preview image
+   * @param selectedFile - The selected file to process
    */
   const handleFileSelection = (selectedFile: File) => {
     setFile(selectedFile);
@@ -33,9 +71,8 @@ const useVerification = () => {
   };
 
   /**
-   * Converts a file to a Base64 string.
-   * @param file - The file to convert.
-   * @returns A promise that resolves to the Base64 string.
+   * Converts a file to Base64 string
+   * @param file - The file to convert
    */
   const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -47,10 +84,8 @@ const useVerification = () => {
   };
 
   /**
-   * Extracts JSON data from a response string.
-   * @param text - The response text containing JSON.
-   * @returns The extracted JSON string.
-   * @throws Will throw an error if JSON format is invalid.
+   * Extracts JSON from response text
+   * @param text - The text containing JSON
    */
   const convertToJSONFormat = (text: string): string => {
     const jsonStart = text.indexOf('{');
@@ -62,7 +97,77 @@ const useVerification = () => {
   };
 
   /**
-   * Handles the trash verification process using Generative AI.
+   * Generates the appropriate prompt based on verification mode
+   */
+  const generatePrompt = (mode: VerificationMode): string => {
+    const basePrompt = 'คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:';
+
+    if (mode === 'collect') {
+      return `${basePrompt}
+1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${config.expectedTrashType}
+2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง ใกล้เคียงกับ: ${config.expectedQuantity}
+3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
+ตอบกลับในรูปแบบ JSON เช่นนี้:
+{
+  "trashTypeMatch": true/false,
+  "quantityMatch": true/false,
+  "confidence": confidence level as a number between 0 and 1
+}`;
+    }
+
+    return `${basePrompt}
+1. ประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้)
+2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง
+3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
+
+ตอบกลับในรูปแบบ JSON เช่นนี้:
+{
+  "trashType": "ประเภทของขยะ",
+  "quantity": "ปริมาณโดยประมาณพร้อมหน่วย",
+  "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1
+}`;
+  };
+
+  /**
+   * Validates the verification result based on mode
+   * @param result - The result to validate
+   */
+  // const validateVerificationResult = (
+  //   result: any
+  // ): result is CollectionVerificationResult | ReportVerificationResult => {
+  //   if (config.mode === 'collect') {
+  //     return (
+  //       typeof result.trashTypeMatch === 'boolean' &&
+  //       typeof result.quantityMatch === 'boolean' &&
+  //       typeof result.confidence === 'number'
+  //     );
+  //   }
+
+  //   return (
+  //     typeof result.trashType === 'string' &&
+  //     typeof result.quantity === 'string' &&
+  //     typeof result.confidence === 'number'
+  //   );
+  // };
+  const validateVerificationResult = (
+    result: VerificationResult) => {
+    if (config.mode === 'collect') {
+      return (
+        typeof result.trashTypeMatch === 'boolean' &&
+        typeof result.quantityMatch === 'boolean' &&
+        typeof result.confidence === 'number'
+      );
+    } else {
+      return (
+        typeof result.trashType === 'string' &&
+        typeof result.quantity === 'string' &&
+        typeof result.confidence === 'number'
+      );
+    }
+  };
+
+  /**
+   * Handles the verification process
    */
   const handleVerify = async () => {
     if (!file) {
@@ -78,46 +183,26 @@ const useVerification = () => {
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const base64Data = await readFileAsBase64(file);
-
-      const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
-1. ประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้)
-2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง
-3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
-
-ตอบกลับในรูปแบบ JSON เช่นนี้:
-{
-  "trashType": "ประเภทของขยะ",
-  "quantity": "ปริมาณโดยประมาณพร้อมหน่วย format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง",
-  "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1,
-}
-ตัวอย่าง:
-{
-  "trashType": "พลาสติก, กระดาษ",
-  "quantity": "1 กก.",
-  "confidence": 0.95
-}`;
+      const prompt = generatePrompt(config.mode);
 
       const result = await model.generateContent([
         { inlineData: { data: base64Data.split(',')[1], mimeType: file.type } },
         prompt,
       ]);
+
       const response = await result.response;
       const text = await response.text();
 
       try {
         const parsedText = convertToJSONFormat(text);
-        const parsedResult: VerificationResult = JSON.parse(parsedText);
+        const parsedResult = JSON.parse(parsedText);
 
-        if (
-          parsedResult.trashType &&
-          parsedResult.quantity &&
-          parsedResult.confidence !== undefined
-        ) {
+        if (validateVerificationResult(parsedResult)) {
           setVerificationResult(parsedResult);
           setVerificationStatus('success');
           toast.success('Trash verification successful!');
         } else {
-          throw new Error('Missing fields in response');
+          throw new Error('Invalid verification result format');
         }
       } catch (error) {
         console.error('Failed to parse JSON response:', text, error);
@@ -133,6 +218,17 @@ const useVerification = () => {
     }
   };
 
+  /**
+   * Resets the verification state
+   */
+  const resetVerification = () => {
+    setFile(null);
+    setPreview(null);
+    setVerificationStatus('idle');
+    setVerificationResult(null);
+    setIsVerifying(false);
+  };
+
   return {
     file,
     preview,
@@ -142,6 +238,7 @@ const useVerification = () => {
     verificationResult,
     handleVerify,
     isVerifying,
+    resetVerification,
   };
 };
 

@@ -38,7 +38,9 @@ export default function ReportPage() {
     verificationResult,
     handleVerify,
     isVerifying,
-  } = useVerification();
+  } = useVerification({
+    mode: 'report',
+  });
 
   const [reports, setReports] = useState<Report[]>([]);
   // const [newReport, setNewReport] = useState({ location: '', type: '', quantity: '' });
@@ -104,8 +106,8 @@ export default function ReportPage() {
       const report = await createReport(
         user.id,
         location,
-        verificationResult!.trashType,
-        verificationResult!.quantity,
+        verificationResult!.trashType || '',
+        verificationResult!.quantity || '',
         preview || undefined
       );
 
