@@ -3,10 +3,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import Image from 'next/image';
 import { Loader } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { StandaloneSearchBox, useJsApiLoader } from '@react-google-maps/api';
+import { useJsApiLoader } from '@react-google-maps/api';
 import { Libraries } from '@react-google-maps/api';
 import { createReport, getRecentReports } from '@/utils/db/actions';
 import { useRouter } from 'next/navigation';

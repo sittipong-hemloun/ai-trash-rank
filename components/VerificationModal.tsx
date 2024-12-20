@@ -71,6 +71,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
       </div>
       {/* Image Preview */}
       {verificationImage && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={verificationImage}
           alt="Verification"

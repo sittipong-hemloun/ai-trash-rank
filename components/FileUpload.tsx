@@ -8,7 +8,7 @@ interface FileUploadProps {
   preview: string | null;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ file, setFile, preview }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ setFile, preview }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -49,6 +49,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ file, setFile, preview }) => {
 
       {/* Image Preview */}
       {preview && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={preview}
           alt="Trash preview"

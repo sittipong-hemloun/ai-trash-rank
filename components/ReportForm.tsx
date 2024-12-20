@@ -1,11 +1,8 @@
-// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/components/ReportForm.tsx
-
-import { useState } from 'react';
-import { Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandaloneSearchBox } from '@react-google-maps/api';
 import FileUpload from '@/components/FileUpload';
 import VerificationReportResultDisplay from '@/components/VerificationReportResultDisplay';
+import { Loader } from 'lucide-react';
 
 interface VerificationResult {
   trashType: string;
