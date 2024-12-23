@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Search, Bell, Menu, Star } from "lucide-react"
+import { Bell, Menu, Star } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -268,13 +268,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         {/* Right-side Icons and User Actions */}
         <div className="flex items-center">
-          {/* Search Icon (Visible on Mobile) */}
-          {isMobile && (
-            <Button variant="ghost" size="icon" className="mr-2">
-              <Search className="h-5 w-5" />
-            </Button>
-          )}
-
           {/* Notifications Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

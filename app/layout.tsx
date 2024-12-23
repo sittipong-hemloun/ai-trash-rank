@@ -45,8 +45,6 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col">
           {/* Header Component */}
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
-          <div className="flex flex-1">
             {/* Sidebar Component */}
             <Sidebar open={sidebarOpen} />
 
@@ -55,7 +53,6 @@ export default function RootLayout({
               {children}
             </main>
           </div>
-        </div>
         {/* Toast Notifications */}
         <Toaster />
       </body>
