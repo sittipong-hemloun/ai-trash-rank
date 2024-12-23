@@ -47,7 +47,7 @@ export default function CollectPage() {
     newStatus: CollectionTask['status']
   ) => {
     if (!user) {
-      toast.error('Please log in to collect trash.')
+      toast.error('กรุณาเข้าสู่ระบบเพื่อเก็บขยะ')
       return
     }
 
@@ -61,13 +61,13 @@ export default function CollectPage() {
               : task
           )
         )
-        toast.success('Task status updated successfully')
+        toast.success('อัปเดตสถานะงานเรียบร้อยแล้ว')
       } else {
-        toast.error('Failed to update task status. Please try again.')
+        toast.error('ไม่สามารถอัปเดตสถานะงานได้ โปรดลองอีกครั้ง')
       }
     } catch (error) {
       console.error('Error updating task status:', error)
-      toast.error('Failed to update task status. Please try again.')
+      toast.error('ไม่สามารถอัปเดตสถานะงานได้ โปรดลองอีกครั้ง')
     }
   }
 
@@ -179,12 +179,12 @@ export default function CollectPage() {
 
         await createNotification(
           user.id,
-          `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+          `การยืนยันสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
           'reward'
         )
 
         toast.success(
-          `Verification successful! You earned ${earnedPoints} points and ${earnedScore} score!`,
+          `การยืนยันสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
           {
             duration: 5000,
             position: 'top-center',
@@ -192,7 +192,7 @@ export default function CollectPage() {
         )
       } else {
         toast.error(
-          'Verification failed. The collected trash does not match the reported trash.',
+          'การตรวจสอบล้มเหลว ขยะที่เก็บรวบรวมไม่ตรงกับขยะที่รายงาน',
           {
             duration: 5000,
             position: 'top-center',
@@ -202,7 +202,7 @@ export default function CollectPage() {
     } catch (error) {
       console.error('Error during verification:', error)
       setVerificationStatus('failure')
-      toast.error('Verification failed. Please try again.', {
+      toast.error('การตรวจสอบล้มเหลว กรุณาลองอีกครั้ง', {
         duration: 5000,
         position: 'top-center',
       })

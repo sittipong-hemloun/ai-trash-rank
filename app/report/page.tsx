@@ -92,7 +92,7 @@ export default function ReportPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || verificationStatus !== 'success') {
-      toast.error('Please verify the trash or log in before submitting.');
+      toast.error('กรุณาตรวจสอบถังขยะหรือเข้าสู่ระบบก่อนส่ง');
       return;
     }
 
@@ -123,10 +123,10 @@ export default function ReportPage() {
           ...prevReports,
         ]);
       }
-      toast.success('Report submitted successfully!');
+      toast.success('ส่งรายงานเรียบร้อยแล้ว!');
     } catch (error) {
       console.error('Error submitting report:', error);
-      toast.error('Failed to submit report.');
+      toast.error('ไม่สามารถส่งรายงานได้');
     } finally {
       setIsSubmitting(false);
     }
@@ -147,7 +147,7 @@ export default function ReportPage() {
         setReports(recentReports);
       } catch (error) {
         console.error('Error fetching reports:', error);
-        toast.error('Failed to load recent reports.');
+        toast.error('ไม่สามารถส่งรายงานได้');
       }
     };
 

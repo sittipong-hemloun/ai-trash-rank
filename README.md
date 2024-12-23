@@ -212,16 +212,16 @@ const useUser = () => {
           if (fetchedUser) {
             setUser(fetchedUser)
           } else {
-            toast.error('User not found. Please log in again.')
+            toast.error('ไม่พบผู้ใช้ กรุณาเข้าสู่ระบบอีกครั้ง')
             router.push('/')
           }
         } else {
-          toast.error('User not logged in. Please log in.')
+          toast.error('ผู้ใช้ยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบ')
           router.push('/')
         }
       } catch (error) {
         console.error('Error fetching user:', error)
-        toast.error('Failed to load user data. Please try again.')
+        toast.error('ไม่สามารถโหลดข้อมูลผู้ใช้ได้ กรุณาลองอีกครั้ง')
       } finally {
         setLoading(false)
       }

@@ -137,7 +137,7 @@ const useVerification = (config: VerificationConfig) => {
    */
   const handleVerify = async () => {
     if (!file) {
-      toast.error('Please select a file to verify.');
+      toast.error('กรุณาเลือกไฟล์เพื่อยืนยัน');
       return;
     }
 
@@ -166,19 +166,19 @@ const useVerification = (config: VerificationConfig) => {
         if (validateVerificationResult(parsedResult)) {
           setVerificationResult(parsedResult);
           setVerificationStatus('success');
-          toast.success('Trash verification successful!');
+          toast.success('การตรวจสอบถังขยะสำเร็จแล้ว!');
         } else {
           throw new Error('Invalid verification result format');
         }
       } catch (error) {
         console.error('Failed to parse JSON response:', text, error);
         setVerificationStatus('failure');
-        toast.error('Failed to parse verification results.');
+        toast.error('ไม่สามารถแยกวิเคราะห์ผลลัพธ์การตรวจสอบได้');
       }
     } catch (error) {
       console.error('Error verifying trash:', error);
       setVerificationStatus('failure');
-      toast.error('Failed to verify the trash. Please try again.');
+      toast.error('ไม่สามารถตรวจสอบถังขยะได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsVerifying(false);
     }

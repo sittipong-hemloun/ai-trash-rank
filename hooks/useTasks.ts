@@ -17,7 +17,7 @@ const useTasks = () => {
         setTasks(fetchedTasks as CollectionTask[])
       } catch (error) {
         console.error('Error fetching tasks:', error)
-        toast.error('Failed to load tasks. Please try again.')
+        toast.error('ไม่สามารถโหลดงานได้ กรุณาลองอีกครั้ง')
       } finally {
         setLoading(false)
       }
