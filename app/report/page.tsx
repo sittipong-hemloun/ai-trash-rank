@@ -43,7 +43,6 @@ export default function ReportPage() {
   });
 
   const [reports, setReports] = useState<Report[]>([]);
-  // const [newReport, setNewReport] = useState({ location: '', type: '', quantity: '' });
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);

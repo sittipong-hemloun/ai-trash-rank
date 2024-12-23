@@ -8,23 +8,6 @@ export type VerificationMode = 'collect' | 'report';
 // Common verification status
 export type VerificationStatus = 'idle' | 'verifying' | 'success' | 'failure';
 
-// Base verification result interface
-// interface BaseVerificationResult {
-//   confidence: number;
-// }
-
-// // Collection-specific verification result
-// export interface CollectionVerificationResult extends BaseVerificationResult {
-//   trashTypeMatch: boolean;
-//   quantityMatch: boolean;
-// }
-
-// // Report-specific verification result
-// export interface ReportVerificationResult extends BaseVerificationResult {
-//   trashType: string;
-//   quantity: string;
-// }
-
 interface VerificationResult {
   trashType?: string;
   quantity?: string;
@@ -132,23 +115,6 @@ const useVerification = (config: VerificationConfig) => {
    * Validates the verification result based on mode
    * @param result - The result to validate
    */
-  // const validateVerificationResult = (
-  //   result: any
-  // ): result is CollectionVerificationResult | ReportVerificationResult => {
-  //   if (config.mode === 'collect') {
-  //     return (
-  //       typeof result.trashTypeMatch === 'boolean' &&
-  //       typeof result.quantityMatch === 'boolean' &&
-  //       typeof result.confidence === 'number'
-  //     );
-  //   }
-
-  //   return (
-  //     typeof result.trashType === 'string' &&
-  //     typeof result.quantity === 'string' &&
-  //     typeof result.confidence === 'number'
-  //   );
-  // };
   const validateVerificationResult = (
     result: VerificationResult) => {
     if (config.mode === 'collect') {

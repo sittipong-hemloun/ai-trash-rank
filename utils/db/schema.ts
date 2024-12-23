@@ -6,7 +6,7 @@ import {
   text, 
   timestamp, 
   jsonb, 
-  boolean 
+  boolean,
 } from "drizzle-orm/pg-core"
 
 /**
@@ -21,6 +21,59 @@ export const Users = pgTable("users", {
   score: integer("score").notNull().default(0), // Score earned by the user
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
+
+/**
+ * Posts table schema.
+ * Represents general posts such as news.
+ */
+export const Posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  image: text("image"), // URL or path to the image
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Activities table schema.
+ * Represents activities that include rewards and have specific time frames.
+ */
+export const Activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  image: text("image"), // URL or path to the image
+  rewardCount: integer("reward_count").notNull().default(0),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Rewards table schema.
+ * Now references Activities instead of Posts.
+ */
+export const Rewards = pgTable("rewards", {
+  id: serial("id").primaryKey(),
+  activityId: integer("activity_id").references(() => Activities.id).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  qrCode: text("qr_code").notNull(), // QR code image URL or data
+  redeemPoint: integer("redeem_point").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Join table for Users and Rewards (Many-to-Many relationship).
+ */
+export const UserRewards = pgTable("user_rewards", {
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  rewardId: integer("reward_id").references(() => Rewards.id).notNull(),
+  redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
+}, (table) => ({
+  primaryKey: [table.userId, table.rewardId],
+}))
 
 /**
  * Reports table schema.
