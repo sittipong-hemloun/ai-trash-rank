@@ -1,6 +1,6 @@
 # AI Trash Rank – Developer Guide
 
-Welcome! This document aims to help you (or your friend) understand how the **AI Trash Rank** project works so you can develop it further. This project is built on top of **Next.js** (App Router) and uses **Drizzle ORM** with a **Neon** PostgreSQL database. It also integrates Google Generative AI, Google Maps API, and Web3Auth for authentication.
+This project is built on top of **Next.js** (App Router) and uses **Drizzle ORM** with a **Neon** PostgreSQL database. It also integrates Google Generative AI, Google Maps API, and Web3Auth for authentication.
 
 Below is an overview of the critical parts of the codebase, focusing on two key areas:
 
