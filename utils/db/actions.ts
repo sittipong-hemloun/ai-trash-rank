@@ -120,7 +120,7 @@ export async function createReport(
     // Create a notification for the user
     await createNotification(
       userId,
-      `You've earned ${pointsEarned} points for reporting trash!`,
+      `คุณได้รับ ${pointsEarned} คะแนนจากการรายงานขยะ`,
       'reward'
     )
 
