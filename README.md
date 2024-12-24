@@ -10,9 +10,6 @@ Below is an overview of the critical parts of the codebase, focusing on two key 
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
   - [Setup Instructions](#setup-instructions)
-  - [Database Layer](#database-layer)
-    - [Overview of Drizzle ORM with Neon DB](#overview-of-drizzle-orm-with-neon-db)
-    - [Schema Definition (utils/db/schema.ts)](#schema-definition-utilsdbschemats)
     - [Actions (utils/db/actions.ts)](#actions-utilsdbactionsts)
   - [Hooks](#hooks)
 
@@ -54,12 +51,12 @@ Key tech stack includes:
 
 3.	**Set Up Environment Variables**:
     - Copy the `.env.example` file to `.env.local` and fill in the required values.
-  ```bash
-  cp .env.example .env.local
-  ```
+    ```bash
+    cp .env.example .env.local
+    ```
 
 <!-- if need to migrate database -->
-4.	**Migrate the Database**:
+4.	**Migrate the Database (Optional)**:
     - Run the following command to create the database tables:
     ```bash
     npm run db:push
