@@ -34,6 +34,17 @@ export async function getUserByEmail(email: string) {
   }
 }
 
+// get all users
+export async function getAllUsers() {
+  try {
+    const users = await db.select().from(Users).execute()
+    return users
+  } catch (error) {
+    console.error("Error fetching all users:", error)
+    return []
+  }
+}
+
 /**
  * Updates a user's points by adding the specified quantity.
  * @param userId - The ID of the user.

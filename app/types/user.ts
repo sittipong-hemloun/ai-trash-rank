@@ -32,9 +32,11 @@ declare type AuthUserInfo = {
 export interface User {
   id: number
   email: string
+  profileImage: string | null
   name: string
   point: number
   score: number
+  createdAt: Date
 }
 
 export default AuthUserInfo
