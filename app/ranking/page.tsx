@@ -38,7 +38,7 @@ export default function RankingPage() {
             <Loader className="animate-spin h-8 w-8 text-gray-600" />
           </div>
         ) : (
-          <div className="bg-white shadow-xl rounded-md overflow-hidden border border-gray-200">
+          <div className="bg-white rounded-md overflow-hidden border border-gray-200">
             <div className="bg-green-500 p-2">
               <div className="flex justify-between items-center text-white">
                 <span className="text-xl pl-2 font-bold">ผู้ที่มีคะแนนสูงสุด</span>

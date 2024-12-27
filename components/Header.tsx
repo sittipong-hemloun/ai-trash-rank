@@ -250,8 +250,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
       <div className="flex items-center justify-between px-4 py-2">
+        {/* Text Logo */}
+        <Link href="/">
+          <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
+        </Link>
+
+
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
           <Button variant="ghost" size="icon" className="mr-2 md:mr-4" onClick={onMenuClick}>
@@ -272,7 +278,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-2 relative">
-                <Bell className="h-5 w-5" />
+                <Bell className="h-5 w-5  text-white" />
                 {notifications.length > 0 && (
                   <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.2rem] h-5">
                     {notifications.length}
