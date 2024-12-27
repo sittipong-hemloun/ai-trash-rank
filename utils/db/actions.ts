@@ -220,6 +220,7 @@ export async function getTrashCollectionTasks(limit: number = 20) {
       })
       .from(Reports)
       .limit(limit)
+      .orderBy(desc(Reports.createdAt))
       .execute()
 
     return tasks.map(task => ({
