@@ -9,13 +9,16 @@ import Image from 'next/image'
 export default function RankingPage() {
   const [loading, setLoading] = useState(true)
   const [allUsers, setAllUsers] = useState<UserType[]>([])
-
+  
+  
   // get all users
   useEffect(() => {
     const fetchRewardsAndUser = async () => {
       setLoading(true)
       try {
         const allUser = await getAllUsers()
+        // soft all users by score
+        allUser.sort((a, b) => b.score - a.score)
         setAllUsers(allUser)
       } catch (error) {
         console.error('Error fetching rewards and user:', error)
