@@ -18,7 +18,12 @@ import TaskList from '@/components/TaskList'
 import VerificationModal from '@/components/VerificationModal'
 import useTasks from '@/hooks/useTasks'
 import useUser from '@/hooks/useUser'
-import VerificationResult from '../types/verificationResult'
+
+// NOTE: You can define a more specific interface for the new verification result.
+export interface CollectVerificationResult {
+  trashIsCollected: boolean
+  confidence: number
+}
 
 const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
 
@@ -35,7 +40,9 @@ export default function CollectPage() {
   const [verificationStatus, setVerificationStatus] = useState<
     'idle' | 'verifying' | 'success' | 'failure'
   >('idle')
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null)
+  const [verificationResult, setVerificationResult] = useState<CollectVerificationResult | null>(
+    null
+  )
 
   /**
    * Handles the status change of a collection task.
@@ -94,6 +101,29 @@ export default function CollectPage() {
   const readFileAsBase64 = (dataUrl: string): string => dataUrl.split(',')[1]
 
   /**
+   * Fetch the original (before) image from its URL and convert to Base64.
+   */
+  async function fetchImageAsBase64(imageUrl: string): Promise<string | null> {
+    try {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          // "data:<mime>;base64," prefix
+          const base64 = (reader.result as string).split(',')[1]
+          resolve(base64)
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch (error) {
+      console.error('Error fetching original image:', error)
+      return null
+    }
+  }
+
+  /**
    * Extracts JSON from a response string.
    * @param text - The response text containing JSON.
    * @returns The extracted JSON string.
@@ -109,7 +139,7 @@ export default function CollectPage() {
   }
 
   /**
-   * Handles the verification process using Generative AI.
+   * New logic: Compare two images (before & after) to check if trash is actually collected.
    */
   const handleVerify = async () => {
     if (!selectedTask || !verificationImage || !user) {
@@ -120,57 +150,69 @@ export default function CollectPage() {
     setVerificationStatus('verifying')
 
     try {
+      // 1) Prepare Google Generative AI
       const genAI = new GoogleGenerativeAI(geminiApiKey!)
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-      const base64Data = readFileAsBase64(verificationImage)
+      // 2) Fetch the original image (before) as Base64
+      const originalBase64 = await fetchImageAsBase64(selectedTask.imageUrl)
+      if (!originalBase64) {
+        throw new Error('Cannot fetch original image as base64.')
+      }
 
+      // 3) Read the new image (after) that user uploaded
+      const afterBase64 = readFileAsBase64(verificationImage)
+
+      // 4) Combine them into multiple parts:
       const imageParts = [
         {
           inlineData: {
-            data: base64Data,
+            data: originalBase64,
+            mimeType: 'image/jpeg',
+          },
+        },
+        {
+          inlineData: {
+            data: afterBase64,
             mimeType: 'image/jpeg',
           },
         },
       ]
 
-      const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการจัดการและการรีไซเคิลขยะ วิเคราะห์ภาพนี้และให้ข้อมูลดังนี้:
-1. ยืนยันว่าประเภทของขยะ (ระบุเฉพาะประเภท เช่น พลาสติก, กระดาษ, แก้ว, โลหะ, อินทรีย์ โดยสามารถมีหลายประเภทได้) ตรงกับ: ${selectedTask.trashType}
-2. ปริมาณหรือจำนวนโดยประมาณ format คือ (ตัวเลข + " " + กก.) เท่านั้น ห้ามใส่ข้อความอื่นๆ หรือข้อความที่ไม่เกี่ยวข้อง ใกล้เคียงกับ: ${selectedTask.quantity}
-3. ระดับความมั่นใจในการประเมินครั้งนี้ (แสดงเป็นเปอร์เซ็นต์)
-ตอบกลับในรูปแบบ JSON เช่นนี้:
+      // 5) Our new prompt for comparing “before” vs “after”:
+      const prompt = `
+คุณเป็นผู้เชี่ยวชาญด้านการจัดการขยะและภาพถ่าย
+มีภาพ 2 ภาพเรียงลำดับ:
+1) ภาพก่อนเก็บขยะ
+2) ภาพหลังเก็บขยะ
+คุณจะตรวจสอบว่าขยะในภาพแรกได้ถูกเก็บไปจริงหรือไม่ (พื้นที่บริเวณเดียวกันแต่ขยะหายไป) โดยให้ผลลัพธ์เป็น JSON:
 {
-  "trashTypeMatch": true/false,
-  "quantityMatch": true/false,
-  "confidence": confidence level as a number between 0 and 1
+  "trashIsCollected": true หรือ false,
+  "confidence": เลขระหว่าง 0 ถึง 1
 }
-ตัวอย่าง:
-{
-  "trashTypeMatch": true,
-  "quantityMatch": true,
-  "confidence": 0.9
-}`
+(ตัวอย่าง: 0.8 คือมั่นใจ 80%)
+ห้ามแสดงข้อความอื่นนอกจาก JSON
+      `
 
+      // 6) Generate content with prompt + images
       const result = await model.generateContent([prompt, ...imageParts])
       const response = await result.response
       const text = await response.text()
+      console.log('Verification response:', text)
 
-      // Parse and validate the AI response
+      // 7) Parse the JSON from the response
       const parsedText = extractJSON(text)
-      const parsedResult: VerificationResult = JSON.parse(parsedText)
+      const parsedResult = JSON.parse(parsedText) as CollectVerificationResult
 
       console.log('Parsed verification result:', parsedResult)
       setVerificationResult(parsedResult)
       setVerificationStatus('success')
 
-      // Handle successful verification
-      if (
-        parsedResult.trashTypeMatch &&
-        parsedResult.quantityMatch &&
-        parsedResult.confidence > 0.7
-      ) {
+      // 8) If the AI says “collected” with high confidence => verify
+      if (parsedResult.trashIsCollected && parsedResult.confidence > 0.7) {
         await handleStatusChange(selectedTask.id, 'verified')
 
+        // Give some points & score
         const earnedPoints = 50
         const earnedScore = 20
 
@@ -179,12 +221,12 @@ export default function CollectPage() {
 
         await createNotification(
           user.id,
-          `การยืนยันสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
-          'reward'
+          `การตรวจสอบสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
+          'รางวัล'
         )
 
         toast.success(
-          `การยืนยันสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
+          `การตรวจสอบสำเร็จ! คุณได้รับคะแนน ${earnedPoints} points และ ${earnedScore} scores`,
           {
             duration: 5000,
             position: 'top-center',
@@ -192,7 +234,7 @@ export default function CollectPage() {
         )
       } else {
         toast.error(
-          'การตรวจสอบล้มเหลว ขยะที่เก็บรวบรวมไม่ตรงกับขยะที่รายงาน',
+          'การตรวจสอบล้มเหลว ดูเหมือนขยะยังไม่ได้ถูกเก็บไปจริง',
           {
             duration: 5000,
             position: 'top-center',

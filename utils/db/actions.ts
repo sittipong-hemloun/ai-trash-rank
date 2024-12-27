@@ -160,7 +160,7 @@ export async function createReport(
     await createNotification(
       userId,
       `คุณได้รับ ${pointsEarned} คะแนนจากการรายงานขยะ`,
-      'reward'
+      'รางวัล'
     )
 
     return report
