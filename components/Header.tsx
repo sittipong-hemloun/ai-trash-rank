@@ -211,15 +211,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
    * Handles user logout using Web3Auth.
    */
   const logout = async () => {
-    if (!web3auth) {
-      console.log("Web3Auth not initialized yet")
-      return
-    }
+    // if (!web3auth) {
+    //   console.log("Web3Auth not initialized yet")
+    //   return
+    // }
     try {
-      await web3auth.logout()
+      localStorage.removeItem('userEmail')
+      // await web3auth.logout()
       setLoggedIn(false)
       setUserInfo(null)
-      localStorage.removeItem('userEmail')
     } catch (error) {
       console.error("Error during logout:", error)
     }
