@@ -1,6 +1,6 @@
 // File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/components/FileUpload.tsx
 
-import { Upload } from 'lucide-react';
+import { Upload, Camera } from 'lucide-react';
 
 interface FileUploadProps {
   file: File | null;
@@ -21,7 +21,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFile, preview }) => {
       <label htmlFor="trash-image" className="block text-lg font-medium text-gray-700 mb-2">
         อัปโหลดรูปภาพขยะ
       </label>
-      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed hover:border-green-500 transition-colors duration-300">
+      {/* Desktop */}
+      <div className="hidden mt-1 md:flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed hover:border-green-500 transition-colors duration-300">
         <div className="space-y-1 text-center">
           <Upload className="mx-auto h-12 w-12 text-gray-400" />
           <div className="flex text-sm text-gray-600">
@@ -34,6 +35,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFile, preview }) => {
                 id="trash-image"
                 name="trash-image"
                 type="file"
+                capture="environment"
                 className="sr-only"
                 onChange={handleFileChange}
                 accept="image/*"
@@ -45,6 +47,25 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFile, preview }) => {
             รองรับไฟล์ประเภท PNG, JPG, GIF ขนาดไม่เกิน 10MB
           </p>
         </div>
+      </div>
+      {/* Mobile */}
+      <div className="mt-2 flex items-center justify-center md:hidden w-full">
+        <label
+          htmlFor="trash-image-mobile"
+          className="flex flex-col items-center cursor-pointer bg-green-500 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 w-full"
+        >
+          <Camera className="h-6 w-6 mb-1" />
+          <span className="text-sm">ถ่ายรูปจากกล้อง</span>
+          <input
+            id="trash-image-mobile"
+            name="trash-image-mobile"
+            type="file"
+            capture="environment"
+            className="sr-only"
+            onChange={handleFileChange}
+            accept="image/*"
+          />
+        </label>
       </div>
 
       {/* Image Preview */}

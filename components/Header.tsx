@@ -270,7 +270,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
       <div className="flex items-center justify-between px-4 py-2">
         {/* Text Logo */}
-        <Link href="">
+        <Link href="" className="hidden md:block">
           <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
         </Link>
 
@@ -278,7 +278,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
           <Button variant="ghost" size="icon" className="mr-2 md:mr-4" onClick={onMenuClick}>
-            <Menu className="h-6 w-6" />
+            <Menu className="h-6 w-6 text-white" />
           </Button>
         </div>
 

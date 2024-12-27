@@ -110,7 +110,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         </div>
 
         {/* Trash Type Field */}
-        <div>
+        <div className='col-span-2 md:col-span-1'>
           <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
             ประเภทขยะ
           </label>
@@ -127,7 +127,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         </div>
 
         {/* Trash Amount Field */}
-        <div>
+        <div className='col-span-2 md:col-span-1'>
           <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
             ปริมาณขยะ
           </label>

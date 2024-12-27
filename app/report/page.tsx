@@ -172,7 +172,7 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="md:p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะ</h1>
 
       {/* Trash Report Submission Form */}
