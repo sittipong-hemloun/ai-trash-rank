@@ -22,11 +22,11 @@ const useUser = () => {
             setUser(fetchedUser)
           } else {
             toast.error('ไม่พบผู้ใช้ กรุณาเข้าสู่ระบบอีกครั้ง')
-            router.push('/')
+            // router.push('')
           }
         } else {
           toast.error('ผู้ใช้ยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบ')
-          router.push('/')
+          // router.push('')
         }
       } catch (error) {
         console.error('Error fetching user:', error)

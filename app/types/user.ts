@@ -36,6 +36,7 @@ export interface User {
   name: string
   point: number
   score: number
+  phoneNumber: string | null
   createdAt: Date
 }
 

@@ -6,6 +6,7 @@ const sidebarItems = [
   { href: "/report", label: "รายงานขยะ" },
   { href: "/collect", label: "เก็บขยะ" },
   { href: "/ranking", label: "อันดับ" },
+  { href: "/profile", label: "โปรไฟล์" },
 ]
 
 interface SidebarProps {

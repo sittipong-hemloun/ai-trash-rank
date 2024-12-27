@@ -34,6 +34,34 @@ export async function getUserByEmail(email: string) {
   }
 }
 
+/**
+ * Updates user's info: name, phoneNumber, and profileImage (all optional).
+ */
+export async function updateUserInfo(
+  userId: number,
+  name?: string,
+  phoneNumber?: string,
+  profileImage?: string
+) {
+  try {
+    const [updatedUser] = await db
+      .update(Users)
+      .set({
+        ...(name ? { name } : {}),
+        ...(phoneNumber ? { phoneNumber } : {}),
+        ...(profileImage ? { profileImage } : {}),
+      })
+      .where(eq(Users.id, userId))
+      .returning()
+      .execute()
+
+    return updatedUser
+  } catch (error) {
+    console.error("Error updating user info:", error)
+    return null
+  }
+}
+
 // get all users
 export async function getAllUsers() {
   try {

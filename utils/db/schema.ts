@@ -17,8 +17,10 @@ export const Users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   profileImage: text("profile_image"),
   name: varchar("name", { length: 255 }).notNull(),
-  point: integer("point").notNull().default(0), // Points earned by the user
-  score: integer("score").notNull().default(0), // Score earned by the user
+  point: integer("point").notNull().default(0),
+  score: integer("score").notNull().default(0),
+  phoneNumber: varchar("phone_number", { length: 10 }),
+  // phoneNumber: varchar("phone_number", { length: 10 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

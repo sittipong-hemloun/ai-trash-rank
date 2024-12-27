@@ -71,6 +71,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const init = async () => {
       try {
         await web3auth.initModal()
+        console.log(web3auth.connected)
 
         if (web3auth.connected) {
           setLoggedIn(true)
@@ -92,6 +93,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
               // Optionally handle the error, e.g., show a notification
             }
           }
+        } else {
+          // connect the user if they have already connected before
+          const userEmail = localStorage.getItem('userEmail')
+          if (userEmail) {
+            const user = await getUserByEmail(userEmail)
+            if (user) {
+              setUserInfo({
+                email: user.email,
+                name: user.name,
+                profileImage: user.profileImage,
+                verifier: "",
+              } as UserInfo)
+              setLoggedIn(true)
+            }
+          }
+          
         }
       } catch (error) {
         console.error("Error initializing Web3Auth:", error)
@@ -253,7 +270,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
       <div className="flex items-center justify-between px-4 py-2">
         {/* Text Logo */}
-        <Link href="/">
+        <Link href="">
           <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
         </Link>
 
@@ -336,7 +353,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   {userInfo ? userInfo.name : "Fetch User Info"}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link href="/settings">โปรไฟล์</Link>
+                  <Link href="/profile">โปรไฟล์</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>ออกจากระบบ</DropdownMenuItem>
               </DropdownMenuContent>

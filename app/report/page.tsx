@@ -159,7 +159,7 @@ export default function ReportPage() {
    */
   useEffect(() => {
     if (!userLoading && !user) {
-      router.push('/');
+      router.push('');
     }
   }, [userLoading, user, router]);
 
