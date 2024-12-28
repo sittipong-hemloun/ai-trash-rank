@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react'
 import { getAllUsers } from '@/utils/db/actions'
 import { Loader, Award, Crown } from 'lucide-react'
 import { toast } from 'react-hot-toast'
-import { User as UserType } from '@/app/types/user'
+import { User as UserType } from '@/types/user'
 import Image from 'next/image'
 
 export default function RankingPage() {
   const [loading, setLoading] = useState(true)
   const [allUsers, setAllUsers] = useState<UserType[]>([])
-  
-  
+
+
   // get all users
   useEffect(() => {
     const fetchRewardsAndUser = async () => {

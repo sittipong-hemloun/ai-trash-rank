@@ -22,7 +22,7 @@ import {
   markNotificationAsRead
 } from "@/utils/db/actions"
 import Image from "next/image"
-import NotificationType from "@/app/types/noti"
+import NotificationType from "@/types/noti"
 
 const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
 
@@ -108,7 +108,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               setLoggedIn(true)
             }
           }
-          
+
         }
       } catch (error) {
         console.error("Error initializing Web3Auth:", error)
@@ -270,7 +270,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
       <div className="flex items-center justify-between px-4 py-2">
         {/* Text Logo */}
-        <Link href="" className="hidden md:block">
+        <Link href="/" className="hidden md:block">
           <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
         </Link>
 

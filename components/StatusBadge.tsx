@@ -1,4 +1,4 @@
-import CollectionTask from "@/app/types/collectionTask"
+import CollectionTask from "@/types/collectionTask"
 
 interface StatusBadgeProps {
   status: CollectionTask['status']

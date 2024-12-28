@@ -12,7 +12,7 @@ import {
   createNotification,
 } from '@/utils/db/actions'
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import CollectionTask from '../types/collectionTask'
+import CollectionTask from '../../../types/collectionTask'
 import Pagination from '@/components/Pagination'
 import TaskList from '@/components/TaskList'
 import VerificationModal from '@/components/VerificationModal'

@@ -1,9 +1,9 @@
 import { useEffect } from "react"
-import CollectionTask from "@/app/types/collectionTask"
+import CollectionTask from "@/types/collectionTask"
 import VerificationCollectResultDisplay from "./VerificationCollectResultDisplay"
 import { Button } from "./ui/button"
 import { Loader, Upload, Camera } from "lucide-react"
-import { CollectVerificationResult } from "@/app/collect/page"
+import { CollectVerificationResult } from "@/app/(main)/collect/page"
 
 interface VerificationModalProps {
   task: CollectionTask

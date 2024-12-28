@@ -1,4 +1,4 @@
-import { User } from "@/app/types/user"
+import { User } from "@/types/user"
 import { getUserByEmail } from "@/utils/db/actions"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"

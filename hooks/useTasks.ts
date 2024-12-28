@@ -1,4 +1,4 @@
-import CollectionTask from "@/app/types/collectionTask"
+import CollectionTask from "@/types/collectionTask"
 import { getTrashCollectionTasks } from "@/utils/db/actions"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"

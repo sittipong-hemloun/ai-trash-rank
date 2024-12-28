@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import CollectionTask from "@/app/types/collectionTask";
-import { User } from "@/app/types/user";
+import CollectionTask from "@/types/collectionTask";
+import { User } from "@/types/user";
 import StatusBadge from "./StatusBadge";
 import { Calendar, MapPin, Trash2, Weight } from "lucide-react";
 import { Button } from "./ui/button";

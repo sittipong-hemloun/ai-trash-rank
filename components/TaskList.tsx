@@ -1,5 +1,5 @@
-import CollectionTask from "@/app/types/collectionTask"
-import { User } from "@/app/types/user"
+import CollectionTask from "@/types/collectionTask"
+import { User } from "@/types/user"
 import TaskCard from "./TaskCard"
 
 interface TaskListProps {

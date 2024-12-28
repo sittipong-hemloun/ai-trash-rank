@@ -1,4 +1,4 @@
-import { CollectVerificationResult } from "@/app/collect/page"
+import { CollectVerificationResult } from "@/app/(main)/collect/page"
 
 interface VerificationCollectResultDisplayProps {
   result: CollectVerificationResult
@@ -9,7 +9,7 @@ interface VerificationCollectResultDisplayProps {
  */
 const VerificationCollectResultDisplay: React.FC<VerificationCollectResultDisplayProps> = ({ result }) => (
   // <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-    <div className={`mt-4 p-4 ${result.trashIsCollected ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'} rounded-md`}>
+  <div className={`mt-4 p-4 ${result.trashIsCollected ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'} rounded-md`}>
     <p>
       ขยะถูกเก็บอย่างถูกต้อง: {result.trashIsCollected ? 'ใช่' : 'ไม่ใช่'}
     </p>
