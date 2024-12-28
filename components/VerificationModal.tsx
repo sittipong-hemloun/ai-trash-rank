@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import CollectionTask from "@/app/types/collectionTask"
 import VerificationCollectResultDisplay from "./VerificationCollectResultDisplay"
 import { Button } from "./ui/button"
-import { Loader, Upload } from "lucide-react"
+import { Loader, Upload, Camera } from "lucide-react"
 import { CollectVerificationResult } from "@/app/collect/page"
 
 interface VerificationModalProps {
@@ -58,7 +58,8 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
           >
             อัปโหลดรูปขยะที่เก็บ
           </label>
-          <div className="mt-1 flex justify-center px=6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+          {/* Desktop Upload */}
+          <div className="hidden md:flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
             <div className="space-y-1 text-center">
               <Upload className="mx-auto h-12 w-12 text-gray-400" />
               <div className="flex text-sm text-gray-600">
@@ -81,6 +82,26 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
                 PNG, JPG, GIF ไปจนถึง 10MB
               </p>
             </div>
+          </div>
+
+          {/* Mobile Upload */}
+          <div className="mt-2 flex items-center justify-center md:hidden w-full">
+            <label
+              htmlFor="verification-image-mobile"
+              className="flex flex-col items-center cursor-pointer bg-green-500 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 w-full"
+            >
+              <Camera className="h-6 w-6 mb-1" />
+              <span className="text-sm">ถ่ายรูปจากกล้อง</span>
+              <input
+                id="verification-image-mobile"
+                name="verification-image-mobile"
+                type="file"
+                capture="environment"
+                className="sr-only"
+                onChange={handleImageUpload}
+                accept="image/*"
+              />
+            </label>
           </div>
         </div>
 
