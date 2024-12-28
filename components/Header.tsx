@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge"
 import { Web3Auth } from "@web3auth/modal"
 import { CHAIN_NAMESPACES, UserInfo, WEB3AUTH_NETWORK } from "@web3auth/base"
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
-import { useMediaQuery } from "@/hooks/useMediaQuery"
 import {
   createUser,
   getUnreadNotifications,
@@ -23,6 +22,7 @@ import {
 } from "@/utils/db/actions"
 import Image from "next/image"
 import NotificationType from "@/types/noti"
+import { useRouter } from "next/navigation"
 
 const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
 
@@ -59,8 +59,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [loading, setLoading] = useState(true)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [notifications, setNotifications] = useState<NotificationType[]>([])
-  const isMobile = useMediaQuery("(max-width: 768px)")
   const [point, setPoint] = useState(0)
+  const router = useRouter()
 
   console.log('User info:', userInfo)
 
@@ -70,45 +70,25 @@ export default function Header({ onMenuClick }: HeaderProps) {
   useEffect(() => {
     const init = async () => {
       try {
-        await web3auth.initModal()
-        console.log(web3auth.connected)
+        setLoggedIn(true)
+        const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
+        const userDBProfileImage = userFromDB?.profileImage || ""
 
-        if (web3auth.connected) {
-          setLoggedIn(true)
-          const user = await web3auth.getUserInfo()
-          setUserInfo({
-            ...user,
-            verifier: user.verifier || "",
-          } as UserInfo)
-          if (user.email) {
-            localStorage.setItem('userEmail', user.email)
-            try {
-              await createUser(
-                user.email,
-                user.profileImage || "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Chill_guy_original_artwork.jpg/220px-Chill_guy_original_artwork.jpg",
-                user.name || 'ไม่ระบุตัวตน'
-              )
-            } catch (error) {
-              console.error("Error creating user:", error)
-              // Optionally handle the error, e.g., show a notification
-            }
+        setUserInfo({
+          ...userFromDB,
+          profileImage: userDBProfileImage,
+        } as UserInfo)
+        if (userFromDB) {
+          localStorage.setItem('userEmail', userFromDB.email)
+          try {
+            await createUser(
+              userFromDB.email,
+              userFromDB.profileImage || "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Chill_guy_original_artwork.jpg/220px-Chill_guy_original_artwork.jpg",
+              userFromDB.name || 'ไม่ระบุตัวตน'
+            )
+          } catch (error) {
+            console.error("Error creating user:", error)
           }
-        } else {
-          // connect the user if they have already connected before
-          const userEmail = localStorage.getItem('userEmail')
-          if (userEmail) {
-            const user = await getUserByEmail(userEmail)
-            if (user) {
-              setUserInfo({
-                email: user.email,
-                name: user.name,
-                profileImage: user.profileImage,
-                verifier: "",
-              } as UserInfo)
-              setLoggedIn(true)
-            }
-          }
-
         }
       } catch (error) {
         console.error("Error initializing Web3Auth:", error)
@@ -211,15 +191,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
    * Handles user logout using Web3Auth.
    */
   const logout = async () => {
-    // if (!web3auth) {
-    //   console.log("Web3Auth not initialized yet")
-    //   return
-    // }
     try {
       localStorage.removeItem('userEmail')
-      // await web3auth.logout()
       setLoggedIn(false)
       setUserInfo(null)
+      router.push('/')
     } catch (error) {
       console.error("Error during logout:", error)
     }
@@ -231,28 +207,46 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const getUserInfo = async () => {
     if (web3auth.connected) {
       const user = await web3auth.getUserInfo()
-      setUserInfo({
-        ...user,
-        verifier: user.verifier || "",
-      } as UserInfo)
-      if (user.email) {
-        localStorage.setItem('userEmail', user.email)
-        try {
-          await createUser(
-            user.email,
-            user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
-            user.name || 'ไม่ระบุตัวตน'
-          )
-        } catch (error) {
-          console.error("Error creating user:", error)
-          // Optionally handle the error
+      const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
+      const userDBProfileImage = userFromDB?.profileImage || ""
+      if (user) {
+        setUserInfo({
+          ...user,
+          profileImage: userDBProfileImage,
+          verifier: user.verifier || "",
+        } as UserInfo)
+        if (user.email) {
+          localStorage.setItem('userEmail', user.email)
+          try {
+            await createUser(
+              user.email,
+              user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+              user.name || 'ไม่ระบุตัวตน'
+            )
+          } catch (error) {
+            console.error("Error creating user:", error)
+            // Optionally handle the error
+          }
         }
       }
     }
   }
 
   if (loading) {
-    return <div>Loading Web3Auth...</div>
+    return <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
+      <div className="flex items-center justify-between px-4 py-2">
+        {/* Text Logo */}
+        <Link href="/" className="hidden md:block">
+          <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
+        </Link>
+        {/* Mobile Menu Button */}
+        <div className="flex items-center md:hidden">
+          <Button variant="ghost" size="icon" className="mr-2 md:mr-4" onClick={onMenuClick}>
+            <Menu className="h-6 w-6 text-white" />
+          </Button>
+        </div>
+      </div>
+    </header>
   }
 
   /**
@@ -273,22 +267,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <Link href="/" className="hidden md:block">
           <h1 className="text-white text-2xl font-bold">AI TRASH RANK</h1>
         </Link>
-
-
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
           <Button variant="ghost" size="icon" className="mr-2 md:mr-4" onClick={onMenuClick}>
             <Menu className="h-6 w-6 text-white" />
           </Button>
         </div>
-
-        {/* Search Bar (Hidden on Mobile) */}
-        {!isMobile && (
-          <div className="flex-1 max-w-xl mx-4">
-            {/* You can add a search bar here if needed */}
-          </div>
-        )}
-
         {/* Right-side Icons and User Actions */}
         <div className="flex items-center">
           {/* Notifications Dropdown */}
@@ -317,7 +301,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   </DropdownMenuItem>
                 ))
               ) : (
-                <DropdownMenuItem>No new notifications</DropdownMenuItem>
+                <DropdownMenuItem>
+                  ไม่มีการแจ้งเตือนใหม่
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
