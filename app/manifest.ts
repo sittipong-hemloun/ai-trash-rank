@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'AITrashRank',
-    short_name: 'AITrashRank',
-    description: 'AITrashRank is a web app to rank trash types using AI.',
+    name: 'AI Trash Rank',
+    short_name: 'AI Trash Rank',
+    description: 'AI Trash Rank is a web app to rank trash types using AI.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

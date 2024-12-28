@@ -151,7 +151,7 @@ export default function Home() {
           </p>
 
           {isLoading ? (
-            <Button className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105"
+            <Button className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium transition-all"
               disabled={true}
             >
               กำลังโหลด...
@@ -196,7 +196,7 @@ export default function Home() {
           />
         </section>
 
-        <section className="bg-white p-10 rounded-3xl shadow-lg mb-20">
+        <section className="bg-white p-10 rounded-3xl shadow-md border mb-20">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-gray-800">ผลลัพธ์ที่พวกเราสร้าง</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <ImpactCard title="ผู้ใช้ทั้งหมด" value={`${impactData.totalUsers.toString()} คน`} icon={Users} />
@@ -213,7 +213,7 @@ function ImpactCard({ title, value, icon: Icon }: { title: string; value: string
   const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US', { maximumFractionDigits: 1 }) : value;
 
   return (
-    <div className="p-6 rounded-xl bg-gray-50 border border-gray-100 transition-all duration-300 ease-in-out hover:shadow-md">
+    <div className="p-6 rounded-xl bg-gray-50 border shadow-sm">
       <Icon className="h-10 w-10 text-green-500 mb-4" />
       <p className="text-sm text-gray-600">{title}</p>
       <p className="text-3xl font-bold mb-2 text-gray-800">{formattedValue}</p>
@@ -223,7 +223,7 @@ function ImpactCard({ title, value, icon: Icon }: { title: string; value: string
 
 function FeatureCard({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
   return (
-    <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col items-center text-center">
+    <div className="bg-white p-8 rounded-xl shadow-sm border flex flex-col items-center text-center">
       <div className="bg-green-100 p-4 rounded-full mb-6">
         <Icon className="h-8 w-8 text-green-600" />
       </div>
