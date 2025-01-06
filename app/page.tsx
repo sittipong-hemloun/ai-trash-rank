@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { ArrowRight, Leaf, Recycle, Users, Coins, MapPin } from 'lucide-react'
+import { ArrowRight, Leaf, Recycle, Users, Coins, MapPin, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getRecentReports, getAllUsers, createUser, getUserByEmail } from '@/utils/db/actions'
+import { getRecentReports, getAllUsers, createUser } from '@/utils/db/actions'
 import Image from 'next/image'
 import LogoImg from '@/public/logo.png'
 import { Web3Auth } from "@web3auth/modal"
@@ -41,6 +41,19 @@ export default function Home() {
     reportsSubmitted: 0,
     totalUsers: 0,
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = () => {
+      setIsInstalled(true)
+      // Optionally, display a toast or alert
+      alert('ขอบคุณที่ติดตั้งแอปพลิเคชันของเรา!')
+    }
+    window.addEventListener('appinstalled', handler)
+    return () => window.removeEventListener('appinstalled', handler)
+  }, [])
 
   useEffect(() => {
     async function fetchImpactData() {
@@ -130,6 +143,39 @@ export default function Home() {
     }
   }
 
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handler = () => setIsInstalled(true);
+    window.addEventListener('appinstalled', handler);
+    return () => window.removeEventListener('appinstalled', handler);
+  }, []);
+
+  useEffect(() => {
+    const beforeInstallPromptHandler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+    };
+  }, []);
+
   return (
     <div className={` px-4 py-16 bg-gradient-to-l from-green-300 to-green-300 via-green-50`}>
       <div className='container mx-auto max-w-6xl'>
@@ -149,6 +195,19 @@ export default function Home() {
             {/* เข้าร่วมชุมชนของเราเพื่อทำให้การจัดการขยะมีประสิทธิภาพและคุ้มค่ามากขึ้น */}
             ร่วมเป็นส่วนหนึ่งกับเรา เพื่อรับสิทธิประโยชน์จากการรายงานขยะและรับรางวัล
           </p>
+
+          {/* Install PWA Button for Mobile Devices */}
+          {!isInstalled && (
+            <div className='block md:hidden mb-4'>
+              <Button
+                onClick={handleInstallClick}
+                className="bg-gray-600 hover:bg-gray-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105"
+              >
+                ติดตั้งแอป
+                <Download className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          )}
 
           {isLoading ? (
             <Button className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium transition-all"
