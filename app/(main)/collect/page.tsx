@@ -268,10 +268,10 @@ export default function CollectPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานการเก็บขยะ</h1>
+      <h1 className="text-3xl font-semibold mb-6 text-gray-200">รายงานการเก็บขยะ</h1>
 
       {/* Search Input */}
-      <div className="mb-4 flex items-center">
+      <div className="mb-4 flex items-center text-gray-200">
         <Input
           type="text"
           placeholder="ค้นหาตามพื้นที่"

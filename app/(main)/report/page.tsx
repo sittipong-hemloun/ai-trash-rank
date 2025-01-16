@@ -173,7 +173,7 @@ export default function ReportPage() {
 
   return (
     <div className="md:p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะ</h1>
+      <h1 className="text-3xl font-semibold mb-6 text-gray-200">รายงานขยะ</h1>
 
       {/* Trash Report Submission Form */}
       <ReportForm
@@ -194,7 +194,7 @@ export default function ReportPage() {
       />
 
       {/* Recent Reports Section */}
-      <h2 className="text-3xl font-semibold mb-6 text-gray-800">รายงานขยะล่าสุด</h2>
+      <h2 className="text-3xl font-semibold mb-6 text-gray-200">รายงานขยะล่าสุด</h2>
       <ReportsTable reports={reports} />
     </div>
   );

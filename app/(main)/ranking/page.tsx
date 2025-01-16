@@ -34,7 +34,7 @@ export default function RankingPage() {
   return (
     <div className="">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">อันดับคะแนน </h1>
+        <h1 className="text-3xl font-semibold mb-6 text-gray-200">อันดับคะแนน </h1>
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
