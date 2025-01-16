@@ -115,7 +115,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
   }, []); // Empty dependency array ensures this runs once on mount
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl mb-12">
+    <form onSubmit={handleSubmit} className="bg-gray-200 p-8 rounded-2xl mb-12">
       {/* File Upload Section */}
       <FileUpload file={file} setFile={setFile} preview={preview} />
 

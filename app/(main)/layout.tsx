@@ -21,7 +21,7 @@ export default function DashboardLayout({
       <Sidebar open={sidebarOpen} />
 
       {/* Main Content Area */}
-      <main className="flex-1 p-4 lg:p-8 ml-0 lg:ml-64 transition-all duration-300 bg-slate-900">
+      <main className="p-4 ml-0 transition-all duration-300 bg-slate-900 min-h-svh">
         <div className="relative z-10">
           {children}
         </div>

@@ -16,7 +16,7 @@ interface TaskCardProps {
  * Displays individual trash collection task details.
  */
 const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerify }) => (
-  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 max-w-lg mx-auto md:max-w-2xl lg:max-w-3xl">
+  <div className="bg-gray-200 p-4 rounded-lg shadow-sm border border-gray-200 max-w-lg mx-auto md:max-w-2xl lg:max-w-3xl">
     {/* Header */}
     <div className="flex justify-between items-start mb-2 md:flex-row flex-col">
       <h2 className="text-lg font-medium text-gray-800 flex items-center">

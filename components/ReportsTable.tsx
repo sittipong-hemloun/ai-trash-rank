@@ -16,7 +16,7 @@ interface ReportsTableProps {
 
 const ReportsTable: React.FC<ReportsTableProps> = ({ reports }) => {
   return (
-    <div className="bg-white overflow-hidden">
+    <div className="bg-gray-200 overflow-hidden">
       <div className="max-h-96 overflow-y-auto">
         <table className="w-full">
           <thead className="sticky top-0 border border-gray-200 bg-gray-50">

@@ -273,6 +273,29 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <Menu className="h-6 w-6 text-white" />
           </Button>
         </div>
+        <div className="flex items-center">
+          <Link href="/report">
+            <Button variant="ghost" className="text-white text-sm md:text-base">รายงานขยะ</Button>
+          </Link>
+          <div className="mx-2 md:mx-4 text-white">
+            |
+          </div>
+          <Link href="/collect">
+            <Button variant="ghost" className="text-white text-sm md:text-base">เก็บขยะ</Button>
+          </Link>
+          <div className="mx-2 md:mx-4 text-white">
+            |
+          </div>
+          <Link href="/ranking">
+            <Button variant="ghost" className="text-white text-sm md:text-base">อันดับ</Button>
+          </Link>
+          <div className="mx-2 md:mx-4 text-white">
+            |
+          </div>
+          <Link href="/profile">
+            <Button variant="ghost" className="text-white text-sm md:text-base">โปรไฟล์</Button>
+          </Link>
+        </div>
         {/* Right-side Icons and User Actions */}
         <div className="flex items-center">
           {/* Notifications Dropdown */}
