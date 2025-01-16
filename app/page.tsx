@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { ArrowRight, Leaf, Recycle, Users, Coins, MapPin, Download } from 'lucide-react'
+import { ArrowRight, Leaf, Users, Coins, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getRecentReports, getAllUsers, createUser } from '@/utils/db/actions'
@@ -177,46 +177,55 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={` px-4 py-16 bg-gradient-to-l from-green-900 to-green-900 via-black`}>
+    <div className={` px-4 pb-16 bg-gradient-to-l from-green-900 to-green-900 via-black`}>
       <div className='container mx-auto max-w-6xl'>
 
-        <section className="text-center mb-20">
-          {/* <AnimatedGlobe /> */}
-          <div className='flex justify-center w-44 h-44 mx-auto mb-8'>
-            <Image src={LogoImg} alt="ฮีโร่" width={500} height={500} />
+        <section className="min-h-svh flex flex-col justify-center">
+          {/* Header with Logo and Title */}
+          <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between mb-16 gap-16 h-full">
+            <div className="flex-shrink-0 mb-8 md:mb-0">
+              <Image
+                src={LogoImg}
+                alt="ฮีโร่"
+                width={275}
+                height={275}
+                className=" shadow-lg transform transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+                รายงานและตรวจสอบขยะด้วย
+                <span className="block text-green-400 mt-2">Generative AI</span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto md:mx-0">
+                ร่วมเป็นส่วนหนึ่งกับเรา เพื่อรับสิทธิประโยชน์จากการรายงานขยะและรับรางวัล
+              </p>
+            </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-100 tracking-tight">
-            รายงานและตรวจสอบขยะด้วย<br />
-            <div className='flex justify-center items-center gap-4'>
-              <span className="text-green-600">Generative AI</span>
-            </div>
-          </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
-            {/* เข้าร่วมชุมชนของเราเพื่อทำให้การจัดการขยะมีประสิทธิภาพและคุ้มค่ามากขึ้น */}
-            ร่วมเป็นส่วนหนึ่งกับเรา เพื่อรับสิทธิประโยชน์จากการรายงานขยะและรับรางวัล
-          </p>
 
-          {/* Install PWA Button for Mobile Devices */}
-          {!isInstalled && (
-            <div className='block md:hidden mb-4'>
-              <Button
-                onClick={handleInstallClick}
-                className="bg-gray-600 hover:bg-gray-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105"
+          {/* Call to Action Buttons */}
+          <div className="flex flex-col items-center md:flex-row md:justify-center gap-6">
+            {/* Install PWA Button for Mobile Devices */}
+            {!isInstalled && (
+              <div className="md:hidden">
+                <button
+                  onClick={handleInstallClick}
+                  className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white text-lg py-3 px-6 rounded-full shadow-md transition transform hover:scale-105"
+                >
+                  ติดตั้งแอป
+                  <Download className="ml-2 h-5 w-5" />
+                </button>
+              </div>
+            )}
+
+            {/* Login or Report Button */}
+            {isLoading ? (
+              <Button className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium transition-all"
+                disabled={true}
               >
-                ติดตั้งแอป
-                <Download className="ml-2 h-5 w-5" />
+                กำลังโหลด...
               </Button>
-            </div>
-          )}
-
-          {isLoading ? (
-            <Button className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium transition-all"
-              disabled={true}
-            >
-              กำลังโหลด...
-            </Button>
-          ) :
-            (
+            ) : (
               <>
                 {!loggedIn ? (
                   <Button onClick={login} className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -229,51 +238,54 @@ export default function Home() {
                       รายงานขยะ
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-
                   </Link>
                 )}
               </>
             )}
-
+          </div>
         </section>
 
-        <section className="grid md:grid-cols-3 gap-10 mb-20">
-          <FeatureCard
-            icon={Leaf}
-            title="ประมวลผลและตรวจสอบด้วย AI"
-            description="ไม่ต้องรอนาน ระบบของเราจะช่วยตรวจสอบขยะให้คุณ"
-          />
-          <FeatureCard
-            icon={Coins}
-            title="รับรางวัล"
-            description="สามารถใช้ point ที่ได้รับจากการรายงานขยะแลกของรางวัลได้"
-          />
-          <FeatureCard
-            icon={Users}
-            title="จัดอันดับผู้ใช้"
-            description="กระตุ้นให้คุณมีส่วนร่วมในการจัดการขยะ และแข่งขันกับเพื่อนๆ"
-          />
-        </section>
 
         <section className="bg-gray-800 p-10 rounded-3xl shadow-md border mb-20">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-gray-200">ผลลัพธ์ที่พวกเราสร้าง</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <ImpactCard title="ผู้ใช้ทั้งหมด" value={`${impactData.totalUsers.toString()} คน`} icon={Users} />
-            <ImpactCard title="ปริมาณขยะที่ถูกเก็บแล้ว" value={`${impactData.trashCollected} กิโลกรัม`} icon={Recycle} />
-            <ImpactCard title="จำนวนรายงานที่ได้รับการจัดการ" value={`${impactData.reportsSubmitted.toString()} รายการ`} icon={MapPin} />
+            <ImpactCard title="ผู้ใช้ทั้งหมด" value={`${impactData.totalUsers.toString()} คน`} />
+            <ImpactCard title="ปริมาณขยะที่ถูกเก็บแล้ว" value={`${impactData.trashCollected} กิโลกรัม`} />
+            <ImpactCard title="จำนวนรายงานที่ได้รับการจัดการ" value={`${impactData.reportsSubmitted.toString()} รายการ`} />
           </div>
         </section>
+
+        <section className="flex flex-col items-center justify-center py-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-12">คุณสมบัติเด่นของเรา</h2>
+          <div className="flex flex-wrap justify-center gap-8">
+            <FeatureCard
+              icon={Leaf}
+              title="ประมวลผลด้วย AI"
+              description="ระบบอัจฉริยะช่วยตรวจสอบขยะอย่างรวดเร็วและมีประสิทธิภาพ"
+            />
+            <FeatureCard
+              icon={Coins}
+              title="รับรางวัล"
+              description="สะสมพอยต์จากการรายงานขยะแลกของรางวัลพิเศษได้ง่ายๆ"
+            />
+            <FeatureCard
+              icon={Users}
+              title="จัดอันดับผู้ใช้"
+              description="แข่งขันและจัดอันดับผู้ใช้เพื่อสร้างแรงจูงใจในการมีส่วนร่วม"
+            />
+          </div>
+        </section>
+
       </div>
     </div>
   )
 }
 
-function ImpactCard({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) {
+function ImpactCard({ title, value }: { title: string; value: string | number }) {
   const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US', { maximumFractionDigits: 1 }) : value;
 
   return (
-    <div className="p-6 rounded-xl bg-gray-700 border shadow-sm">
-      <Icon className="h-10 w-10 text-green-500 mb-4" />
+    <div className="p-6 rounded-xl bg-gray-700 border shadow-sm flex flex-col items-center text-center gap-2">
       <p className="text-sm text-gray-100">{title}</p>
       <p className="text-3xl font-bold mb-2 text-gray-300">{formattedValue}</p>
     </div>
