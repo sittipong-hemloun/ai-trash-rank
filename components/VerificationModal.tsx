@@ -127,7 +127,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
               กำลังตรวจสอบ...
             </>
           ) : (
-            'Verify Collection'
+              'ตรวจสอบ'
           )}
         </Button>
 

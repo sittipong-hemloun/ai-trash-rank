@@ -273,7 +273,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <Menu className="h-6 w-6 text-white" />
           </Button>
         </div>
-        <div className="flex items-center">
+        <div className="hidden items-center md:flex">
           <Link href="/report">
             <Button variant="ghost" className="text-white text-sm md:text-base">รายงานขยะ</Button>
           </Link>
