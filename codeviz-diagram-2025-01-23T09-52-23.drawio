@@ -1,0 +1,373 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.0.7">
+  <diagram id="codeviz-diagram" name="System Diagram">
+    <mxGraphModel dx="1605" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="subGraph3" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="32" y="187" width="1123" height="1075" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph0" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="50" y="205" width="660" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="CollectPage" value="Collect Page&lt;br&gt;(React/TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph0" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ProfilePage" value="Profile Page&lt;br&gt;(React/TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph0" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="RankingPage" value="Ranking Page&lt;br&gt;(React/TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph0" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ReportPage" value="Report Page&lt;br&gt;(React/TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph0" vertex="1">
+          <mxGeometry x="460" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph0_label" value="Page Components" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="58" y="213" width="584" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph1" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="62" y="475" width="940" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="FileUpload" value="File Upload&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="402" y="230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Header" value="Header&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="542" y="230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Pagination" value="Pagination&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ReportForm" value="Report Form&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="600" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ReportsTable" value="Reports Table&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="740" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Sidebar" value="Sidebar&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="460" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="TaskList" value="Task List&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="VerificationModal" value="Verification Modal&lt;br&gt;(React)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph1" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph1_label" value="UI Components" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="70" y="483" width="864" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph2" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="313" y="835" width="800" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="Avatar" value="Avatar&lt;br&gt;(Radix UI)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph2" vertex="1">
+          <mxGeometry x="460" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Badge" value="Badge&lt;br&gt;(Radix UI)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph2" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Button" value="Button&lt;br&gt;(Radix UI)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph2" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="DropdownMenu" value="Dropdown Menu&lt;br&gt;(Radix UI)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph2" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Input" value="Input&lt;br&gt;(Radix UI)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph2" vertex="1">
+          <mxGeometry x="600" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph2_label" value="Shared Components" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="321" y="843" width="724" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="NextApp" value="Next.js App&lt;br&gt;(Next.js)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph3" vertex="1">
+          <mxGeometry x="232" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph3_label" value="Frontend Container" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="40" y="195" width="1047" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph7" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="504.5" y="1357" width="1080" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph4" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="830" y="355" width="240" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="DrizzleORM" value="Drizzle ORM&lt;br&gt;(TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph4" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PostgresDB" value="PostgreSQL Database&lt;br&gt;(Neon PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph4" vertex="1">
+          <mxGeometry x="40" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph4_label" value="Database Layer" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="838" y="363" width="164" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph5" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="50" y="355" width="800" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="Activities" value="Activities Model&lt;br&gt;(Drizzle Schema)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph5" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Notifications" value="Notifications Model&lt;br&gt;(Drizzle Schema)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph5" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Reports" value="Reports Model&lt;br&gt;(Drizzle Schema)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph5" vertex="1">
+          <mxGeometry x="600" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Rewards" value="Rewards Model&lt;br&gt;(Drizzle Schema)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph5" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Users" value="Users Model&lt;br&gt;(Drizzle Schema)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph5" vertex="1">
+          <mxGeometry x="460" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph5_label" value="Data Models" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="58" y="363" width="724" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph6" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="350" y="95" width="520" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="NotificationActions" value="Notification Actions&lt;br&gt;(TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph6" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ReportActions" value="Report Actions&lt;br&gt;(TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph6" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="UserActions" value="User Actions&lt;br&gt;(TypeScript)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph6" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph6_label" value="Database Actions" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="subGraph7" vertex="1">
+          <mxGeometry x="358" y="103" width="444" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph7_label" value="Backend Container" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="512.5" y="1365" width="1004" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph8" value="" style="html=1;whiteSpace=wrap;container=1;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="124.5" y="1342" width="380" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="GoogleAI" value="Google AI&lt;br&gt;(Gemini API)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph8" vertex="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="GoogleMaps" value="Google Maps API&lt;br&gt;(Places API)" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="subGraph8" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="subGraph8_label" value="External Services" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=none;spacing=5;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="132.5" y="1350" width="304" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="User" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#09555B;strokeColor=#BAC8D3;fontColor=#EEEEEE;" parent="1" vertex="1">
+          <mxGeometry x="244" y="12" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_Pagination_7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="CollectPage" target="Pagination" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_Pagination_7_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_CollectPage_Pagination_7" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_ReportActions_23" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="CollectPage" target="ReportActions" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_ReportActions_23_label" value="updates" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_CollectPage_ReportActions_23" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_TaskList_5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="CollectPage" target="TaskList" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_TaskList_5_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_CollectPage_TaskList_5" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_VerificationModal_6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="CollectPage" target="VerificationModal" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_CollectPage_VerificationModal_6_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_CollectPage_VerificationModal_6" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_DrizzleORM_PostgresDB_16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="DrizzleORM" target="PostgresDB" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_DrizzleORM_PostgresDB_16_label" value="interfaces with" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_DrizzleORM_PostgresDB_16" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_Header_Avatar_11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="Header" target="Avatar" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_Header_Avatar_11_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_Header_Avatar_11" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_Header_DropdownMenu_12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="Header" target="DropdownMenu" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_Header_DropdownMenu_12_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_Header_DropdownMenu_12" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NextApp_CollectPage_1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NextApp" target="CollectPage" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NextApp_CollectPage_1_label" value="renders" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NextApp_CollectPage_1" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NextApp_ProfilePage_3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NextApp" target="ProfilePage" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NextApp_ProfilePage_3_label" value="renders" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NextApp_ProfilePage_3" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NextApp_RankingPage_4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NextApp" target="RankingPage" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NextApp_RankingPage_4_label" value="renders" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NextApp_RankingPage_4" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NextApp_ReportPage_2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NextApp" target="ReportPage" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NextApp_ReportPage_2_label" value="renders" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NextApp_ReportPage_2" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NotificationActions_DrizzleORM_19" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NotificationActions" target="DrizzleORM" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NotificationActions_DrizzleORM_19_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NotificationActions_DrizzleORM_19" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_NotificationActions_Notifications_26" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="NotificationActions" target="Notifications" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_NotificationActions_Notifications_26_label" value="modifies" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_NotificationActions_Notifications_26" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportActions_DrizzleORM_18" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportActions" target="DrizzleORM" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportActions_DrizzleORM_18_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportActions_DrizzleORM_18" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportActions_Reports_24" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportActions" target="Reports" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportActions_Reports_24_label" value="modifies" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportActions_Reports_24" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_Button_14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportForm" target="Button" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_Button_14_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportForm_Button_14" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_FileUpload_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportForm" target="FileUpload" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_FileUpload_10_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportForm_FileUpload_10" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_GoogleMaps_20" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportForm" target="GoogleMaps" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_GoogleMaps_20_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportForm_GoogleMaps_20" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_Input_13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportForm" target="Input" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportForm_Input_13_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportForm_Input_13" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportActions_22" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportPage" target="ReportActions" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportActions_22_label" value="creates" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportPage_ReportActions_22" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportForm_8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportPage" target="ReportForm" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportForm_8_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportPage_ReportForm_8" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportsTable_9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="ReportPage" target="ReportsTable" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_ReportPage_ReportsTable_9_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_ReportPage_ReportsTable_9" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_TaskList_Badge_15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="TaskList" target="Badge" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_TaskList_Badge_15_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_TaskList_Badge_15" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_User_NextApp_0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="User" target="NextApp" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_User_NextApp_0_label" value="interacts with" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_User_NextApp_0" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_UserActions_DrizzleORM_17" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="UserActions" target="DrizzleORM" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_UserActions_DrizzleORM_17_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_UserActions_DrizzleORM_17" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_UserActions_Users_25" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="UserActions" target="Users" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_UserActions_Users_25_label" value="modifies" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_UserActions_Users_25" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-L_VerificationModal_GoogleAI_21" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=none;labelBorderColor=none;fontColor=default;strokeColor=#0B4D6A;" parent="1" source="VerificationModal" target="GoogleAI" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-L_VerificationModal_GoogleAI_21_label" value="uses" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontColor=#EEEEEE;" parent="edge-L_VerificationModal_GoogleAI_21" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
