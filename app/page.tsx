@@ -180,15 +180,15 @@ export default function Home() {
     <div className={` px-4 pb-16 bg-gradient-to-l from-green-900 to-green-900 via-black`}>
       <div className='container mx-auto max-w-6xl'>
 
-        <section className="min-h-svh flex flex-col justify-center">
+        <section className="min-h-screen flex flex-col justify-center">
           {/* Header with Logo and Title */}
-          <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between mb-16 gap-16 h-full">
+          <div className="max-w-5xl mx-auto md:px-6 flex flex-col md:flex-row items-center justify-between md:mb-16 mb-8 md:gap-16 h-full">
             <div className="flex-shrink-0 mb-8 md:mb-0">
               <Image
                 src={LogoImg}
                 alt="ฮีโร่"
-                width={275}
-                height={275}
+                width={255}
+                height={255}
                 className=" shadow-lg transform transition-transform duration-300 hover:scale-105"
               />
             </div>
@@ -210,7 +210,7 @@ export default function Home() {
               <div className="md:hidden">
                 <button
                   onClick={handleInstallClick}
-                  className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white text-lg py-3 px-6 rounded-full shadow-md transition transform hover:scale-105"
+                  className="flex items-center bg-slate-600 hover:bg-slate-700 text-white text-lg py-3 px-6 rounded-full shadow-md transition transform hover:scale-105"
                 >
                   ติดตั้งแอป
                   <Download className="ml-2 h-5 w-5" />
