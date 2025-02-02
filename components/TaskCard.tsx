@@ -55,7 +55,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerif
 
     {/* Action Buttons */}
     <div className="flex justify-end mt-3">
-      {task.status === "pending" && (
+      {task.status === "pending" && task.userId !== user?.id && (
         <Button
           onClick={() => onStartCollect(task.id, "in_progress")}
           variant="outline"

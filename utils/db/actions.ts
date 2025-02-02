@@ -213,6 +213,7 @@ export async function getTrashCollectionTasks(limit: number = 20) {
     const tasks = await db
       .select({
         id: Reports.id,
+        userId: Reports.userId, // Include the reporter's ID
         location: Reports.location,
         trashType: Reports.trashType,
         quantity: Reports.quantity,
