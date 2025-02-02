@@ -11,7 +11,6 @@ import {
   updateUserScore,
   createNotification,
 } from '@/utils/db/actions'
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import CollectionTask from '../../../types/collectionTask'
 import Pagination from '@/components/Pagination'
 import TaskList from '@/components/TaskList'
@@ -20,13 +19,17 @@ import useTasks from '@/hooks/useTasks'
 import useUser from '@/hooks/useUser'
 import TaskGoogleMap from '@/components/TaskGoogleMap'
 
+// Import OpenAI client libraries instead of Google’s Gemini API.
+import { OpenAI } from 'openai'
+
 // NOTE: You can define a more specific interface for the new verification result.
 export interface CollectVerificationResult {
   trashIsCollected: boolean
   confidence: number
 }
 
-const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+// Use your new OpenAI API key instead of the Gemini API key.
+const openaiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 
 const ITEMS_PER_PAGE = 5
 
@@ -151,36 +154,25 @@ export default function CollectPage() {
     setVerificationStatus('verifying')
 
     try {
-      // 1) Prepare Google Generative AI
-      const genAI = new GoogleGenerativeAI(geminiApiKey!)
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      if (!openaiApiKey) {
+        throw new Error("Missing OpenAI API key")
+      }
 
-      // 2) Fetch the original image (before) as Base64
+      const openai = new OpenAI({
+        apiKey: openaiApiKey,
+        dangerouslyAllowBrowser: true
+      })
+
+      // 1) Fetch the original image (before) as Base64
       const originalBase64 = await fetchImageAsBase64(selectedTask.imageUrl)
       if (!originalBase64) {
         throw new Error('Cannot fetch original image as base64.')
       }
 
-      // 3) Read the new image (after) that user uploaded
+      // 2) Read the new image (after) that user uploaded
       const afterBase64 = readFileAsBase64(verificationImage)
 
-      // 4) Combine them into multiple parts:
-      const imageParts = [
-        {
-          inlineData: {
-            data: originalBase64,
-            mimeType: 'image/jpeg',
-          },
-        },
-        {
-          inlineData: {
-            data: afterBase64,
-            mimeType: 'image/jpeg',
-          },
-        },
-      ]
-
-      // 5) Our new prompt for comparing “before” vs “after”:
+      // 3) Our new prompt for comparing “before” vs “after”:
       const prompt = `
 คุณเป็นผู้เชี่ยวชาญด้านการจัดการขยะและภาพถ่าย
 มีภาพ 2 ภาพเรียงลำดับ:
@@ -195,13 +187,40 @@ export default function CollectPage() {
 ห้ามแสดงข้อความอื่นนอกจาก JSON
       `
 
-      // 6) Generate content with prompt + images
-      const result = await model.generateContent([prompt, ...imageParts])
-      const response = await result.response
-      const text = await response.text()
+      // 4) Compose the message with the prompt and inline image data.
+      // (Here we “inject” the Base64 strings into the prompt text.)
+      const messages = [{
+        role: "user" as const,
+        content: [
+          {
+            type: "text" as const,
+            text: prompt,
+          },
+          {
+            type: "image_url" as const,
+            image_url: {
+              url: `data:image/jpeg;base64,${originalBase64}`,
+            },
+          },
+          {
+            type: "image_url" as const,
+            image_url: {
+              url: `data:image/jpeg;base64,${afterBase64}`,
+            },
+          },
+        ],
+      }];
+
+      // 5) Call OpenAI's Chat Completion API.
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: messages,
+      })
+
+      const text = completion.choices[0].message?.content || ""
       console.log('Verification response:', text)
 
-      // 7) Parse the JSON from the response
+      // 6) Parse the JSON from the response.
       const parsedText = extractJSON(text)
       const parsedResult = JSON.parse(parsedText) as CollectVerificationResult
 
@@ -209,7 +228,7 @@ export default function CollectPage() {
       setVerificationResult(parsedResult)
       setVerificationStatus('success')
 
-      // 8) If the AI says “collected” with high confidence => verify
+      // 7) If the AI says “collected” with high confidence => verify.
       if (parsedResult.trashIsCollected && parsedResult.confidence > 0.7) {
         await handleStatusChange(selectedTask.id, 'verified')
 

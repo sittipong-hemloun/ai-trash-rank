@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// Import OpenAI client libraries instead of Google’s Gemini API.
+import { OpenAI } from 'openai';
 
 // Verification modes
 export type VerificationMode = 'collect' | 'report';
@@ -23,7 +24,7 @@ interface VerificationConfig {
   expectedQuantity?: string;
 }
 
-const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
+const openaiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY!;
 
 /**
  * Custom hook for handling trash verification
@@ -120,13 +121,13 @@ const useVerification = (config: VerificationConfig) => {
   "isThereTrash": true/false,
   "trashType": "ประเภทของขยะ",
   "quantity": "ปริมาณโดยประมาณพร้อมหน่วย",
-  "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1
+  "confidence": ระดับความมั่นใจในรูปแบบตัวเลขระหว่าง 0 ถึง 1,
   "materials": [
     {
       "material": "วัสดุที่พบ",
       "binType": "ประเภทถังขยะที่เหมาะสม"
     }
-  ],
+  ]
 }`;
   };
 
@@ -164,19 +165,38 @@ const useVerification = (config: VerificationConfig) => {
     setIsVerifying(true);
 
     try {
-      const genAI = new GoogleGenerativeAI(geminiApiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const openai = new OpenAI({
+        apiKey: openaiApiKey,
+        dangerouslyAllowBrowser: true
+      });
 
       const base64Data = await readFileAsBase64(file);
+
       const prompt = generatePrompt(config.mode);
+      const imageData = base64Data.split(',')[1];
 
-      const result = await model.generateContent([
-        { inlineData: { data: base64Data.split(',')[1], mimeType: file.type } },
-        prompt,
-      ]);
+      const messages = [{
+        role: "user" as const,
+        content: [
+          {
+            type: "text" as const,
+            text: prompt,
+          },
+          {
+            type: "image_url" as const,
+            image_url: {
+              url: `data:image/jpeg;base64,${imageData}`,
+            },
+          },
+        ],
+      }];
 
-      const response = await result.response;
-      const text = await response.text();
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: messages,
+      });
+
+      const text = completion.choices[0].message?.content || '';
 
       try {
         const parsedText = convertToJSONFormat(text);
