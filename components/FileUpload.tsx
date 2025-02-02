@@ -25,10 +25,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFile, preview }) => {
       <div className="hidden mt-1 md:flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed hover:border-green-500 transition-colors duration-300">
         <div className="space-y-1 text-center">
           <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <div className="flex text-sm text-gray-600">
+          <div className="flex text-sm text-gray-600 items-center">
             <label
               htmlFor="trash-image"
-              className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
+              className="relative px-2 py-1 cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
             >
               <span>คลิกเพื่ออัปโหลดรูปขยะ</span>
               <input

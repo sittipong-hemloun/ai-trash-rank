@@ -8,10 +8,12 @@ import VerificationReportResultDisplay from '@/components/VerificationReportResu
 import { Loader, RefreshCw } from 'lucide-react';
 
 interface VerificationResult {
+  isThereTrash?: boolean;
   trashType?: string;
   quantity?: string;
   trashTypeMatch?: boolean;
   quantityMatch?: boolean;
+  materials?: { material: string; binType: string }[];
   confidence: number;
 }
 
