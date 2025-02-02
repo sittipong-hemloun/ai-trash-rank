@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import CollectionTask from '@/types/collectionTask';
 import CuteTrashImg from '../public/images/cuteTrash.png';
+import useUser from '@/hooks/useUser';
 
 type TaskGoogleMapProps = {
   tasks: CollectionTask[];
@@ -16,11 +17,32 @@ const containerStyle = {
 const defaultCenter = { lat: 13.7563, lng: 100.5018 };
 
 const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks, onMarkerClick }) => {
+
+  const { user } = useUser();
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'script-loader',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries: ['maps', 'places'],
   });
+
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Error getting user location:', error);
+        }
+      );
+    }
+  }, []);
 
   if (loadError) {
     return <div>Error loading maps</div>;
@@ -61,10 +83,10 @@ const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks, onMarkerClick }) =
   return (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={defaultCenter}
+      center={userLocation || defaultCenter}
       zoom={10}
     >
-      {tasks.filter((tasks => tasks.status == "pending")).map((task) => {
+      {tasks.filter(task => task.status === "pending").map((task) => {
         const position = parseCoordinates(task.coordinates);
         console.log(position);
         return (
@@ -80,6 +102,14 @@ const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks, onMarkerClick }) =
           />
         );
       })}
+      {userLocation && (
+        <div className=' rounded-full bg-white p-2'>
+          <Marker
+            icon={user?.profileImage ? { url: user.profileImage, scaledSize: new window.google.maps.Size(40, 40) } : undefined}
+            position={userLocation}
+          />
+        </div>
+      )}
     </GoogleMap>
   );
 };

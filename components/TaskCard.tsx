@@ -16,7 +16,7 @@ interface TaskCardProps {
  * Displays individual trash collection task details.
  */
 const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerify }) => (
-  <div className="bg-gray-200 p-4 rounded-lg shadow-sm border border-gray-200 max-w-lg mx-auto md:max-w-2xl lg:max-w-3xl">
+  <div className="bg-gray-200 p-4 rounded-lg shadow-sm border border-gray-200 mx-auto">
     {/* Header */}
     <div className="flex justify-between items-start mb-2 md:flex-row flex-col">
       <h2 className="text-lg font-medium text-gray-800 flex items-center">
@@ -55,36 +55,49 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerif
 
     {/* Action Buttons */}
     <div className="flex justify-end mt-3">
-      {task.status === "pending" && task.userId !== user?.id && (
-        <Button
-          onClick={() => onStartCollect(task.id, "in_progress")}
-          variant="outline"
-          size="sm"
-          className="w-full md:w-auto"
-        >
-          เริ่มเก็บขยะ
-        </Button>
-      )}
-      {task.status === "in_progress" && task.collectorId === user?.id && (
-        <Button
-          onClick={() => onVerify(task)}
-          variant="outline"
-          size="sm"
-          className="w-full md:w-auto"
-        >
-          เก็บเสร็จสิ้นและตรวจสอบ
-        </Button>
-      )}
-      {task.status === "in_progress" && task.collectorId !== user?.id && (
-        <span className="text-yellow-600 text-sm font-medium">
-          คนอื่นกำลังดำเนินการ
+
+      {task.userId == user?.id ? (
+        <span className="text-gray-400 text-sm font-medium">
+          ไม่สามารถเก็บขยะของตนเองได้
         </span>
+      ) : (
+        <>
+          {
+            task.status === "pending" && (
+              <Button
+                onClick={() => onStartCollect(task.id, "in_progress")}
+                variant="outline"
+                size="sm"
+                className="w-full md:w-auto"
+              >
+                เริ่มเก็บขยะ
+              </Button>
+            )
+          }
+          {task.status === "in_progress" && task.collectorId === user?.id && (
+            <Button
+              onClick={() => onVerify(task)}
+              variant="outline"
+              size="sm"
+              className="w-full md:w-auto"
+            >
+              เก็บเสร็จสิ้นและตรวจสอบ
+            </Button>
+          )}
+          {task.status === "in_progress" && task.collectorId !== user?.id && (
+            <span className="text-yellow-600 text-sm font-medium">
+              คนอื่นกำลังดำเนินการ
+            </span>
+          )}
+          {task.status === "verified" && (
+            <span className="text-green-600 text-sm font-medium">
+              จัดเก็บแล้ว
+            </span>
+          )}
+        </>
       )}
-      {task.status === "verified" && (
-        <span className="text-green-600 text-sm font-medium">
-          จัดเก็บแล้ว
-        </span>
-      )}
+
+
     </div>
   </div>
 );
