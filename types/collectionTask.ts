@@ -10,6 +10,7 @@ interface CollectionTask {
   date: string
   collectorId: number | null
   imageUrl: string
+  coordinates: string
 }
 
 export default CollectionTask

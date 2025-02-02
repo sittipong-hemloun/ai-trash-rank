@@ -1,5 +1,3 @@
-// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank-copy/app/report/page.tsx
-
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
@@ -16,7 +14,8 @@ import ReportsTable from '@/components/ReportsTable';
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 
-const libraries: Libraries = ['places'];
+// Updated libraries to include both 'maps' and 'places'
+const libraries: Libraries = ['maps', 'places'];
 
 interface Report {
   id: number;
@@ -44,12 +43,13 @@ export default function ReportPage() {
 
   const [reports, setReports] = useState<Report[]>([]);
   const [location, setLocation] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
 
-  // Load Google Maps JavaScript API
+  // Load Google Maps JavaScript API with unified options
   const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
+    id: 'script-loader',
     googleMapsApiKey,
     libraries,
   });
@@ -71,6 +71,18 @@ export default function ReportPage() {
       }
     }
   }, [searchBox]);
+
+
+  // setCoordinates by current location
+  const setCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setCoordinates({ lat, lng });
+      });
+    }
+  };
 
   /**
    * Handles input changes for the report form.
@@ -99,15 +111,18 @@ export default function ReportPage() {
     setIsSubmitting(true);
 
     try {
-
       console.log('verificationResult', verificationResult);
+
+      setCurrentLocation();
 
       const report = await createReport(
         user.id,
         location,
         verificationResult!.trashType || '',
         verificationResult!.quantity || '',
-        preview || undefined
+        preview || undefined,
+        verificationResult,
+        coordinates ? JSON.stringify(coordinates) : undefined
       );
 
       console.log('report', report);

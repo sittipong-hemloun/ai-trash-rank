@@ -91,6 +91,7 @@ export const Reports = pgTable("reports", {
   status: varchar("status", { length: 255 }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   collectorId: integer("collector_id").references(() => Users.id),
+  coordinates: text("coordinates"),
 })
 
 /**

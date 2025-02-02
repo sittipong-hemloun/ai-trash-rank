@@ -127,6 +127,7 @@ export async function updateUserScore(userId: number, scoreToAdd: number) {
  * @param quantity - Amount of the trash.
  * @param imageUrl - URL to the trash image.
  * @param verificationResult - Result of the trash verification.
+ * @param coordinates - Coordinates in JSON string format.
  * @returns The created report or null if an error occurs.
  */
 export async function createReport(
@@ -135,7 +136,8 @@ export async function createReport(
   trashType: string,
   quantity: string,
   imageUrl?: string,
-  verificationResult?: unknown
+  verificationResult?: unknown,
+  coordinates?: string
 ) {
   try {
     const [report] = await db
@@ -148,6 +150,7 @@ export async function createReport(
         imageUrl,
         verificationResult,
         status: "pending",
+        coordinates,
       })
       .returning()
       .execute()
@@ -217,6 +220,7 @@ export async function getTrashCollectionTasks(limit: number = 20) {
         date: Reports.createdAt,
         collectorId: Reports.collectorId,
         imageUrl: Reports.imageUrl,
+        coordinates: Reports.coordinates,
       })
       .from(Reports)
       .limit(limit)

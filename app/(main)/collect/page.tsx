@@ -18,6 +18,7 @@ import TaskList from '@/components/TaskList'
 import VerificationModal from '@/components/VerificationModal'
 import useTasks from '@/hooks/useTasks'
 import useUser from '@/hooks/useUser'
+import TaskGoogleMap from '@/components/TaskGoogleMap'
 
 // NOTE: You can define a more specific interface for the new verification result.
 export interface CollectVerificationResult {
@@ -279,6 +280,14 @@ export default function CollectPage() {
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
+
+      {/* Map View */}
+      {!isLoading && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold text-gray-200 mb-2">Map View</h2>
+          <TaskGoogleMap tasks={tasks} />
+        </div>
+      )}
 
       {/* Loading Indicator */}
       {isLoading ? (
