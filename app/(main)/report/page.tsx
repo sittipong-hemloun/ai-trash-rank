@@ -37,6 +37,7 @@ export default function ReportPage() {
     verificationResult,
     handleVerify,
     isVerifying,
+    resetVerification
   } = useVerification({
     mode: 'report',
   });
@@ -46,6 +47,22 @@ export default function ReportPage() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
+
+  useEffect(() => {
+    // setCoordinates by current location
+    async function setCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCoordinates({ lat, lng });
+        });
+      }
+    };
+
+    setCurrentLocation();
+  }, []);
+
 
   // Load Google Maps JavaScript API with unified options
   const { isLoaded } = useJsApiLoader({
@@ -74,15 +91,15 @@ export default function ReportPage() {
 
 
   // setCoordinates by current location
-  const setCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setCoordinates({ lat, lng });
-      });
-    }
-  };
+  // async function setCurrentLocation() {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition((position) => {
+  //       const lat = position.coords.latitude;
+  //       const lng = position.coords.longitude;
+  //       setCoordinates({ lat, lng });
+  //     });
+  //   }
+  // };
 
   /**
    * Handles input changes for the report form.
@@ -113,7 +130,41 @@ export default function ReportPage() {
     try {
       console.log('verificationResult', verificationResult);
 
-      setCurrentLocation();
+      // setCurrentLocation();
+
+      // await setCurrentLocation();
+
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        console.log('lat', lat);
+        console.log('lng', lng);
+        // setCoordinates({ lat, lng });
+      });
+
+      // console.log('coordinates', coordinates);
+
+      // async function setCoordinates() {
+      //   await const result = navigator.geolocation.getCurrentPosition((position) => {
+      //     const lat = position.coords.latitude;
+      //     const lng = position.coords.longitude;
+      //     console.log('lat', lat);
+      //     console.log('lng', lng);
+      //     return { lat, lng };
+      //     // return convertToString;
+      //   });
+      //   // const convertToString = JSON.stringify({ lat, lng });
+
+      //   const convertToString = JSON.stringify(result);
+      //   console.log('convertToString', convertToString);
+
+      //   return convertToString;
+      // }
+
+      // const coordinates = setCoordinates();
+
+      console.log('coordinates', coordinates);
+
 
       const report = await createReport(
         user.id,
@@ -139,6 +190,11 @@ export default function ReportPage() {
         ]);
       }
       toast.success('ส่งรายงานเรียบร้อยแล้ว!');
+
+      // Clear the report form fields after successful submission
+      resetVerification();
+      setLocation('');
+      router.push('/collect');
     } catch (error) {
       console.error('Error submitting report:', error);
       toast.error('ไม่สามารถส่งรายงานได้');
