@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -23,7 +24,7 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [scoreUpdated, setScoreUpdated] = useState(false);
-  
+
   // New states for the zombie twist
   const [flareCount, setFlareCount] = useState(3);
   const [isTimeStopped, setIsTimeStopped] = useState(false);
@@ -234,13 +235,16 @@ Please only output JSON.`;
         // Quiz question screen.
         <div className="relative bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-8 text-white max-w-xl w-full">
           {/* Flare button */}
-          <button
-            onClick={handleUseFlare}
-            disabled={flareCount === 0 || isTimeStopped}
-            className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-400 transition"
-          >
-            Flare ({flareCount})
-          </button>
+          <div className='flex justify-end mb-4'>
+
+            <button
+              onClick={handleUseFlare}
+              disabled={flareCount === 0 || isTimeStopped}
+              className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-400 transition"
+            >
+              🔫 ({flareCount})
+            </button>
+          </div>
           <div className="mb-4">
             <div className="w-full bg-gray-700 rounded-full h-3 mb-2">
               <div
@@ -268,6 +272,9 @@ Please only output JSON.`;
             </div>
           </div>
           {/* Zombie animation */}
+          <div className='absolute -bottom-14 right-40 w-full h-16 flex items-center justify-center'>
+            <img src={user?.profileImage || '/avatar.png'} alt="User avatar" className="w-10 h-10 rounded-full" />
+          </div>
           <div
             style={{
               position: 'absolute',
