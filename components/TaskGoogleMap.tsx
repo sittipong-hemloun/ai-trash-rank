@@ -4,6 +4,7 @@ import CollectionTask from '@/types/collectionTask';
 
 type TaskGoogleMapProps = {
   tasks: CollectionTask[];
+  onMarkerClick?: (location: string) => void;
 };
 
 const containerStyle = {
@@ -13,7 +14,7 @@ const containerStyle = {
 
 const defaultCenter = { lat: 13.7563, lng: 100.5018 };
 
-const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks }) => {
+const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks, onMarkerClick }) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'script-loader',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
@@ -60,7 +61,17 @@ const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks }) => {
       {tasks.map((task) => {
         const position = parseCoordinates(task.coordinates);
         console.log(position);
-        return <Marker key={task.id} position={position} />;
+        return (
+          <Marker
+            key={task.id}
+            position={position}
+            onClick={() => {
+              if (onMarkerClick) {
+                onMarkerClick(task.location);
+              }
+            }}
+          />
+        );
       })}
     </GoogleMap>
   );

@@ -285,7 +285,7 @@ export default function CollectPage() {
       {!isLoading && (
         <div className="mb-4">
           <h2 className="text-2xl font-semibold text-gray-200 mb-2">Map View</h2>
-          <TaskGoogleMap tasks={tasks} />
+          <TaskGoogleMap tasks={tasks} onMarkerClick={(location) => setSearchTerm(location)} />
         </div>
       )}
 
