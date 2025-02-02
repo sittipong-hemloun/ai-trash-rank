@@ -284,8 +284,9 @@ export default function CollectPage() {
       {/* Map View */}
       {!isLoading && (
         <div className="mb-4">
-          <h2 className="text-2xl font-semibold text-gray-200 mb-2">Map View</h2>
-          <TaskGoogleMap tasks={tasks} onMarkerClick={(location) => setSearchTerm(location)} />
+          <div className=' rounded-xl border-green-500 p-2 border-2'>
+            <TaskGoogleMap tasks={tasks} onMarkerClick={(location) => setSearchTerm(location)} />
+          </div>
         </div>
       )}
 

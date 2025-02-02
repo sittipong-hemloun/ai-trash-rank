@@ -1,6 +1,7 @@
 import React from 'react';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import CollectionTask from '@/types/collectionTask';
+import CuteTrashImg from '../public/images/cuteTrash.png';
 
 type TaskGoogleMapProps = {
   tasks: CollectionTask[];
@@ -52,19 +53,25 @@ const TaskGoogleMap: React.FC<TaskGoogleMapProps> = ({ tasks, onMarkerClick }) =
     return defaultCenter;
   };
 
+  const customIcon = {
+    url: CuteTrashImg.src,
+    scaledSize: new window.google.maps.Size(30, 40)
+  };
+
   return (
     <GoogleMap
       mapContainerStyle={containerStyle}
       center={defaultCenter}
       zoom={10}
     >
-      {tasks.map((task) => {
+      {tasks.filter((tasks => tasks.status == "pending")).map((task) => {
         const position = parseCoordinates(task.coordinates);
         console.log(position);
         return (
           <Marker
             key={task.id}
             position={position}
+            icon={customIcon}
             onClick={() => {
               if (onMarkerClick) {
                 onMarkerClick(task.location);

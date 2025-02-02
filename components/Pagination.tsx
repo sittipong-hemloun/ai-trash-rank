@@ -20,17 +20,17 @@ const Pagination: React.FC<PaginationProps> = ({
     <Button
       onClick={onPrevious}
       disabled={currentPage === 1}
-      className="mr-2"
+      className="mr-2 border-green-500 border-2"
     >
       ก่อนหน้า
     </Button>
-    <span className="mx-2 self-center">
+    <span className="mx-2 self-center text-white">
       หน้า {currentPage} จาก {totalPages}
     </span>
     <Button
       onClick={onNext}
       disabled={currentPage === totalPages}
-      className="ml-2"
+      className="ml-2 border-green-500 border-2"
     >
       ถัดไป
     </Button>
