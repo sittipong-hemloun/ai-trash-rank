@@ -286,6 +286,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="mx-2 md:mx-4 text-white">
             |
           </div>
+          <Link href="/quiz">
+            <Button variant="ghost" className="text-white text-sm md:text-base">ควิซ</Button>
+          </Link>
+          <div className="mx-2 md:mx-4 text-white">
+            |
+          </div>
           <Link href="/ranking">
             <Button variant="ghost" className="text-white text-sm md:text-base">อันดับ</Button>
           </Link>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 const sidebarItems = [
   { href: "/report", label: "รายงานขยะ" },
   { href: "/collect", label: "เก็บขยะ" },
+  { href: "/quiz", label: "ควิซ" },
   { href: "/ranking", label: "อันดับ" },
   { href: "/profile", label: "โปรไฟล์" },
 ]
