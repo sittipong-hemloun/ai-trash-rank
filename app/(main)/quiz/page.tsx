@@ -23,6 +23,10 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [scoreUpdated, setScoreUpdated] = useState(false);
+  
+  // New states for the zombie twist
+  const [flareCount, setFlareCount] = useState(3);
+  const [isTimeStopped, setIsTimeStopped] = useState(false);
 
   const { user } = useUser();
 
@@ -76,7 +80,7 @@ Please only output JSON.`;
 
   // Global timer for the quiz.
   useEffect(() => {
-    if (!quizStarted || quizEnded || loading) return;
+    if (!quizStarted || quizEnded || loading || isTimeStopped) return;
     if (timeLeft <= 0) {
       endQuiz();
       return;
@@ -85,10 +89,14 @@ Please only output JSON.`;
       setTimeLeft(prev => prev - 1);
     }, 1000);
     return () => clearInterval(timerId);
-  }, [timeLeft, quizEnded, loading, quizStarted]);
+  }, [timeLeft, quizEnded, loading, quizStarted, isTimeStopped]);
 
   const handleAnswer = (selectedIndex: number) => {
     if (quizEnded) return;
+    const isCorrect = selectedIndex === questions[currentQuestionIndex].correctAnswer;
+    if (isCorrect) {
+      setTimeLeft(prev => prev + 3);
+    }
     setUserAnswers(prev => {
       const newAnswers = [...prev];
       newAnswers[currentQuestionIndex] = selectedIndex;
@@ -131,12 +139,24 @@ Please only output JSON.`;
     setUserAnswers([]);
     setTimeLeft(60);
     setScoreUpdated(false);
+    setFlareCount(3);
+    setIsTimeStopped(false);
     loadQuestions();
   };
 
   const startQuiz = () => {
     setQuizStarted(true);
     setTimeLeft(60);
+  };
+
+  const handleUseFlare = () => {
+    if (flareCount > 0 && !isTimeStopped) {
+      setFlareCount(prev => prev - 1);
+      setIsTimeStopped(true);
+      setTimeout(() => {
+        setIsTimeStopped(false);
+      }, 5000);
+    }
   };
 
   const correctCount = questions.reduce((count, question, index) => {
@@ -146,9 +166,12 @@ Please only output JSON.`;
     return count;
   }, 0);
 
+  // Calculate zombie position based on timeLeft. Clamped to a maximum of 60 seconds.
+  const maxDistance = 300; // maximum distance in pixels
+
   // Main container with a beautiful gradient background.
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center relative">
       {!quizStarted ? (
         // Introductory rules screen.
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-8 text-center max-w-xl mt-2">
@@ -158,6 +181,10 @@ Please only output JSON.`;
             <li>แต่ละคำถามมีตัวเลือก 4 ตัวเลือก</li>
             <li>คะแนนที่ได้รับ = จำนวนคำตอบที่ถูก × 10</li>
             <li>เมื่อเวลาหมดหรือคุณตอบครบ 10 คำถามแล้ว ระบบจะแสดงผลคะแนนและคำตอบที่ผิด</li>
+            <li>🧟 ซอมบี้จะเริ่มอยู่ไกลจากคุณ และจะค่อย ๆ เข้ามาใกล้เมื่อเวลาลดลง</li>
+            <li>ตอบถูกจะเพิ่มเวลาให้คุณ 3 วินาที</li>
+            <li>คุณมีไอเท็มแฟลร์ 3 ชิ้น ใช้เพื่อหยุดเวลาเป็นเวลา 5 วินาที</li>
+            <li>หากเวลาถึง 0 ซอมบี้จะกินคุณ!</li>
           </ul>
           <button
             onClick={startQuiz}
@@ -168,7 +195,7 @@ Please only output JSON.`;
         </div>
       ) : loading ? (
         // Loading state.
-          <div className="flex flex-col items-center justify-center mt-60">
+        <div className="flex flex-col items-center justify-center mt-60">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mb-4"></div>
           <p className="text-white text-xl">กำลังโหลดคำถาม...</p>
         </div>
@@ -205,7 +232,15 @@ Please only output JSON.`;
         </div>
       ) : (
         // Quiz question screen.
-        <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-8 text-white max-w-xl w-full">
+        <div className="relative bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-8 text-white max-w-xl w-full">
+          {/* Flare button */}
+          <button
+            onClick={handleUseFlare}
+            disabled={flareCount === 0 || isTimeStopped}
+            className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-400 transition"
+          >
+            Flare ({flareCount})
+          </button>
           <div className="mb-4">
             <div className="w-full bg-gray-700 rounded-full h-3 mb-2">
               <div
@@ -225,12 +260,23 @@ Please only output JSON.`;
                 <button
                   key={index}
                   onClick={() => handleAnswer(index)}
-                  className="w-full py-3 px-4 bg-gray-800 rounded-lg shadow hover:bg-green-600 transition transform hover:scale-105"
+                  className="w-full py-3 px-4 bg-gray-800 rounded-lg shadow"
                 >
                   {option}
                 </button>
               ))}
             </div>
+          </div>
+          {/* Zombie animation */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-50px',
+              left: `${(Math.min(timeLeft, 60) / 60) * maxDistance}px`,
+              transition: 'left 1s linear',
+            }}
+          >
+            <span style={{ fontSize: '40px' }}>🧟</span>
           </div>
         </div>
       )}
