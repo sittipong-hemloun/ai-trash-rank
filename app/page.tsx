@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { ArrowRight, Leaf, Users, Coins, Download } from 'lucide-react'
+import { ArrowRight, Leaf, Users, Coins } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getRecentReports, getAllUsers, createUser } from '@/utils/db/actions'
@@ -42,18 +42,18 @@ export default function Home() {
     totalUsers: 0,
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  // const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  // const [isInstalled, setIsInstalled] = useState(false);
 
-  useEffect(() => {
-    const handler = () => {
-      setIsInstalled(true)
-      // Optionally, display a toast or alert
-      alert('ขอบคุณที่ติดตั้งแอปพลิเคชันของเรา!')
-    }
-    window.addEventListener('appinstalled', handler)
-    return () => window.removeEventListener('appinstalled', handler)
-  }, [])
+  // useEffect(() => {
+  //   const handler = () => {
+  //     setIsInstalled(true)
+  //     // Optionally, display a toast or alert
+  //     alert('ขอบคุณที่ติดตั้งแอปพลิเคชันของเรา!')
+  //   }
+  //   window.addEventListener('appinstalled', handler)
+  //   return () => window.removeEventListener('appinstalled', handler)
+  // }, [])
 
   useEffect(() => {
     async function fetchImpactData() {
@@ -143,38 +143,38 @@ export default function Home() {
     }
   }
 
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
-        }
-        setDeferredPrompt(null);
-      });
-    }
-  };
+  // const handleInstallClick = () => {
+  //   if (deferredPrompt) {
+  //     deferredPrompt.prompt();
+  //     deferredPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
+  //       if (choiceResult.outcome === 'accepted') {
+  //         console.log('User accepted the install prompt');
+  //       } else {
+  //         console.log('User dismissed the install prompt');
+  //       }
+  //       setDeferredPrompt(null);
+  //     });
+  //   }
+  // };
 
-  useEffect(() => {
-    const handler = () => setIsInstalled(true);
-    window.addEventListener('appinstalled', handler);
-    return () => window.removeEventListener('appinstalled', handler);
-  }, []);
+  // useEffect(() => {
+  //   const handler = () => setIsInstalled(true);
+  //   window.addEventListener('appinstalled', handler);
+  //   return () => window.removeEventListener('appinstalled', handler);
+  // }, []);
 
-  useEffect(() => {
-    const beforeInstallPromptHandler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
+  // useEffect(() => {
+  //   const beforeInstallPromptHandler = (e: Event) => {
+  //     e.preventDefault();
+  //     setDeferredPrompt(e);
+  //   };
 
-    window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+  //   window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler);
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', beforeInstallPromptHandler);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+  //   };
+  // }, []);
 
   return (
     <div className={` px-4 pb-16 bg-gradient-to-l from-green-900 to-green-900 via-black`}>
@@ -206,7 +206,7 @@ export default function Home() {
           {/* Call to Action Buttons */}
           <div className="flex flex-col items-center md:flex-row md:justify-center gap-6">
             {/* Install PWA Button for Mobile Devices */}
-            {!isInstalled && (
+            {/* {!isInstalled && (
               <div className="md:hidden">
                 <button
                   onClick={handleInstallClick}
@@ -216,7 +216,7 @@ export default function Home() {
                   <Download className="ml-2 h-5 w-5" />
                 </button>
               </div>
-            )}
+            )} */}
 
             {/* Login or Report Button */}
             {isLoading ? (

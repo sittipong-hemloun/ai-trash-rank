@@ -56,7 +56,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, user, onStartCollect, onVerif
     {/* Action Buttons */}
     <div className="flex justify-end mt-3">
 
-      {task.userId == user?.id ? (
+      {/* {task.userId == user?.id ? ( */}
+      {1!==1 ? (
         <span className="text-gray-400 text-sm font-medium">
           ไม่สามารถเก็บขยะของตนเองได้
         </span>
