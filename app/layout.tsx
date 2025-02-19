@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 "use client"
 
 import { useEffect } from "react"
@@ -38,6 +39,15 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <script type="text/javascript" src="https://cookiecdn.com/cwc.js"></script>
+        <script
+          id="cookieWow"
+          type="text/javascript"
+          src="https://cookiecdn.com/configs/zzKwaxZD1kNEbj3Mve5HKhaX"
+          data-cwcid="zzKwaxZD1kNEbj3Mve5HKhaX"
+        ></script>
+      </head>
       <body className={inter.className}>
         {children}
         {/* Toast Notifications */}
