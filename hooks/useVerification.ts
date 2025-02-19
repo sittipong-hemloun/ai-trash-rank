@@ -194,6 +194,7 @@ const useVerification = (config: VerificationConfig) => {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: messages,
+        response_format: { type: "json_object" },
       });
 
       const text = completion.choices[0].message?.content || '';

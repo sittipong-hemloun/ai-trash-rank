@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import useUser from '@/hooks/useUser';
 import { updateUserScore } from '@/utils/db/actions';
 
-const openaiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY!;
+const deepseekApiKey = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY!;
 
 interface QuizQuestion {
   question: string;
@@ -34,8 +34,9 @@ export default function QuizPage() {
   const loadQuestions = useCallback(async () => {
     setLoading(true);
     try {
-      const openai = new OpenAI({
-        apiKey: openaiApiKey,
+      const client = new OpenAI({
+        baseURL: 'https://api.deepseek.com',
+        apiKey: deepseekApiKey,
         dangerouslyAllowBrowser: true,
       });
 
@@ -52,9 +53,12 @@ Please only output JSON.`;
         content: prompt,
       }];
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const completion = await client.chat.completions.create({
+        model: 'deepseek-chat',
         messages: messages,
+        response_format: {
+          'type': 'json_object'
+        }
       });
 
       const text = completion.choices[0].message?.content || '';
@@ -202,7 +206,7 @@ Please only output JSON.`;
         </div>
       ) : quizEnded ? (
         // Quiz results summary.
-        <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-2 text-white max-w-xl">
+        <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg shadow-xl p-2 text-white w-full max-w-xl">
           <h1 className="text-3xl font-bold mb-4 text-center">สรุปผลคะแนน</h1>
           <p className="text-xl mb-2 text-center">คุณทำได้ {correctCount} ข้อจากทั้งหมด {questions.length} ข้อ</p>
           <p className="text-xl mb-6 text-center">ได้รับ {correctCount * 10} score</p>
