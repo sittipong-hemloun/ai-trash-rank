@@ -105,3 +105,16 @@ export const Notifications = pgTable("notifications", {
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
+
+/**
+ * Bin table schema for Google Maps.
+ */
+export const Bins = pgTable("bins", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  location: text("location").notNull(),
+  coordinates: text("coordinates").notNull(), // Latitude and Longitude
+  type: varchar("type", { length: 50 }).notNull(), // Type of bin
+  status: varchar("status", { length: 50 }).notNull().default("active"), // Status of the bin
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})

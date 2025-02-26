@@ -1,5 +1,5 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications } from './schema'
+import { Users, Reports, Notifications, Bins } from './schema'
 import { eq, sql, and, desc } from 'drizzle-orm'
 
 /**
@@ -313,5 +313,36 @@ export async function markNotificationAsRead(notificationId: number) {
     await db.update(Notifications).set({ isRead: true }).where(eq(Notifications.id, notificationId)).execute()
   } catch (error) {
     console.error("Error marking notification as read:", error)
+  }
+}
+
+/**
+ * Creates a new bin in the database.
+ * @param location - Location of the bin.
+ * @param coordinates - Coordinates of the bin.
+ * @param status - Status of the bin.
+ * @returns The created bin or null if an error occurs.
+ */
+export async function createBin(userId: number, location: string, coordinates: string, status: 'active' | 'inactive', type: string) {
+  try {
+    const [bin] = await db.insert(Bins).values({ userId, location, coordinates, status, type }).returning().execute()
+    return bin
+  } catch (error) {
+    console.error("Error creating bin:", error)
+    return null
+  }
+}
+
+/**
+ * Retrieves all bins from the database.
+ * @returns An array of bins or an empty array if an error occurs.
+ */
+export async function getAllBins() {
+  try {
+    const bins = await db.select().from(Bins).execute()
+    return bins
+  } catch (error) {
+    console.error("Error fetching bins:", error)
+    return []
   }
 }
