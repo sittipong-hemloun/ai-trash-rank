@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-sync-scripts */
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Inter } from 'next/font/google'
 import "./globals.css"
 import { Toaster } from 'react-hot-toast'
@@ -14,6 +14,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const [cookieConsent, setCookieConsent] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkCookie = () => {
+      if (document.cookie.includes('cwc_consent_zzKwaxZD1kNEbj3Mve5HKhaX')) {
+        setCookieConsent(true);
+      } else {
+        setCookieConsent(false);
+      }
+    };
+
+    checkCookie();
+    const interval = setInterval(checkCookie, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchTotalEarnings = async () => {
@@ -26,7 +41,6 @@ export default function RootLayout({
           if (user) {
             const userScore = user.score
             console.log('User score from layout:', userScore)
-            // Additional logic can be added here if needed
           }
         }
       } catch (error) {
@@ -38,7 +52,7 @@ export default function RootLayout({
   }, [])
 
   return (
-    <html lang="en">
+    <html lang="th">
       <head>
         <script type="text/javascript" src="https://cookiecdn.com/cwc.js"></script>
         <script
@@ -50,8 +64,18 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         {children}
-        {/* Toast Notifications */}
         <Toaster />
+        {!cookieConsent && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 9999
+          }} />
+        )}
       </body>
     </html>
   )
