@@ -47,7 +47,6 @@ export const Activities = pgTable("activities", {
   name: varchar("name", { length: 255 }).notNull(),
   content: text("content").notNull(),
   image: text("image"), // URL or path to the image
-  rewardCount: integer("reward_count").notNull().default(0),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -56,12 +55,12 @@ export const Activities = pgTable("activities", {
 /**
  * Rewards table schema.
  * Now references Activities instead of Posts.
- */
+*/
 export const Rewards = pgTable("rewards", {
   id: serial("id").primaryKey(),
   activityId: integer("activity_id").references(() => Activities.id).notNull(),
+  amount: integer("amount").notNull().default(0),
   name: varchar("name", { length: 255 }).notNull(),
-  qrCode: text("qr_code").notNull(), // QR code image URL or data
   redeemPoint: integer("redeem_point").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })

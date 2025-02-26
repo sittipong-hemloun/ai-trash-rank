@@ -1,6 +1,6 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Bins } from './schema'
-import { eq, sql, and, desc } from 'drizzle-orm'
+import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins } from "./schema";
+import { eq, sql, and, desc } from "drizzle-orm";
 
 /**
  * Creates a new user in the database.
@@ -9,13 +9,21 @@ import { eq, sql, and, desc } from 'drizzle-orm'
  * @param name - User's name.
  * @returns The created user or null if an error occurs.
  */
-export async function createUser(email: string, profileImage: string, name: string) {
+export async function createUser(
+  email: string,
+  profileImage: string,
+  name: string
+) {
   try {
-    const [user] = await db.insert(Users).values({ email, profileImage, name }).returning().execute()
-    return user
+    const [user] = await db
+      .insert(Users)
+      .values({ email, profileImage, name })
+      .returning()
+      .execute();
+    return user;
   } catch (error) {
-    console.error("Error creating user:", error)
-    return null
+    console.error("Error creating user:", error);
+    return null;
   }
 }
 
@@ -26,11 +34,15 @@ export async function createUser(email: string, profileImage: string, name: stri
  */
 export async function getUserByEmail(email: string) {
   try {
-    const [user] = await db.select().from(Users).where(eq(Users.email, email)).execute()
-    return user
+    const [user] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.email, email))
+      .execute();
+    return user;
   } catch (error) {
-    console.error("Error fetching user by email:", error)
-    return null
+    console.error("Error fetching user by email:", error);
+    return null;
   }
 }
 
@@ -53,23 +65,23 @@ export async function updateUserInfo(
       })
       .where(eq(Users.id, userId))
       .returning()
-      .execute()
+      .execute();
 
-    return updatedUser
+    return updatedUser;
   } catch (error) {
-    console.error("Error updating user info:", error)
-    return null
+    console.error("Error updating user info:", error);
+    return null;
   }
 }
 
 // get all users
 export async function getAllUsers() {
   try {
-    const users = await db.select().from(Users).execute()
-    return users
+    const users = await db.select().from(Users).execute();
+    return users;
   } catch (error) {
-    console.error("Error fetching all users:", error)
-    return []
+    console.error("Error fetching all users:", error);
+    return [];
   }
 }
 
@@ -83,16 +95,16 @@ export async function updateUserPoints(userId: number, pointsToAdd: number) {
   try {
     const [updatedUser] = await db
       .update(Users)
-      .set({ 
-        point: sql`${Users.point} + ${pointsToAdd}`
+      .set({
+        point: sql`${Users.point} + ${pointsToAdd}`,
       })
       .where(eq(Users.id, userId))
       .returning()
-      .execute()
-    return updatedUser
+      .execute();
+    return updatedUser;
   } catch (error) {
-    console.error("Error updating user points:", error)
-    return null
+    console.error("Error updating user points:", error);
+    return null;
   }
 }
 
@@ -106,16 +118,16 @@ export async function updateUserScore(userId: number, scoreToAdd: number) {
   try {
     const [updatedUser] = await db
       .update(Users)
-      .set({ 
+      .set({
         score: sql`${Users.score} + ${scoreToAdd}`,
       })
       .where(eq(Users.id, userId))
       .returning()
-      .execute()
-    return updatedUser
+      .execute();
+    return updatedUser;
   } catch (error) {
-    console.error("Error updating user score:", error)
-    return null
+    console.error("Error updating user score:", error);
+    return null;
   }
 }
 
@@ -153,23 +165,23 @@ export async function createReport(
         coordinates,
       })
       .returning()
-      .execute()
+      .execute();
 
     // Award points for reporting trash
-    const pointsEarned = 10
-    await updateUserPoints(userId, pointsEarned)
+    const pointsEarned = 10;
+    await updateUserPoints(userId, pointsEarned);
 
     // Create a notification for the user
     await createNotification(
       userId,
       `คุณได้รับ ${pointsEarned} คะแนนจากการรายงานขยะ`,
-      'รางวัล'
-    )
+      "รางวัล"
+    );
 
-    return report
+    return report;
   } catch (error) {
-    console.error("Error creating report:", error)
-    return null
+    console.error("Error creating report:", error);
+    return null;
   }
 }
 
@@ -180,11 +192,15 @@ export async function createReport(
  */
 export async function getReportsByUserId(userId: number) {
   try {
-    const reports = await db.select().from(Reports).where(eq(Reports.userId, userId)).execute()
-    return reports
+    const reports = await db
+      .select()
+      .from(Reports)
+      .where(eq(Reports.userId, userId))
+      .execute();
+    return reports;
   } catch (error) {
-    console.error("Error fetching reports:", error)
-    return []
+    console.error("Error fetching reports:", error);
+    return [];
   }
 }
 
@@ -226,15 +242,15 @@ export async function getTrashCollectionTasks(limit: number = 20) {
       .from(Reports)
       .limit(limit)
       .orderBy(desc(Reports.createdAt))
-      .execute()
+      .execute();
 
-    return tasks.map(task => ({
+    return tasks.map((task) => ({
       ...task,
-      date: task.date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
-    }))
+      date: task.date.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+    }));
   } catch (error) {
-    console.error("Error fetching trash collection tasks:", error)
-    return []
+    console.error("Error fetching trash collection tasks:", error);
+    return [];
   }
 }
 
@@ -245,22 +261,28 @@ export async function getTrashCollectionTasks(limit: number = 20) {
  * @param collectorId - The ID of the collector (optional).
  * @returns The updated report or throws an error if the update fails.
  */
-export async function updateTaskStatus(reportId: number, newStatus: string, collectorId?: number) {
+export async function updateTaskStatus(
+  reportId: number,
+  newStatus: string,
+  collectorId?: number
+) {
   try {
-    const updateData: { status: string; collectorId?: number } = { status: newStatus }
+    const updateData: { status: string; collectorId?: number } = {
+      status: newStatus,
+    };
     if (collectorId !== undefined) {
-      updateData.collectorId = collectorId
+      updateData.collectorId = collectorId;
     }
     const [updatedReport] = await db
       .update(Reports)
       .set(updateData)
       .where(eq(Reports.id, reportId))
       .returning()
-      .execute()
-    return updatedReport
+      .execute();
+    return updatedReport;
   } catch (error) {
-    console.error("Error updating task status:", error)
-    throw error
+    console.error("Error updating task status:", error);
+    throw error;
   }
 }
 
@@ -271,17 +293,21 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
  * @param type - The type of notification.
  * @returns The created notification or null if an error occurs.
  */
-export async function createNotification(userId: number, message: string, type: string) {
+export async function createNotification(
+  userId: number,
+  message: string,
+  type: string
+) {
   try {
     const [notification] = await db
       .insert(Notifications)
       .values({ userId, message, type })
       .returning()
-      .execute()
-    return notification
+      .execute();
+    return notification;
   } catch (error) {
-    console.error("Error creating notification:", error)
-    return null
+    console.error("Error creating notification:", error);
+    return null;
   }
 }
 
@@ -292,15 +318,16 @@ export async function createNotification(userId: number, message: string, type: 
  */
 export async function getUnreadNotifications(userId: number) {
   try {
-    return await db.select().from(Notifications).where(
-      and(
-        eq(Notifications.userId, userId),
-        eq(Notifications.isRead, false)
+    return await db
+      .select()
+      .from(Notifications)
+      .where(
+        and(eq(Notifications.userId, userId), eq(Notifications.isRead, false))
       )
-    ).execute()
+      .execute();
   } catch (error) {
-    console.error("Error fetching unread notifications:", error)
-    return []
+    console.error("Error fetching unread notifications:", error);
+    return [];
   }
 }
 
@@ -310,9 +337,13 @@ export async function getUnreadNotifications(userId: number) {
  */
 export async function markNotificationAsRead(notificationId: number) {
   try {
-    await db.update(Notifications).set({ isRead: true }).where(eq(Notifications.id, notificationId)).execute()
+    await db
+      .update(Notifications)
+      .set({ isRead: true })
+      .where(eq(Notifications.id, notificationId))
+      .execute();
   } catch (error) {
-    console.error("Error marking notification as read:", error)
+    console.error("Error marking notification as read:", error);
   }
 }
 
@@ -333,6 +364,20 @@ export async function createBin(userId: number, location: string, coordinates: s
   }
 }
 
+export async function getAllPosts() {
+  try {
+    const posts = await db
+      .select()
+      .from(Posts)
+      .orderBy(desc(Posts.createdAt))
+      .execute();
+    return posts;
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    return [];
+  }
+}
+
 /**
  * Retrieves all bins from the database.
  * @returns An array of bins or an empty array if an error occurs.
@@ -344,5 +389,118 @@ export async function getAllBins() {
   } catch (error) {
     console.error("Error fetching bins:", error)
     return []
+  }
+}
+
+/**
+ * Retrieves all activities from the database.
+ */
+export async function getAllActivities() {
+  try {
+    const activities = await db
+      .select()
+      .from(Activities)
+      .orderBy(desc(Activities.createdAt))
+      .execute();
+    return activities;
+  } catch (error) {
+    console.error("Error fetching all activities:", error);
+    return [];
+  }
+}
+
+export async function createPosts(
+  userId: number,
+  name: string,
+  content: string,
+  image?: string
+) {
+  try {
+    const [post] = await db
+      .insert(Posts)
+      .values({
+        userId,
+        name,
+        content,
+        image,
+      })
+      .returning()
+      .execute();
+    return post;
+  } catch (error) {
+    console.error("Error create post fail:", error);
+    return [];
+  }
+}
+
+export async function createActivities(
+  userId: number,
+  name: string,
+  content: string,
+  startDate: Date,
+  endDate: Date,
+  image?: string
+) {
+  try {
+    const [activity] = await db
+      .insert(Activities)
+      .values({
+        userId,
+        name,
+        content,
+        startDate,
+        endDate,
+        image,
+      })
+      .returning()
+      .execute();
+    console.log("activity",activity)
+    return activity;
+  } catch (error) {
+    console.error("Error create activity fail:", error);
+    return [];
+  }
+}
+
+
+export async function getActivityById(activityId: number) {
+  try {
+    const [activity] = await db
+      .select()
+      .from(Activities)
+      .where(eq(Activities.id, activityId))
+      .execute();
+    return activity;
+  } catch (error) {
+    console.error("Error fetching activity by ID:", error);
+    return null;
+  }
+}
+
+export async function getPostById(postId: number) {
+  try {
+    const [post] = await db
+      .select()
+      .from(Posts)
+      .where(eq(Posts.id, postId))
+      .execute();
+    return post;
+  } catch (error) {
+    console.error("Error fetching post by ID:", error);
+    return null;
+  }
+}
+
+export async function getRewardsByActivityId(activityId: number) {
+  try {
+    const rewards = await db
+      .select()
+      .from(Rewards)
+      .where(eq(Rewards.activityId, activityId))
+      .execute();
+    return rewards;
+  } catch (error) {
+    console.error("Error fetching rewards by activity id:", error);
+    return [];
   }
 }
