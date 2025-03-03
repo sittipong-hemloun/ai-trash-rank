@@ -56,20 +56,14 @@ export default function AddBinPage() {
     }
     setSubmitting(true)
     try {
-      // Format coordinates as "lat,lng"
       const coordsString = `${currentCoords.lat},${currentCoords.lng}`
-      // Use coordinates to create a location string (could be enhanced with reverse geocoding)
       const locationText = `ตำแหน่ง: ${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}`
-
-      // Note: Photo upload functionality can be integrated with a storage service.
-      // For now, we are not processing the bin photo further.
 
       const newBin = await createBin(
         user.id,
         locationText,
         coordsString,
         'active',
-        // binType === 'mixed' ? 'ถังขยะทั่วไป' : 'ถังขยะที่มีแบบแยกประเภท'
         binType === 'mixed' ? 'mixed' : 'separated'
       )
 
@@ -88,24 +82,34 @@ export default function AddBinPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 text-white">
-      <h1 className="text-3xl font-bold mb-6">เพิ่มตำแหน่งถังขยะ</h1>
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-white">เพิ่มตำแหน่งถังขยะ</h1>
+        <button
+          onClick={() => router.back()}
+          className="text-sm text-gray-300 hover:text-gray-100"
+        >
+          ย้อนกลับ
+        </button>
+      </div>
       {!loading && user ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-lg font-medium mb-1">ตำแหน่งปัจจุบัน</label>
+        <form onSubmit={handleSubmit} className="space-y-6 bg-gray-200 p-6 rounded-lg shadow-md">
+          {/* <div>
+            <label className="block text-lg font-medium mb-2 text-white">ตำแหน่งปัจจุบัน</label>
             {currentCoords ? (
-              <p>{`ละติจูด: ${currentCoords.lat.toFixed(6)}, ลองจิจูด: ${currentCoords.lng.toFixed(6)}`}</p>
+              <p className="text-gray-300">
+                {`ละติจูด: ${currentCoords.lat.toFixed(6)}, ลองจิจูด: ${currentCoords.lng.toFixed(6)}`}
+              </p>
             ) : (
-              <p>กำลังค้นหาตำแหน่ง...</p>
+              <p className="text-gray-300">กำลังค้นหาตำแหน่ง...</p>
             )}
-          </div>
+          </div> */}
           <div>
-            <label className="block text-lg font-medium mb-1">รูปถ่ายถังขยะ</label>
+            <label className="block text-lg font-medium mb-2 text-gray-700">รูปถ่ายถังขยะ</label>
             <FileUpload file={binPhoto} setFile={setBinPhoto} preview={preview} />
           </div>
           <div>
-            <label className="block text-lg font-medium mb-1">ประเภทถังขยะ</label>
+            <label className="block text-lg font-medium mb-2 text-gray-700">ประเภทถังขยะ</label>
             <select
               value={binType}
               onChange={(e) => setBinType(e.target.value)}
@@ -126,7 +130,7 @@ export default function AddBinPage() {
           </div>
         </form>
       ) : (
-        <p>Loading...</p>
+        <p className="text-white">Loading...</p>
       )}
     </div>
   )
