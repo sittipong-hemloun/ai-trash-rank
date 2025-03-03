@@ -3,4 +3,5 @@ export default interface Bin {
   location: string;
   coordinates: string;
   status: 'active' | 'inactive';
+  type: 'separated' | 'mixed';
 };

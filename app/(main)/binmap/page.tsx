@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react'
 import BinGoogleMap from '@/components/BinGoogleMap'
 import Bin from '@/types/bin'
 import { getAllBins } from '@/utils/db/actions'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+
 export default function BinMap() {
   const [bins, setBins] = useState<Bin[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBins = async () => {
@@ -22,8 +26,9 @@ export default function BinMap() {
 
   return (
     <div>
-        <h1>Bin Map</h1>
-        <BinGoogleMap bins={bins} />
+      <h1>Bin Map</h1>
+      <Button onClick={() => router.push('/binmap/add-bin')}>เพิ่มถังขยะ</Button>
+      <BinGoogleMap bins={bins} />
     </div>
   )
 }

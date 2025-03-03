@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import CuteTrashImg from '../public/images/cuteTrash.png';
+// import CuteTrashImg from '../public/images/cuteTrash.png';
+import SeparatedWasteBinsIcon from '../public/images/bins/SeparatedWasteBinsIcon.png';
+import MixedWasteBinsIcon from '../public/images/bins/MixedWasteBinIcon.png';
 import useUser from '@/hooks/useUser';
 import Bin from '@/types/bin';
 
@@ -75,10 +77,25 @@ const BinGoogleMap: React.FC<BinGoogleMapProps> = ({ bins, onMarkerClick }) => {
     return defaultCenter;
   };
 
-  const customIcon = {
-    url: CuteTrashImg.src,
-    scaledSize: new window.google.maps.Size(30, 40)
-  };
+  // const customIcon = {
+  //   url: CuteTrashImg.src,
+  //   scaledSize: new window.google.maps.Size(30, 40)
+  // };
+
+  const customIcon = (binType: string) => {
+    switch (binType) {
+      case 'separated':
+        return {
+          url: SeparatedWasteBinsIcon.src,
+          scaledSize: new window.google.maps.Size(30, 40)
+        };
+      case 'mixed':
+        return {
+          url: MixedWasteBinsIcon.src,
+          scaledSize: new window.google.maps.Size(30, 40)
+        };
+    }
+  }
 
   return (
     <GoogleMap
@@ -93,10 +110,10 @@ const BinGoogleMap: React.FC<BinGoogleMapProps> = ({ bins, onMarkerClick }) => {
           <Marker
             key={bin.id}
             position={position}
-            icon={customIcon}
+            icon={customIcon(bin.type)}
             onClick={() => {
               if (onMarkerClick) {
-                onMarkerClick(bin.location);
+                onMarkerClick(bin.coordinates);
               }
             }}
           />
