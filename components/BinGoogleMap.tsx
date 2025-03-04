@@ -13,7 +13,7 @@ type BinGoogleMapProps = {
 
 const containerStyle = {
   width: '100%',
-  height: '400px',
+  height: '500px',
 };
 
 const defaultCenter = { lat: 13.7563, lng: 100.5018 };

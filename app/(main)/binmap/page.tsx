@@ -25,7 +25,7 @@ export default function BinMap() {
   }, [])
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-200">แผนที่ถังขยะ</h1>
         <Button
