@@ -6,36 +6,34 @@ import useUser from "@/hooks/useUser";
 import { getUserRewards } from "@/utils/db/actions";
 
 interface UserReward {
-  redeemedAt: string;
+  redeemedAt: Date;
   rewardId: number;
   name: string;
   redeemPoint: number;
 }
 
 export default function RewardPage() {
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const [rewards, setRewards] = useState<UserReward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchRewards() {
-      if (!user) {
-        toast.error("คุณต้องเข้าสู่ระบบเพื่อดูของรางวัลที่แลกแล้ว");
-        setIsLoading(false);
-        return;
+      if (!loading && user) {
+        try {
+          const data = await getUserRewards(user.id);
+          setRewards(data);
+        } catch (error) {
+          console.error("Error fetching user rewards:", error);
+          toast.error("เกิดข้อผิดพลาดในการโหลดของรางวัล");
+        } finally {
+          setIsLoading(false);
+        }
       }
-      try {
-        const data = await getUserRewards(user.id);
-        setRewards(data);
-      } catch (error) {
-        console.error("Error fetching user rewards:", error);
-        toast.error("เกิดข้อผิดพลาดในการโหลดของรางวัล");
-      } finally {
-        setIsLoading(false);
-      }
+
     }
     fetchRewards();
-  }, [user]);
+  }, [user, loading]);
 
   if (isLoading) return <div>Loading...</div>;
 
