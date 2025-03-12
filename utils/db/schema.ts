@@ -46,9 +46,19 @@ export const Activities = pgTable("activities", {
   userId: integer("user_id").references(() => Users.id).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   content: text("content").notNull(),
-  image: text("image"), // URL or path to the image
+  image: text("image"), // Single/featured image if needed
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Table to store multiple images for each activity.
+ */
+export const ActivityImages = pgTable("activity_images", {
+  id: serial("id").primaryKey(),
+  activityId: integer("activity_id").references(() => Activities.id).notNull(),
+  url: text("url").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

@@ -1,4 +1,4 @@
-// app/post-activity/create/page.tsx
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { createActivities, createPosts, createReward } from "@/utils/db/actions";
+import {
+  createActivities,
+  createPosts,
+  createReward,
+} from "@/utils/db/actions";
 import useUser from "@/hooks/useUser";
 
 export default function CreatePostActivityPage() {
@@ -14,33 +18,79 @@ export default function CreatePostActivityPage() {
   const [mode, setMode] = useState<"post" | "activity">("post");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+
+  // Featured image file + preview
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [featuredPreview, setFeaturedPreview] = useState<string>("");
+
+  // Multiple images if it's an activity
+  const [activityImages, setActivityImages] = useState<File[]>([]);
+  const [activityImagesPreview, setActivityImagesPreview] = useState<string[]>(
+    []
+  );
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  // เพิ่ม field "amount" ใน state rewards
   const [rewards, setRewards] = useState<
     { name: string; redeemPoint: number; amount: number }[]
   >([{ name: "", redeemPoint: 1, amount: 1 }]);
 
   const { user, loading } = useUser();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-    }
-  };
-
+  /**
+   * Convert file to base64 string
+   */
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
-  // อัปเดตค่าของ reward แต่ละฟิลด์
+  /**
+   * Handle single featured image selection & preview
+   */
+  const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFeaturedImage(file);
+      // Generate local preview
+      const reader = new FileReader();
+      reader.onload = () => setFeaturedPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  /**
+   * Handle multiple images selection for the activity
+   */
+  const handleActivityImagesUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files) return;
+    const newFiles = Array.from(e.target.files);
+
+    // Update the state with newly selected files
+    setActivityImages((prev) => [...prev, ...newFiles]);
+
+    // Generate local preview for each new file
+    newFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setActivityImagesPreview((prevPreviews) => [
+          ...prevPreviews,
+          reader.result as string,
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  /**
+   * Update reward fields
+   */
   const updateReward = (
     index: number,
     field: "name" | "redeemPoint" | "amount",
@@ -56,12 +106,10 @@ export default function CreatePostActivityPage() {
     setRewards(newRewards);
   };
 
-  // เพิ่มฟิลด์ reward ใหม่
   const addRewardField = () => {
     setRewards([...rewards, { name: "", redeemPoint: 1, amount: 1 }]);
   };
 
-  // ลบฟิลด์ reward (หากมีมากกว่าหนึ่งฟิลด์)
   const removeRewardField = (index: number) => {
     if (rewards.length > 1) {
       const newRewards = rewards.filter((_, i) => i !== index);
@@ -69,34 +117,57 @@ export default function CreatePostActivityPage() {
     }
   };
 
+  /**
+   * Handle form submission
+   */
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!user) {
       toast.error("กรุณาเข้าสู่ระบบก่อนส่ง");
       return;
     }
-    e.preventDefault();
+
     try {
-      let imageString: string | undefined;
-      if (image) {
-        imageString = await fileToBase64(image);
+      let featuredImageString: string | undefined;
+      if (featuredImage) {
+        featuredImageString = await fileToBase64(featuredImage);
       }
 
       if (mode === "post") {
-        const post = await createPosts(user.id, title, content, imageString);
-        console.log("the post", post);
+        // Create a single post
+        const post = await createPosts(
+          user.id,
+          title,
+          content,
+          featuredImageString
+        );
+        if (!Array.isArray(post)) {
+          toast.success("Post created successfully!");
+          router.push("/post-activity");
+        } else {
+          toast.error("Cannot create post!");
+        }
       } else {
-        // ใช้ rewards.length เป็นจำนวนรางวัลที่แนบไปกับกิจกรรม
+        // We have an activity: store multiple images
+        let multipleImagesBase64: string[] = [];
+        if (activityImages.length) {
+          // Convert all activity images to base64
+          const promises = activityImages.map((f) => fileToBase64(f));
+          multipleImagesBase64 = await Promise.all(promises);
+        }
+
         const activity = await createActivities(
           user.id,
           title,
           content,
           new Date(startDate),
           new Date(endDate),
-          imageString
+          featuredImageString,
+          multipleImagesBase64
         );
-        console.log("activity from page", activity);
-        if (activity && !Array.isArray(activity) && 'id' in activity) {
-          // สร้าง reward ทีละรายการสำหรับกิจกรรมที่สร้างขึ้น
+
+        if (activity && !Array.isArray(activity) && "id" in activity) {
+          // If we have any rewards, create them
           for (const reward of rewards) {
             if (reward.name.trim() !== "") {
               await createReward(
@@ -107,13 +178,12 @@ export default function CreatePostActivityPage() {
               );
             }
           }
+          toast.success("Activity created successfully!");
+          router.push("/post-activity");
+        } else {
+          toast.error("Cannot create activity!");
         }
       }
-
-      toast.success(
-        `${mode === "post" ? "Post" : "Activity"} created successfully!`
-      );
-      router.push("/post-activity");
     } catch (error) {
       console.error("Error creating item:", error);
       toast.error("Cannot create item!");
@@ -126,7 +196,6 @@ export default function CreatePostActivityPage() {
         เพิ่ม{mode === "post" ? "ข่าวสาร" : "กิจกรรม"}
       </h1>
 
-      {/* ตัวเลือกโหมด */}
       <div className="w-full space-x-4 mb-4">
         <Button
           variant={mode === "post" ? "default" : "outline"}
@@ -140,7 +209,6 @@ export default function CreatePostActivityPage() {
         >
           เพิ่มกิจกรรม
         </Button>
-
         <Link href="/post-activity">
           <Button className="float-right">ย้อนกลับ</Button>
         </Link>
@@ -175,60 +243,111 @@ export default function CreatePostActivityPage() {
           />
         </div>
 
-        {/* อัปโหลดรูป */}
-        <div className="flex text-sm text-gray-600">
+        {/* อัปโหลดรูปหลัก/Featured */}
+        <div className="flex flex-col">
+          <label className="block text-sm mb-1 font-medium text-black">
+            รูปหลัก (Featured Image)
+          </label>
           <label
-            htmlFor="verification-image"
-            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
+            htmlFor="featured-image"
+            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
           >
-            <span>อัปโหลดรูป</span>
+            อัปโหลดรูป
             <input
-              id="verification-image"
-              name="verification-image"
+              id="featured-image"
+              name="featured-image"
               type="file"
               className="sr-only"
-              onChange={handleImageUpload}
+              onChange={handleFeaturedImageUpload}
               accept="image/*"
             />
           </label>
+
+          {/* preview featured image if available */}
+          {featuredPreview && (
+            <img
+              src={featuredPreview}
+              alt="Preview"
+              className="mt-2 w-full h-auto rounded"
+            />
+          )}
         </div>
 
-        {/* ฟิลด์สำหรับกิจกรรม */}
+        {/* ฟิลด์สำหรับกิจกรรมเท่านั้น */}
         {mode === "activity" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1 font-medium text-black">
+                  วันที่เริ่ม
+                </label>
+                <input
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate}
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 font-medium text-black">
+                  วันที่สิ้นสุด
+                </label>
+                <input
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
+                  type="date"
+                  required
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Multiple images */}
             <div>
               <label className="block text-sm mb-1 font-medium text-black">
-                วันที่เริ่ม
+                รูปภาพอื่น ๆ (หลายรูป)
               </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
-                type="date"
-                required
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                max={endDate}
-              />
+              <label
+                htmlFor="activity-images"
+                className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
+              >
+                เลือกรูปหลายรูป
+                <input
+                  id="activity-images"
+                  name="activity-images"
+                  type="file"
+                  className="sr-only"
+                  onChange={handleActivityImagesUpload}
+                  accept="image/*"
+                  multiple
+                />
+              </label>
+
+              {/* Show local preview for newly selected multiple images */}
+              {activityImagesPreview.length > 0 && (
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {activityImagesPreview.map((previewUrl, idx) => (
+                    <img
+                      key={idx}
+                      src={previewUrl}
+                      alt="preview"
+                      className="w-full h-auto rounded"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* ของรางวัล */}
             <div>
-              <label className="block text-sm mb-1 font-medium text-black">
-                วันที่สิ้นสุด
-              </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
-                type="date"
-                required
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            {/* ฟิลด์สำหรับรางวัล */}
-            <div className="col-span-2">
               <h3 className="text-lg font-semibold mb-2 text-black">
                 ของรางวัล
               </h3>
               {rewards.map((reward, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
-                  ชื่อ
+                  <span>ชื่อ</span>
                   <input
                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="text"
@@ -239,7 +358,7 @@ export default function CreatePostActivityPage() {
                     }
                     required
                   />
-                  คะแนน
+                  <span>คะแนน</span>
                   <input
                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
@@ -251,7 +370,7 @@ export default function CreatePostActivityPage() {
                     }
                     required
                   />
-                  จำนวน
+                  <span>จำนวน</span>
                   <input
                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
@@ -274,11 +393,11 @@ export default function CreatePostActivityPage() {
                   )}
                 </div>
               ))}
-              <Button type="button" onClick={addRewardField} variant="outline">
+              <Button type="button" variant="outline" onClick={addRewardField}>
                 เพิ่มของรางวัล
               </Button>
             </div>
-          </div>
+          </>
         )}
 
         {loading ? (

@@ -8,12 +8,17 @@ import useUser from "@/hooks/useUser";
 import {
   getActivityById,
   getRewardsByActivityId,
-  getActivityRedemptions, // import ฟังก์ชันใหม่
+  getActivityRedemptions,
   updateUserPoints,
   decrementRewardAmount,
   createUserReward,
-  deleteActivity
+  deleteActivity,
+  getActivityImagesByActivityId,
 } from "@/utils/db/actions";
+
+// Import the carousel library
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from "react-responsive-carousel";
 
 interface Activity {
   id: number;
@@ -44,6 +49,13 @@ interface Redemption {
   userPhone: string | null;
 }
 
+interface ActivityImage {
+  id: number;
+  activityId: number;
+  url: string;
+  createdAt: string;
+}
+
 export default function ActivityIndexPage() {
   const { activity_id } = useParams();
   const router = useRouter();
@@ -51,6 +63,7 @@ export default function ActivityIndexPage() {
   const [activity, setActivity] = useState<Activity | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [activityImages, setActivityImages] = useState<ActivityImage[]>([]);
 
   // ดึงข้อมูลกิจกรรมจากฐานข้อมูล
   useEffect(() => {
@@ -59,10 +72,19 @@ export default function ActivityIndexPage() {
       if (act) {
         const formattedActivity: Activity = {
           ...act,
-          rewardCount: 0, // Add default value as the property doesn't exist in the returned object
-          startDate: act.startDate instanceof Date ? act.startDate.toISOString() : String(act.startDate),
-          endDate: act.endDate instanceof Date ? act.endDate.toISOString() : String(act.endDate),
-          createdAt: act.createdAt instanceof Date ? act.createdAt.toISOString() : String(act.createdAt)
+          rewardCount: 0, // Add default value for safety
+          startDate:
+            act.startDate instanceof Date
+              ? act.startDate.toISOString()
+              : String(act.startDate),
+          endDate:
+            act.endDate instanceof Date
+              ? act.endDate.toISOString()
+              : String(act.endDate),
+          createdAt:
+            act.createdAt instanceof Date
+              ? act.createdAt.toISOString()
+              : String(act.createdAt),
         };
         setActivity(formattedActivity);
       } else {
@@ -77,9 +99,12 @@ export default function ActivityIndexPage() {
     const fetchRewards = async () => {
       if (activity) {
         const rewardsData = await getRewardsByActivityId(activity.id);
-        const formattedRewards = rewardsData.map(reward => ({
+        const formattedRewards = rewardsData.map((reward) => ({
           ...reward,
-          createdAt: reward.createdAt instanceof Date ? reward.createdAt.toISOString() : String(reward.createdAt)
+          createdAt:
+            reward.createdAt instanceof Date
+              ? reward.createdAt.toISOString()
+              : String(reward.createdAt),
         }));
         setRewards(formattedRewards);
       }
@@ -97,6 +122,24 @@ export default function ActivityIndexPage() {
     };
     fetchRedemptions();
   }, [activity, user]);
+
+  // ดึงรูปภาพหลายรูปของ activity
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (activity) {
+        const images = await getActivityImagesByActivityId(activity.id);
+        const formattedImages = images.map((image) => ({
+          ...image,
+          createdAt: 
+            image.createdAt instanceof Date
+              ? image.createdAt.toISOString()
+              : String(image.createdAt),
+        }));
+        setActivityImages(formattedImages);
+      }
+    };
+    fetchImages();
+  }, [activity]);
 
   // ฟังก์ชันสำหรับแลกของรางวัล
   const handleRedeem = async (reward: Reward) => {
@@ -130,7 +173,7 @@ export default function ActivityIndexPage() {
     }
   };
 
-  // ฟังก์ชันสำหรับแก้ไขและลบกิจกรรม (เหมือนเดิม)
+  // ฟังก์ชันสำหรับแก้ไขและลบกิจกรรม
   const handleEditActivity = () => {
     router.push(`/post-activity/activity/${activity?.id}/edit`);
   };
@@ -174,9 +217,12 @@ export default function ActivityIndexPage() {
           ย้อนกลับ
         </button>
       </div>
+
+      {/* ชื่อกิจกรรม */}
       <h3 className="text-xl text-black mb-2 font-semibold break-words">
         {activity?.name}
       </h3>
+
       {activity?.image && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -185,14 +231,33 @@ export default function ActivityIndexPage() {
           className="w-full h-auto mb-4 rounded-md"
         />
       )}
+
+      {/* Carousel for multiple images */}
+      {activityImages.length > 0 ? (
+        <div className="mb-4">
+          <Carousel showThumbs={false} autoPlay infiniteLoop>
+            {activityImages.map((img) => (
+              <div key={img.id}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt="activity image" />
+              </div>
+            ))}
+          </Carousel>
+        </div>
+      ) : null}
+
       <p className="mb-2 break-words">{activity?.content}</p>
       <p className="mb-2">
         วันที่เริ่มต้น:{" "}
-        {new Date(activity?.startDate || "").toLocaleDateString()}
+        {activity?.startDate
+          ? new Date(activity.startDate).toLocaleDateString()
+          : ""}
       </p>
       <p className="mb-2">
         วันที่สิ้นสุด:{" "}
-        {new Date(activity?.endDate || "").toLocaleDateString()}
+        {activity?.endDate
+          ? new Date(activity.endDate).toLocaleDateString()
+          : ""}
       </p>
 
       {/* แสดงรายการของรางวัล */}
@@ -211,6 +276,9 @@ export default function ActivityIndexPage() {
                   <p className="text-black font-medium">{reward.name}</p>
                   <p className="text-gray-600">
                     คะแนนที่ใช้แลก: {reward.redeemPoint}
+                  </p>
+                  <p className="text-gray-600">
+                    คงเหลือ: {reward.amount}
                   </p>
                 </div>
                 <Button onClick={() => handleRedeem(reward)}>

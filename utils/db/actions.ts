@@ -1,5 +1,5 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards } from "./schema";
+import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages } from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
 /**
@@ -364,20 +364,6 @@ export async function createBin(userId: number, location: string, coordinates: s
   }
 }
 
-export async function getAllPosts() {
-  try {
-    const posts = await db
-      .select()
-      .from(Posts)
-      .orderBy(desc(Posts.createdAt))
-      .execute();
-    return posts;
-  } catch (error) {
-    console.error("Error fetching all posts:", error);
-    return [];
-  }
-}
-
 /**
  * Retrieves all bins from the database.
  * @returns An array of bins or an empty array if an error occurs.
@@ -389,6 +375,20 @@ export async function getAllBins() {
   } catch (error) {
     console.error("Error fetching bins:", error)
     return []
+  }
+}
+
+export async function getAllPosts() {
+  try {
+    const posts = await db
+      .select()
+      .from(Posts)
+      .orderBy(desc(Posts.createdAt))
+      .execute();
+    return posts;
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    return [];
   }
 }
 
@@ -433,13 +433,52 @@ export async function createPosts(
   }
 }
 
+/**
+ * Insert multiple images for an activity. Called once the activity row is created.
+ */
+export async function createActivityImage(activityId: number, url: string) {
+  try {
+    const [activityImage] = await db
+      .insert(ActivityImages)
+      .values({
+        activityId,
+        url
+      })
+      .returning()
+      .execute();
+    return activityImage;
+  } catch (error) {
+    console.error("Error creating activity image:", error);
+    return null;
+  }
+}
+
+/**
+ * Retrieves all images for a given activityId
+ */
+export async function getActivityImagesByActivityId(activityId: number) {
+  try {
+    const images = await db
+      .select()
+      .from(ActivityImages)
+      .where(eq(ActivityImages.activityId, activityId))
+      .orderBy(desc(ActivityImages.createdAt))
+      .execute();
+    return images;
+  } catch (error) {
+    console.error("Error fetching activity images:", error);
+    return [];
+  }
+}
+
 export async function createActivities(
   userId: number,
   name: string,
   content: string,
   startDate: Date,
   endDate: Date,
-  image?: string
+  image?: string,
+  images?: string[]
 ) {
   try {
     const [activity] = await db
@@ -454,14 +493,20 @@ export async function createActivities(
       })
       .returning()
       .execute();
-    console.log("activity",activity)
+
+    // If we have multiple images, insert them
+    if (images && images.length > 0) {
+      for (const img of images) {
+        await createActivityImage(activity.id, img);
+      }
+    }
+
     return activity;
   } catch (error) {
     console.error("Error create activity fail:", error);
     return [];
   }
 }
-
 
 export async function getActivityById(activityId: number) {
   try {
@@ -586,6 +631,8 @@ export async function deleteActivity(activityId: number) {
   try {
     // ลบ rewards ที่เกี่ยวข้องกับ activity นี้ก่อน
     await db.delete(Rewards).where(eq(Rewards.activityId, activityId)).execute();
+    // ลบ activity_images ที่เกี่ยวข้อง
+    await db.delete(ActivityImages).where(eq(ActivityImages.activityId, activityId)).execute();
     // จากนั้นลบ activity
     await db.delete(Activities).where(eq(Activities.id, activityId)).execute();
     return true;
@@ -610,11 +657,6 @@ export async function deletePost(postId: number) {
 
 /**
  * อัปเดตโพสต์ด้วย id ที่กำหนด
- * @param postId - ID ของโพสต์
- * @param name - หัวข้อโพสต์ใหม่
- * @param content - เนื้อหาโพสต์ใหม่
- * @param image - URL หรือ base64 ของรูปภาพ (ถ้ามี)
- * @returns โพสต์ที่อัปเดตแล้วหรือ null หากเกิดข้อผิดพลาด
  */
 export async function updatePost(
   postId: number,
@@ -642,13 +684,6 @@ export async function updatePost(
 
 /**
  * อัปเดตกิจกรรมด้วย id ที่กำหนด
- * @param activityId - ID ของกิจกรรม
- * @param name - หัวข้อกิจกรรมใหม่
- * @param content - เนื้อหากิจกรรมใหม่
- * @param startDate - วันที่เริ่มกิจกรรม (ในรูปแบบ string ที่สามารถแปลงเป็น Date ได้)
- * @param endDate - วันที่สิ้นสุดกิจกรรม (ในรูปแบบ string)
- * @param image - URL หรือ base64 ของรูปภาพ (ถ้ามี)
- * @returns กิจกรรมที่อัปเดตแล้วหรือ null หากเกิดข้อผิดพลาด
  */
 export async function updateActivity(
   activityId: number,
@@ -680,8 +715,6 @@ export async function updateActivity(
 
 /**
  * ลบของรางวัลทั้งหมดที่เกี่ยวข้องกับกิจกรรมที่มี activityId ที่กำหนด
- * @param activityId - ID ของกิจกรรม
- * @returns true หากลบสำเร็จ, false หากเกิดข้อผิดพลาด
  */
 export async function deleteRewardsByActivityId(activityId: number) {
   try {
