@@ -382,6 +382,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <DropdownMenuItem>
                   <Link href="/profile">โปรไฟล์</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/reward">รางวัลของฉัน</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>ออกจากระบบ</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

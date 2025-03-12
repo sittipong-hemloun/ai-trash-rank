@@ -1,5 +1,5 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins } from "./schema";
+import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards } from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
 /**
@@ -501,6 +501,220 @@ export async function getRewardsByActivityId(activityId: number) {
     return rewards;
   } catch (error) {
     console.error("Error fetching rewards by activity id:", error);
+    return [];
+  }
+}
+
+export async function createReward(
+  activityId: number,
+  name: string,
+  redeemPoint: number,
+  amount: number
+) {
+  try {
+    const [reward] = await db
+      .insert(Rewards)
+      .values({
+        activityId,
+        name,
+        redeemPoint,
+        amount,
+      })
+      .returning()
+      .execute();
+    return reward;
+  } catch (error) {
+    console.error("Error creating reward:", error);
+    return null;
+  }
+}
+
+export async function decrementRewardAmount(rewardId: number) {
+  try {
+    const [updatedReward] = await db
+      .update(Rewards)
+      .set({
+        amount: sql`${Rewards.amount} - 1`,
+      })
+      .where(and(eq(Rewards.id, rewardId), sql`${Rewards.amount} > 0`))
+      .returning()
+      .execute();
+    return updatedReward;
+  } catch (error) {
+    console.error("Error decrementing reward amount:", error);
+    return null;
+  }
+}
+
+export async function createUserReward(userId: number, rewardId: number) {
+  try {
+    const [userReward] = await db.insert(UserRewards)
+      .values({ userId, rewardId })
+      .returning()
+      .execute();
+    return userReward;
+  } catch (error) {
+    console.error("Error creating user reward:", error);
+    return null;
+  }
+}
+
+export async function getUserRewards(userId: number) {
+  try {
+    const rewards = await db
+      .select({
+        redeemedAt: UserRewards.redeemedAt,
+        rewardId: Rewards.id,
+        name: Rewards.name,
+        redeemPoint: Rewards.redeemPoint,
+      })
+      .from(UserRewards)
+      .innerJoin(Rewards, eq(Rewards.id, UserRewards.rewardId))
+      .where(eq(UserRewards.userId, userId))
+      .execute();
+    return rewards;
+  } catch (error) {
+    console.error("Error fetching user rewards:", error);
+    return [];
+  }
+}
+
+/**
+ * ลบกิจกรรม (activity) โดยใช้ activityId
+ */
+export async function deleteActivity(activityId: number) {
+  try {
+    // ลบ rewards ที่เกี่ยวข้องกับ activity นี้ก่อน
+    await db.delete(Rewards).where(eq(Rewards.activityId, activityId)).execute();
+    // จากนั้นลบ activity
+    await db.delete(Activities).where(eq(Activities.id, activityId)).execute();
+    return true;
+  } catch (error) {
+    console.error("Error deleting activity:", error);
+    return false;
+  }
+}
+
+/**
+ * ลบโพสต์ (post) โดยใช้ postId
+ */
+export async function deletePost(postId: number) {
+  try {
+    await db.delete(Posts).where(eq(Posts.id, postId)).execute();
+    return true;
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return false;
+  }
+}
+
+/**
+ * อัปเดตโพสต์ด้วย id ที่กำหนด
+ * @param postId - ID ของโพสต์
+ * @param name - หัวข้อโพสต์ใหม่
+ * @param content - เนื้อหาโพสต์ใหม่
+ * @param image - URL หรือ base64 ของรูปภาพ (ถ้ามี)
+ * @returns โพสต์ที่อัปเดตแล้วหรือ null หากเกิดข้อผิดพลาด
+ */
+export async function updatePost(
+  postId: number,
+  name: string,
+  content: string,
+  image?: string
+) {
+  try {
+    const [updatedPost] = await db
+      .update(Posts)
+      .set({
+        name,
+        content,
+        ...(image ? { image } : {}),
+      })
+      .where(eq(Posts.id, postId))
+      .returning()
+      .execute();
+    return updatedPost;
+  } catch (error) {
+    console.error("Error updating post:", error);
+    return null;
+  }
+}
+
+/**
+ * อัปเดตกิจกรรมด้วย id ที่กำหนด
+ * @param activityId - ID ของกิจกรรม
+ * @param name - หัวข้อกิจกรรมใหม่
+ * @param content - เนื้อหากิจกรรมใหม่
+ * @param startDate - วันที่เริ่มกิจกรรม (ในรูปแบบ string ที่สามารถแปลงเป็น Date ได้)
+ * @param endDate - วันที่สิ้นสุดกิจกรรม (ในรูปแบบ string)
+ * @param image - URL หรือ base64 ของรูปภาพ (ถ้ามี)
+ * @returns กิจกรรมที่อัปเดตแล้วหรือ null หากเกิดข้อผิดพลาด
+ */
+export async function updateActivity(
+  activityId: number,
+  name: string,
+  content: string,
+  startDate: string,
+  endDate: string,
+  image?: string
+) {
+  try {
+    const [updatedActivity] = await db
+      .update(Activities)
+      .set({
+        name,
+        content,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        ...(image ? { image } : {}),
+      })
+      .where(eq(Activities.id, activityId))
+      .returning()
+      .execute();
+    return updatedActivity;
+  } catch (error) {
+    console.error("Error updating activity:", error);
+    return null;
+  }
+}
+
+/**
+ * ลบของรางวัลทั้งหมดที่เกี่ยวข้องกับกิจกรรมที่มี activityId ที่กำหนด
+ * @param activityId - ID ของกิจกรรม
+ * @returns true หากลบสำเร็จ, false หากเกิดข้อผิดพลาด
+ */
+export async function deleteRewardsByActivityId(activityId: number) {
+  try {
+    await db
+      .delete(Rewards)
+      .where(eq(Rewards.activityId, activityId))
+      .execute();
+    return true;
+  } catch (error) {
+    console.error("Error deleting rewards for activity:", error);
+    return false;
+  }
+}
+
+export async function getActivityRedemptions(activityId: number) {
+  try {
+    const redemptions = await db
+      .select({
+        redeemedAt: UserRewards.redeemedAt,
+        rewardName: Rewards.name,
+        userName: Users.name,
+        userEmail: Users.email,
+        userPhone: Users.phoneNumber,
+      })
+      .from(UserRewards)
+      .innerJoin(Rewards, eq(Rewards.id, UserRewards.rewardId))
+      .innerJoin(Users, eq(Users.id, UserRewards.userId))
+      .where(eq(Rewards.activityId, activityId))
+      .orderBy(desc(UserRewards.redeemedAt))
+      .execute();
+    return redemptions;
+  } catch (error) {
+    console.error("Error fetching activity redemptions:", error);
     return [];
   }
 }

@@ -7,11 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { createActivities, createPosts } from "@/utils/db/actions";
+import { createActivities, createPosts, createReward } from "@/utils/db/actions";
 import useUser from "@/hooks/useUser";
-// สำหรับการสร้าง Reward ในฐานข้อมูล
-import { db } from "@/utils/db/dbConfig";
-import { Rewards } from "@/utils/db/schema";
 
 export default function CreatePostActivityPage() {
   const router = useRouter();
@@ -73,35 +70,9 @@ export default function CreatePostActivityPage() {
     }
   };
 
-  // ฟังก์ชันสำหรับสร้าง reward ลงในฐานข้อมูล (เพิ่ม parameter amount)
-  async function createReward(
-    activityId: number,
-    name: string,
-    redeemPoint: number,
-    amount: number
-  ) {
-    try {
-      const [reward] = await db
-        .insert(Rewards)
-        .values({
-          activityId,
-          name,
-          qrCode: "", // กำหนด placeholder สำหรับ QR code (ปรับตามที่ต้องการ)
-          redeemPoint,
-          amount,
-        })
-        .returning()
-        .execute();
-      return reward;
-    } catch (error) {
-      console.error("Error creating reward:", error);
-      return null;
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     if (!user) {
-      toast.error("กรุณาตรวจสอบถังขยะหรือเข้าสู่ระบบก่อนส่ง");
+      toast.error("กรุณาเข้าสู่ระบบก่อนส่ง");
       return;
     }
     e.preventDefault();
@@ -122,7 +93,6 @@ export default function CreatePostActivityPage() {
           content,
           new Date(startDate),
           new Date(endDate),
-          rewards.length,
           imageString
         );
         console.log("activity from page", activity);
@@ -254,13 +224,14 @@ export default function CreatePostActivityPage() {
             </div>
             {/* ฟิลด์สำหรับรางวัล */}
             <div className="col-span-2">
-              <label className="block text-sm mb-1 font-medium text-black">
-                ของรางวัล (Reward)
-              </label>
+              <h3 className="text-lg font-semibold mb-2 text-black">
+                ของรางวัล
+              </h3>
               {rewards.map((reward, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
                   ชื่อ
-                  <Input
+                  <input
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="text"
                     placeholder="ชื่อของรางวัล"
                     value={reward.name}
@@ -270,7 +241,8 @@ export default function CreatePostActivityPage() {
                     required
                   />
                   คะแนน
-                  <Input
+                  <input
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
                     min="1"
                     placeholder="คะแนนที่ใช้แลก"
@@ -281,7 +253,8 @@ export default function CreatePostActivityPage() {
                     required
                   />
                   จำนวน
-                  <Input
+                  <input
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
                     min="1"
                     placeholder="จำนวน"
