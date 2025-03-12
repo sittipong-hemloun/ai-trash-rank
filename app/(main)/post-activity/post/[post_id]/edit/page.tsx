@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getPostById, updatePost } from "@/utils/db/actions";
-import useUser from "@/hooks/useUser";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +10,7 @@ interface Post {
   id: number;
   name: string;
   content: string;
-  image: string;
+  image: string | null;
   createdAt: Date;
   userId: number;
 }
@@ -19,12 +18,11 @@ interface Post {
 export default function EditPostPage() {
   const { post_id } = useParams();
   const router = useRouter();
-  const { user } = useUser();
   const [post, setPost] = useState<Post | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
+  const [preview, setPreview] = useState<string | null>("");
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -67,7 +65,7 @@ export default function EditPostPage() {
         imageString = await fileToBase64(image);
       }
       // updatePost เป็นฟังก์ชันสำหรับอัปเดตโพสต์ในฐานข้อมูล
-      const updated = await updatePost(post.id, title, content, imageString);
+      const updated = await updatePost(post.id, title, content, imageString || undefined);
       if (updated) {
         toast.success("แก้ไขโพสต์สำเร็จ");
         router.push(`/post-activity/post/${post.id}`);
@@ -85,11 +83,11 @@ export default function EditPostPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold mb-4 text-black">แก้ไขโพสต์</h1>
         <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push(`/post-activity/post/${post?.id}`)} // สำหรับหน้า edit โพสต์
-            >
-            ยกเลิก
+          type="button"
+          variant="outline"
+          onClick={() => router.push(`/post-activity/post/${post?.id}`)} // สำหรับหน้า edit โพสต์
+        >
+          ยกเลิก
         </Button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -119,21 +117,22 @@ export default function EditPostPage() {
         <div className="flex flex-col">
           <div className="flex text-sm text-gray-600">
             <label
-                htmlFor="verification-image"
-                className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
+              htmlFor="verification-image"
+              className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
             >
-                <span>อัปโหลดรูป</span>
-                <input
+              <span>อัปโหลดรูป</span>
+              <input
                 id="verification-image"
                 name="verification-image"
                 type="file"
                 className="sr-only"
                 onChange={handleImageChange}
                 accept="image/*"
-                />
+              />
             </label>
           </div>
           {preview && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="Preview" className="mt-2 w-full h-auto rounded" />
           )}
         </div>

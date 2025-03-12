@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import useUser from "@/hooks/useUser";
-import { 
-  getActivityById, 
-  getRewardsByActivityId, 
+import {
+  getActivityById,
+  getRewardsByActivityId,
   getActivityRedemptions, // import ฟังก์ชันใหม่
   updateUserPoints,
   decrementRewardAmount,
@@ -41,7 +41,7 @@ interface Redemption {
   rewardName: string;
   userName: string;
   userEmail: string;
-  userPhone: string;
+  userPhone: string | null;
 }
 
 export default function ActivityIndexPage() {
@@ -56,7 +56,18 @@ export default function ActivityIndexPage() {
   useEffect(() => {
     const fetchActivity = async () => {
       const act = await getActivityById(Number(activity_id));
-      setActivity(act);
+      if (act) {
+        const formattedActivity: Activity = {
+          ...act,
+          rewardCount: 0, // Add default value as the property doesn't exist in the returned object
+          startDate: act.startDate instanceof Date ? act.startDate.toISOString() : String(act.startDate),
+          endDate: act.endDate instanceof Date ? act.endDate.toISOString() : String(act.endDate),
+          createdAt: act.createdAt instanceof Date ? act.createdAt.toISOString() : String(act.createdAt)
+        };
+        setActivity(formattedActivity);
+      } else {
+        setActivity(null);
+      }
     };
     fetchActivity();
   }, [activity_id]);
@@ -66,7 +77,11 @@ export default function ActivityIndexPage() {
     const fetchRewards = async () => {
       if (activity) {
         const rewardsData = await getRewardsByActivityId(activity.id);
-        setRewards(rewardsData);
+        const formattedRewards = rewardsData.map(reward => ({
+          ...reward,
+          createdAt: reward.createdAt instanceof Date ? reward.createdAt.toISOString() : String(reward.createdAt)
+        }));
+        setRewards(formattedRewards);
       }
     };
     fetchRewards();
@@ -163,6 +178,7 @@ export default function ActivityIndexPage() {
         {activity?.name}
       </h3>
       {activity?.image && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={activity.image}
           alt={activity.name}

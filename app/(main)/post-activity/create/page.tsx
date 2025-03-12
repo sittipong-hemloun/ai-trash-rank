@@ -4,7 +4,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { createActivities, createPosts, createReward } from "@/utils/db/actions";
@@ -96,7 +95,7 @@ export default function CreatePostActivityPage() {
           imageString
         );
         console.log("activity from page", activity);
-        if (activity) {
+        if (activity && !Array.isArray(activity) && 'id' in activity) {
           // สร้าง reward ทีละรายการสำหรับกิจกรรมที่สร้างขึ้น
           for (const reward of rewards) {
             if (reward.name.trim() !== "") {

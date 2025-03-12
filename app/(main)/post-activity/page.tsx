@@ -14,8 +14,25 @@ const ITEMS_PER_PAGE = 8;
 
 export default function PostActivityPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState([]);
-  const [activities, setActivities] = useState([]);
+  interface Post {
+    id: number;
+    name: string;
+    image: string | null;
+    content: string;
+    userId: number;
+    createdAt: Date;
+  }
+
+  interface Activity {
+    id: number;
+    name: string;
+    image: string | null;
+    createdAt: Date;
+    userId: number;
+  }
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"posts" | "activities">("posts");
   const [isLoading, setIsLoading] = useState(true);

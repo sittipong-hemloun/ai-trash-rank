@@ -13,7 +13,7 @@ interface Post {
   id: number;
   name: string;
   content: string;
-  image: string;
+  image: string | null;
   createdAt: Date;
   userId: number;
 }

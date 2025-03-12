@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import useUser from "@/hooks/useUser";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +34,6 @@ interface Reward {
 export default function EditActivityPage() {
   const { activity_id } = useParams();
   const router = useRouter();
-  const { user } = useUser();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -49,7 +47,13 @@ export default function EditActivityPage() {
     const fetchActivity = async () => {
       const act = await getActivityById(Number(activity_id));
       if (act) {
-        setActivity(act);
+        // Convert Date objects to strings to match Activity interface
+        setActivity({
+          ...act,
+          startDate: act.startDate.toISOString(),
+          endDate: act.endDate.toISOString(),
+          createdAt: act.createdAt.toISOString()
+        });
         setTitle(act.name);
         setContent(act.content);
         setStartDate(new Date(act.startDate).toISOString().split("T")[0]);
@@ -64,7 +68,12 @@ export default function EditActivityPage() {
     const fetchRewards = async () => {
       if (activity) {
         const rewardsData = await getRewardsByActivityId(activity.id);
-        setRewards(rewardsData);
+        // Convert Date objects to strings to match Reward interface
+        const formattedRewards = rewardsData.map(reward => ({
+          ...reward,
+          createdAt: reward.createdAt instanceof Date ? reward.createdAt.toISOString() : reward.createdAt
+        }));
+        setRewards(formattedRewards);
       }
     };
     fetchRewards();
@@ -242,6 +251,7 @@ export default function EditActivityPage() {
           </div>
 
           {preview && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={preview}
               alt="Preview"
