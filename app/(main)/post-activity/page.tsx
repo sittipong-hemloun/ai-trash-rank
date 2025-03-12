@@ -53,41 +53,24 @@ export default function PostActivityPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto ">
-      <h1 className="text-3xl font-semibold mb-6 text-white">
+      <h1 className="text-3xl font-semibold mb-6 text-gray-200">
         ข่าวสารและกิจกรรม
       </h1>
 
       <div className="w-full space-x-3 mb-6">
         <Button
           variant={activeTab === "posts" ? "default" : "outline"}
-          // onClick={() => setActiveTab("posts")}
           onClick={() => handleTabChange("posts")}
         >
           ข่าวสาร
         </Button>
         <Button
           variant={activeTab === "activities" ? "default" : "outline"}
-          // onClick={() => setActiveTab("activities")}
           onClick={() => handleTabChange("activities")}
         >
           กิจกรรม
         </Button>
 
-        {/* {activeTab === "posts" && (
-          <Link href="/post-activity/create">
-            <Button className="float-right">
-              เพิ่มข่าวสาร
-            </Button>
-          </Link>
-        )}
-
-        {activeTab === "activities" && (
-            <Link href="/post-activity/create">
-              <Button className="float-right">
-                เพิ่มของรางวัล
-              </Button>
-            </Link>
-        )} */}
         <Link href="/post-activity/create">
           <Button className="float-right">เพิ่ม</Button>
         </Link>
