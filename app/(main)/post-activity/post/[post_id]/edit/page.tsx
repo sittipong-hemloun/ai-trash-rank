@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -85,7 +86,7 @@ export default function EditPostPage() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push(`/post-activity/post/${post?.id}`)} // สำหรับหน้า edit โพสต์
+          onClick={() => router.push(`/post-activity/post/${post?.id}`)}
         >
           ยกเลิก
         </Button>
@@ -132,8 +133,7 @@ export default function EditPostPage() {
             </label>
           </div>
           {preview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="Preview" className="mt-2 w-full h-auto rounded" />
+            <img src={preview} alt="Preview" className="mt-2 w-full h-64 object-contain rounded" />
           )}
         </div>
         <Button className="w-full" type="submit">บันทึกการแก้ไข</Button>

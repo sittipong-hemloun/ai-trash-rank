@@ -34,9 +34,6 @@ interface Reward {
   createdAt?: string;
 }
 
-/**
- * For existing images from DB
- */
 interface ExistingImage {
   id: number;
   activityId: number;
@@ -53,14 +50,10 @@ export default function EditActivityPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // For main featured image
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
 
-  // For existing images from DB
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
-
-  // For new multiple images
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newImagesPreview, setNewImagesPreview] = useState<string[]>([]);
 
@@ -70,7 +63,6 @@ export default function EditActivityPage() {
     const fetchActivity = async () => {
       const act = await getActivityById(Number(activity_id));
       if (act) {
-        // Convert Date objects to strings to match Activity interface
         const startString = new Date(act.startDate).toISOString().split("T")[0];
         const endString = new Date(act.endDate).toISOString().split("T")[0];
 
@@ -94,7 +86,6 @@ export default function EditActivityPage() {
     const fetchRewards = async () => {
       if (activity) {
         const rewardsData = await getRewardsByActivityId(activity.id);
-        // Convert Date objects to strings to match Reward interface
         const formattedRewards = rewardsData.map((reward) => ({
           ...reward,
           createdAt:
@@ -108,12 +99,10 @@ export default function EditActivityPage() {
     fetchRewards();
   }, [activity]);
 
-  // Fetch existing images from DB
   useEffect(() => {
     const fetchImages = async () => {
       if (activity) {
         const images = await getActivityImagesByActivityId(activity.id);
-        // Convert Date objects to strings to match ExistingImage interface
         const formattedImages = images.map((image) => ({
           ...image,
           createdAt: image.createdAt instanceof Date
@@ -126,9 +115,6 @@ export default function EditActivityPage() {
     fetchImages();
   }, [activity]);
 
-  /**
-   * Convert file to base64 string
-   */
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -138,23 +124,16 @@ export default function EditActivityPage() {
     });
   };
 
-  /**
-   * Handle new featured image selection
-   */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImage(file);
-      // Show local preview
       const reader = new FileReader();
       reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  /**
-   * Handle new multiple images
-   */
   const handleNewImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -173,9 +152,6 @@ export default function EditActivityPage() {
     });
   };
 
-  /**
-   * Update reward fields
-   */
   const updateRewardField = (
     index: number,
     field: "name" | "redeemPoint" | "amount",
@@ -202,20 +178,15 @@ export default function EditActivityPage() {
     }
   };
 
-  /**
-   * Submit update
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activity) return;
     try {
       let imageString = preview;
-      // If we have a new main image, convert to base64
       if (image) {
         imageString = await fileToBase64(image);
       }
 
-      // 1) Update main activity data
       const updatedActivity = await updateActivity(
         activity.id,
         title,
@@ -229,7 +200,6 @@ export default function EditActivityPage() {
         return;
       }
 
-      // 2) Delete existing rewards & re-insert with updated data
       await deleteRewardsByActivityId(activity.id);
       for (const reward of rewards) {
         if (reward.name.trim() !== "") {
@@ -242,11 +212,9 @@ export default function EditActivityPage() {
         }
       }
 
-      // 3) Insert newly selected multiple images
       if (newImages.length > 0) {
         for (const newFile of newImages) {
           const base64 = await fileToBase64(newFile);
-          // createActivityImage to store them
           await createActivityImage(activity.id, base64);
         }
       }
@@ -324,7 +292,6 @@ export default function EditActivityPage() {
             />
           </div>
         </div>
-
         {/* อัปโหลดรูปหลัก */}
         <div className="flex flex-col">
           <label className="block text-sm mb-1 font-medium text-black">
@@ -349,7 +316,7 @@ export default function EditActivityPage() {
             <img
               src={preview}
               alt="Preview"
-              className="mt-2 w-full h-auto rounded"
+              className="mt-2 w-full h-64 object-contain rounded"
             />
           )}
         </div>
@@ -364,7 +331,7 @@ export default function EditActivityPage() {
                   key={img.id}
                   src={img.url}
                   alt="existing"
-                  className="w-full h-auto rounded"
+                  className="w-full h-64 object-contain rounded"
                 />
               ))}
             </div>
@@ -399,7 +366,7 @@ export default function EditActivityPage() {
                   key={idx}
                   src={previewUrl}
                   alt="preview new"
-                  className="w-full h-auto rounded"
+                  className="w-full h-64 object-contain rounded"
                 />
               ))}
             </div>

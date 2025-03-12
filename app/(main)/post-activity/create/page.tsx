@@ -19,15 +19,11 @@ export default function CreatePostActivityPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // Featured image file + preview
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [featuredPreview, setFeaturedPreview] = useState<string>("");
 
-  // Multiple images if it's an activity
   const [activityImages, setActivityImages] = useState<File[]>([]);
-  const [activityImagesPreview, setActivityImagesPreview] = useState<string[]>(
-    []
-  );
+  const [activityImagesPreview, setActivityImagesPreview] = useState<string[]>([]);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -37,9 +33,6 @@ export default function CreatePostActivityPage() {
 
   const { user, loading } = useUser();
 
-  /**
-   * Convert file to base64 string
-   */
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -49,33 +42,24 @@ export default function CreatePostActivityPage() {
     });
   };
 
-  /**
-   * Handle single featured image selection & preview
-   */
   const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setFeaturedImage(file);
-      // Generate local preview
       const reader = new FileReader();
       reader.onload = () => setFeaturedPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  /**
-   * Handle multiple images selection for the activity
-   */
   const handleActivityImagesUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
 
-    // Update the state with newly selected files
     setActivityImages((prev) => [...prev, ...newFiles]);
 
-    // Generate local preview for each new file
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -88,9 +72,6 @@ export default function CreatePostActivityPage() {
     });
   };
 
-  /**
-   * Update reward fields
-   */
   const updateReward = (
     index: number,
     field: "name" | "redeemPoint" | "amount",
@@ -117,9 +98,6 @@ export default function CreatePostActivityPage() {
     }
   };
 
-  /**
-   * Handle form submission
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -134,7 +112,6 @@ export default function CreatePostActivityPage() {
       }
 
       if (mode === "post") {
-        // Create a single post
         const post = await createPosts(
           user.id,
           title,
@@ -148,10 +125,8 @@ export default function CreatePostActivityPage() {
           toast.error("Cannot create post!");
         }
       } else {
-        // We have an activity: store multiple images
         let multipleImagesBase64: string[] = [];
         if (activityImages.length) {
-          // Convert all activity images to base64
           const promises = activityImages.map((f) => fileToBase64(f));
           multipleImagesBase64 = await Promise.all(promises);
         }
@@ -167,7 +142,6 @@ export default function CreatePostActivityPage() {
         );
 
         if (activity && !Array.isArray(activity) && "id" in activity) {
-          // If we have any rewards, create them
           for (const reward of rewards) {
             if (reward.name.trim() !== "") {
               await createReward(
@@ -215,7 +189,6 @@ export default function CreatePostActivityPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* หัวข้อ */}
         <div>
           <label className="block text-sm mb-1 font-medium text-black">
             หัวข้อ
@@ -229,7 +202,6 @@ export default function CreatePostActivityPage() {
           />
         </div>
 
-        {/* เนื้อหา */}
         <div>
           <label className="block text-sm mb-1 font-medium text-black">
             เนื้อหา
@@ -243,7 +215,6 @@ export default function CreatePostActivityPage() {
           />
         </div>
 
-        {/* อัปโหลดรูปหลัก/Featured */}
         <div className="flex flex-col">
           <label className="block text-sm mb-1 font-medium text-black">
             รูปหลัก (Featured Image)
@@ -263,17 +234,15 @@ export default function CreatePostActivityPage() {
             />
           </label>
 
-          {/* preview featured image if available */}
           {featuredPreview && (
             <img
               src={featuredPreview}
               alt="Preview"
-              className="mt-2 w-full h-auto rounded"
+              className="mt-2 w-full h-64 object-contain rounded"
             />
           )}
         </div>
 
-        {/* ฟิลด์สำหรับกิจกรรมเท่านั้น */}
         {mode === "activity" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,7 +273,6 @@ export default function CreatePostActivityPage() {
               </div>
             </div>
 
-            {/* Multiple images */}
             <div>
               <label className="block text-sm mb-1 font-medium text-black">
                 รูปภาพอื่น ๆ (หลายรูป)
@@ -325,7 +293,6 @@ export default function CreatePostActivityPage() {
                 />
               </label>
 
-              {/* Show local preview for newly selected multiple images */}
               {activityImagesPreview.length > 0 && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {activityImagesPreview.map((previewUrl, idx) => (
@@ -333,14 +300,13 @@ export default function CreatePostActivityPage() {
                       key={idx}
                       src={previewUrl}
                       alt="preview"
-                      className="w-full h-auto rounded"
+                      className="w-full h-64 object-contain rounded"
                     />
                   ))}
                 </div>
               )}
             </div>
 
-            {/* ของรางวัล */}
             <div>
               <h3 className="text-lg font-semibold mb-2 text-black">
                 ของรางวัล

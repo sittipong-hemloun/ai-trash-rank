@@ -86,7 +86,7 @@ export default function PostActivityPage() {
         <img
           src={post.image}
           alt={post.name}
-          className="w-full h-auto mb-4 rounded-md"
+          className="w-full h-64 object-contain mb-4 rounded-md"
         />
       )}
       <p className="mb-2 break-words">{post?.content}</p>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -16,7 +17,6 @@ import {
   getActivityImagesByActivityId,
 } from "@/utils/db/actions";
 
-// Import the carousel library
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 
@@ -65,14 +65,13 @@ export default function ActivityIndexPage() {
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [activityImages, setActivityImages] = useState<ActivityImage[]>([]);
 
-  // ดึงข้อมูลกิจกรรมจากฐานข้อมูล
   useEffect(() => {
     const fetchActivity = async () => {
       const act = await getActivityById(Number(activity_id));
       if (act) {
         const formattedActivity: Activity = {
           ...act,
-          rewardCount: 0, // Add default value for safety
+          rewardCount: 0,
           startDate:
             act.startDate instanceof Date
               ? act.startDate.toISOString()
@@ -94,7 +93,6 @@ export default function ActivityIndexPage() {
     fetchActivity();
   }, [activity_id]);
 
-  // ดึงรายการของรางวัลของกิจกรรม
   useEffect(() => {
     const fetchRewards = async () => {
       if (activity) {
@@ -112,7 +110,6 @@ export default function ActivityIndexPage() {
     fetchRewards();
   }, [activity]);
 
-  // ดึงข้อมูล redemptions หากผู้ใช้เป็นเจ้าของกิจกรรม
   useEffect(() => {
     const fetchRedemptions = async () => {
       if (activity && user && user.id === activity.userId) {
@@ -123,14 +120,13 @@ export default function ActivityIndexPage() {
     fetchRedemptions();
   }, [activity, user]);
 
-  // ดึงรูปภาพหลายรูปของ activity
   useEffect(() => {
     const fetchImages = async () => {
       if (activity) {
         const images = await getActivityImagesByActivityId(activity.id);
         const formattedImages = images.map((image) => ({
           ...image,
-          createdAt: 
+          createdAt:
             image.createdAt instanceof Date
               ? image.createdAt.toISOString()
               : String(image.createdAt),
@@ -141,7 +137,6 @@ export default function ActivityIndexPage() {
     fetchImages();
   }, [activity]);
 
-  // ฟังก์ชันสำหรับแลกของรางวัล
   const handleRedeem = async (reward: Reward) => {
     if (!user) {
       toast.error("คุณต้องเข้าสู่ระบบเพื่อแลกของรางวัล");
@@ -173,7 +168,6 @@ export default function ActivityIndexPage() {
     }
   };
 
-  // ฟังก์ชันสำหรับแก้ไขและลบกิจกรรม
   const handleEditActivity = () => {
     router.push(`/post-activity/activity/${activity?.id}/edit`);
   };
@@ -218,28 +212,24 @@ export default function ActivityIndexPage() {
         </button>
       </div>
 
-      {/* ชื่อกิจกรรม */}
       <h3 className="text-xl text-black mb-2 font-semibold break-words">
         {activity?.name}
       </h3>
 
       {activity?.image && (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={activity.image}
           alt={activity.name}
-          className="w-full h-auto mb-4 rounded-md"
+          className="w-full h-64 object-contain mb-4 rounded-md"
         />
       )}
 
-      {/* Carousel for multiple images */}
       {activityImages.length > 0 ? (
         <div className="mb-4">
           <Carousel showThumbs={false} autoPlay infiniteLoop>
             {activityImages.map((img) => (
               <div key={img.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt="activity image" />
+                <img src={img.url} alt="activity image" className="w-full h-64 object-contain" />
               </div>
             ))}
           </Carousel>
@@ -260,7 +250,6 @@ export default function ActivityIndexPage() {
           : ""}
       </p>
 
-      {/* แสดงรายการของรางวัล */}
       <div className="mt-6">
         <h4 className="text-lg font-semibold mb-2">ของรางวัลที่สามารถแลกได้</h4>
         {rewards.length === 0 ? (
@@ -290,7 +279,6 @@ export default function ActivityIndexPage() {
         )}
       </div>
 
-      {/* ตารางแสดงประวัติการแลกของรางวัล (เฉพาะเจ้าของกิจกรรม) */}
       {user && activity && user.id === activity.userId && (
         <div className="mt-8">
           <h4 className="text-lg font-semibold mb-2">ประวัติการแลกของรางวัล</h4>
