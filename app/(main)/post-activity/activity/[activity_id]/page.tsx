@@ -138,6 +138,32 @@ export default function ActivityIndexPage() {
     fetchImages();
   }, [activity]);
 
+  const exportCSV = () => {
+    if (redemptions.length === 0) {
+      toast.error("ไม่มีข้อมูลที่จะส่งออก");
+      return;
+    }
+    const header = ["ชื่อ", "อีเมล", "เบอร์โทรศัพท์", "ที่อยู่", "ของรางวัล", "วันที่แลก"];
+    const rows = redemptions.map((item) => [
+      `"${item.userName}"`,
+      `"${item.userEmail}"`,
+      `"${item.userPhone || ""}"`,
+      `"${item.userAddress || ""}"`,
+      `"${item.rewardName}"`,
+      `"${new Date(item.redeemedAt).toLocaleDateString()}"`,
+    ]);
+    const csvContent = [header, ...rows].map((e) => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "redemptions.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleRedeem = async (reward: Reward) => {
     if (!user) {
       toast.error("คุณต้องเข้าสู่ระบบเพื่อแลกของรางวัล");
@@ -292,7 +318,10 @@ export default function ActivityIndexPage() {
 
       {user && activity && user.id === activity.userId && (
         <div className="mt-8">
-          <h4 className="text-lg font-semibold mb-2">ประวัติการแลกของรางวัล</h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-lg font-semibold">ประวัติการแลกของรางวัล</h4>
+            <Button onClick={exportCSV}>Export CSV</Button>
+          </div>
           {redemptions.length === 0 ? (
             <p>ยังไม่มีการแลกของรางวัล</p>
           ) : (
