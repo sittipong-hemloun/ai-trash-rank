@@ -33,7 +33,7 @@ export const Posts = pgTable("posts", {
   userId: integer("user_id").references(() => Users.id).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   content: text("content").notNull(),
-  image: text("image"), // URL or path to the image
+  image: text("image"), // URL or path to the featured image
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
@@ -63,9 +63,19 @@ export const ActivityImages = pgTable("activity_images", {
 })
 
 /**
+ * Table to store additional images for posts.
+ */
+export const PostImages = pgTable("post_images", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => Posts.id).notNull(),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
  * Rewards table schema.
  * Now references Activities instead of Posts.
-*/
+ */
 export const Rewards = pgTable("rewards", {
   id: serial("id").primaryKey(),
   activityId: integer("activity_id").references(() => Activities.id).notNull(),

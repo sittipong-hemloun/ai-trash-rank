@@ -10,6 +10,7 @@ import {
   createActivities,
   createPosts,
   createReward,
+  createPostImage
 } from "@/utils/db/actions";
 import useUser from "@/hooks/useUser";
 
@@ -21,6 +22,10 @@ export default function CreatePostActivityPage() {
 
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [featuredPreview, setFeaturedPreview] = useState<string>("");
+
+  // Additional images for post mode
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [additionalImagesPreview, setAdditionalImagesPreview] = useState<string[]>([]);
 
   const [activityImages, setActivityImages] = useState<File[]>([]);
   const [activityImagesPreview, setActivityImagesPreview] = useState<string[]>([]);
@@ -50,6 +55,22 @@ export default function CreatePostActivityPage() {
       reader.onload = () => setFeaturedPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleAdditionalImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const newFiles = Array.from(e.target.files);
+    setAdditionalImages((prev) => [...prev, ...newFiles]);
+    newFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAdditionalImagesPreview((prevPreviews) => [
+          ...prevPreviews,
+          reader.result as string,
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleActivityImagesUpload = (
@@ -119,6 +140,13 @@ export default function CreatePostActivityPage() {
           featuredImageString
         );
         if (!Array.isArray(post)) {
+          // Upload additional images if any
+          if (additionalImages.length > 0) {
+            for (const file of additionalImages) {
+              const base64 = await fileToBase64(file);
+              await createPostImage(post.id, base64);
+            }
+          }
           toast.success("Post created successfully!");
           router.push("/post-activity");
         } else {
@@ -242,6 +270,42 @@ export default function CreatePostActivityPage() {
             />
           )}
         </div>
+
+        {mode === "post" && (
+          <div className="flex flex-col">
+            <label className="block text-sm mb-1 font-medium text-black">
+              รูปรอง (Additional Images)
+            </label>
+            <label
+              htmlFor="post-additional-images"
+              className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
+            >
+              เลือกรูปหลายรูป
+              <input
+                id="post-additional-images"
+                name="post-additional-images"
+                type="file"
+                className="sr-only"
+                onChange={handleAdditionalImagesUpload}
+                accept="image/*"
+                multiple
+              />
+            </label>
+
+            {additionalImagesPreview.length > 0 && (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {additionalImagesPreview.map((previewUrl, idx) => (
+                  <img
+                    key={idx}
+                    src={previewUrl}
+                    alt="preview additional"
+                    className="w-full h-64 object-contain rounded"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {mode === "activity" && (
           <>

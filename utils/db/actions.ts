@@ -1,5 +1,5 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages } from "./schema";
+import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages, PostImages } from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
 /**
@@ -467,6 +467,47 @@ export async function getActivityImagesByActivityId(activityId: number) {
     return images;
   } catch (error) {
     console.error("Error fetching activity images:", error);
+    return [];
+  }
+}
+
+/**
+ * Creates a new post image.
+ * @param postId - The ID of the post.
+ * @param url - The URL or base64 string of the image.
+ * @returns The created post image record or null if an error occurs.
+ */
+export async function createPostImage(postId: number, url: string) {
+  try {
+    const [postImage] = await db
+      .insert(PostImages)
+      .values({
+        postId,
+        url,
+      })
+      .returning()
+      .execute();
+    return postImage;
+  } catch (error) {
+    console.error("Error creating post image:", error);
+    return null;
+  }
+}
+
+/**
+ * Retrieves all images for a given postId.
+ */
+export async function getPostImagesByPostId(postId: number) {
+  try {
+    const images = await db
+      .select()
+      .from(PostImages)
+      .where(eq(PostImages.postId, postId))
+      .orderBy(desc(PostImages.createdAt))
+      .execute();
+    return images;
+  } catch (error) {
+    console.error("Error fetching post images:", error);
     return [];
   }
 }

@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
-import { getPostById } from "@/utils/db/actions";
-import { useEffect, useState } from "react";
-import useUser from "@/hooks/useUser";
+import { getPostById, getPostImagesByPostId, deletePost } from "@/utils/db/actions";
 import toast from "react-hot-toast";
-import { deletePost } from "@/utils/db/actions";
+import useUser from "@/hooks/useUser";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from "react-responsive-carousel";
 
 interface Post {
   id: number;
@@ -18,9 +18,17 @@ interface Post {
   userId: number;
 }
 
+interface PostImage {
+  id: number;
+  postId: number;
+  url: string;
+  createdAt: Date;
+}
+
 export default function PostActivityPage() {
   const { post_id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
+  const [postImages, setPostImages] = useState<PostImage[]>([]);
   const router = useRouter();
   const { user } = useUser();
 
@@ -28,6 +36,10 @@ export default function PostActivityPage() {
     const fetchPost = async () => {
       const postData = await getPostById(Number(post_id));
       setPost(postData);
+      if (postData) {
+        const images = await getPostImagesByPostId(postData.id);
+        setPostImages(images);
+      }
     };
     fetchPost();
   }, [post_id]);
@@ -50,6 +62,15 @@ export default function PostActivityPage() {
       toast.error("เกิดข้อผิดพลาดในการลบโพสต์");
     }
   };
+
+  // Combine featured image and additional images for Carousel
+  const carouselImages = [];
+  if (post?.image) {
+    carouselImages.push({ id: "featured", url: post.image });
+  }
+  if (postImages.length > 0) {
+    carouselImages.push(...postImages);
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-gray-200 rounded-2xl">
@@ -82,12 +103,14 @@ export default function PostActivityPage() {
       <h3 className="text-xl text-black mb-2 font-semibold break-words">
         {post?.name}
       </h3>
-      {post?.image && (
-        <img
-          src={post.image}
-          alt={post.name}
-          className="w-full h-64 object-contain mb-4 rounded-md"
-        />
+      {carouselImages.length > 0 && (
+        <Carousel showThumbs={false} autoPlay infiniteLoop>
+          {carouselImages.map((img) => (
+            <div key={img.id}>
+              <img src={img.url} alt="Post image" className="w-full h-64 object-contain rounded-md" />
+            </div>
+          ))}
+        </Carousel>
       )}
       <p className="mb-2 break-words">{post?.content}</p>
       <p className="mb-2">
