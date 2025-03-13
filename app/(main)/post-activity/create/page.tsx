@@ -135,6 +135,8 @@ export default function CreatePostActivityPage() {
       if (mode === "post") {
         const post = await createPosts(
           user.id,
+          user.name,
+          user.profileImage,
           title,
           content,
           featuredImageString
@@ -161,6 +163,8 @@ export default function CreatePostActivityPage() {
 
         const activity = await createActivities(
           user.id,
+          user.name,
+          user.profileImage,
           title,
           content,
           new Date(startDate),

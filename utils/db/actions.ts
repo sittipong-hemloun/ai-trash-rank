@@ -1,5 +1,5 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages, PostImages } from "./schema";
+import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages, PostImages, Likes, Comments } from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
 /**
@@ -42,6 +42,26 @@ export async function getUserByEmail(email: string) {
     return user;
   } catch (error) {
     console.error("Error fetching user by email:", error);
+    return null;
+  }
+}
+
+/**
+ * Retrieves a user by their ID.
+ * @param userId - User's ID.
+ * @returns The user or null if not found.
+ */
+export async function getUserById(userId: number) {
+  try {
+    const [user] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.id, userId))
+      .execute();
+    return user;
+  }
+  catch (error) {
+    console.error("Error fetching user by ID:", error);
     return null;
   }
 }
@@ -411,6 +431,8 @@ export async function getAllActivities() {
 
 export async function createPosts(
   userId: number,
+  userName: string,
+  userProfileImage: string | null,
   name: string,
   content: string,
   image?: string
@@ -420,6 +442,8 @@ export async function createPosts(
       .insert(Posts)
       .values({
         userId,
+        userName,
+        userProfileImage,
         name,
         content,
         image,
@@ -514,6 +538,8 @@ export async function getPostImagesByPostId(postId: number) {
 
 export async function createActivities(
   userId: number,
+  userName: string,
+  userProfileImage: string | null,
   name: string,
   content: string,
   startDate: Date,
@@ -526,6 +552,8 @@ export async function createActivities(
       .insert(Activities)
       .values({
         userId,
+        userName,
+        userProfileImage,
         name,
         content,
         startDate,
@@ -789,6 +817,115 @@ export async function getActivityRedemptions(activityId: number) {
     return redemptions;
   } catch (error) {
     console.error("Error fetching activity redemptions:", error);
+    return [];
+  }
+}
+
+/**
+ * Adds a like for a given target (post or activity).
+ * Toggles the like: if already liked, it will unlike.
+ * @param userId - The ID of the user liking.
+ * @param targetType - The type of target ('post' or 'activity').
+ * @param targetId - The ID of the target.
+ * @returns An object indicating the action performed ('added' or 'removed') and the like record if added.
+ */
+export async function addLike(userId: number, targetType: string, targetId: number) {
+  try {
+    // Check if the user already liked the target
+    const existingLikes = await db
+      .select()
+      .from(Likes)
+      .where(and(eq(Likes.userId, userId), eq(Likes.targetType, targetType), eq(Likes.targetId, targetId)))
+      .execute();
+    if(existingLikes.length > 0) {
+      // Already liked, so remove the like (toggle off)
+      await db
+        .delete(Likes)
+        .where(and(eq(Likes.userId, userId), eq(Likes.targetType, targetType), eq(Likes.targetId, targetId)))
+        .execute();
+      console.log("Like removed:", existingLikes[0]);
+      return { action: "removed", like: existingLikes[0] };
+    }
+    const [like] = await db
+      .insert(Likes)
+      .values({ userId, targetType, targetId })
+      .returning()
+      .execute();
+    console.log("Like added:", like);
+    return { action: "added", like };
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    return null;
+  }
+}
+
+/**
+ * Retrieves likes for a given target.
+ * @param targetType - The type of target ('post' or 'activity').
+ * @param targetId - The ID of the target.
+ * @returns An array of likes.
+ */
+export async function getLikes(targetType: string, targetId: number) {
+  try {
+    const likes = await db
+      .select()
+      .from(Likes)
+      .where(and(eq(Likes.targetType, targetType), eq(Likes.targetId, targetId)))
+      .execute();
+    return likes;
+  } catch (error) {
+    console.error("Error fetching likes:", error);
+    return [];
+  }
+}
+
+/**
+ * Adds a comment for a given target (post or activity).
+ * @param userId - The ID of the user commenting.
+ * @param targetType - The type of target ('post' or 'activity').
+ * @param targetId - The ID of the target.
+ * @param content - The comment content.
+ * @returns The created comment record or null if an error occurs.
+ */
+export async function addComment(userId: number,
+  userName: string,
+  userProfileImage: string | null,
+  targetType: string, targetId: number, content: string) {
+  try {
+    const [comment] = await db
+      .insert(Comments)
+      .values({
+        userId,
+        userName,
+        userProfileImage,
+        targetType, targetId, content
+      })
+      .returning()
+      .execute();
+    return comment;
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    return null;
+  }
+}
+
+/**
+ * Retrieves comments for a given target.
+ * @param targetType - The type of target ('post' or 'activity').
+ * @param targetId - The ID of the target.
+ * @returns An array of comments.
+ */
+export async function getComments(targetType: string, targetId: number) {
+  try {
+    const comments = await db
+      .select()
+      .from(Comments)
+      .where(and(eq(Comments.targetType, targetType), eq(Comments.targetId, targetId)))
+      .orderBy(desc(Comments.createdAt))
+      .execute();
+    return comments;
+  } catch (error) {
+    console.error("Error fetching comments:", error);
     return [];
   }
 }

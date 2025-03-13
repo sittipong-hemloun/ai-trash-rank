@@ -31,6 +31,8 @@ export const Users = pgTable("users", {
 export const Posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id).notNull(),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  userProfileImage: text("user_profile_image"),
   name: varchar("name", { length: 255 }).notNull(),
   content: text("content").notNull(),
   image: text("image"), // URL or path to the featured image
@@ -44,6 +46,8 @@ export const Posts = pgTable("posts", {
 export const Activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id).notNull(),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  userProfileImage: text("user_profile_image"),
   name: varchar("name", { length: 255 }).notNull(),
   content: text("content").notNull(),
   image: text("image"), // Single/featured image if needed
@@ -135,5 +139,32 @@ export const Bins = pgTable("bins", {
   coordinates: text("coordinates").notNull(), // Latitude and Longitude
   type: varchar("type", { length: 50 }).notNull(), // Type of bin
   status: varchar("status", { length: 50 }).notNull().default("active"), // Status of the bin
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Likes table schema.
+ * Supports likes for posts and activities.
+ */
+export const Likes = pgTable("likes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  targetType: varchar("target_type", { length: 50 }).notNull(), // 'post' or 'activity'
+  targetId: integer("target_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * Comments table schema.
+ * Supports comments for posts and activities.
+ */
+export const Comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  userProfileImage: text("user_profile_image"),
+  targetType: varchar("target_type", { length: 50 }).notNull(), // 'post' or 'activity'
+  targetId: integer("target_id").notNull(),
+  content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
