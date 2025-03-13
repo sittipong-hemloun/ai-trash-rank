@@ -20,7 +20,7 @@ export const Users = pgTable("users", {
   point: integer("point").notNull().default(0),
   score: integer("score").notNull().default(0),
   phoneNumber: varchar("phone_number", { length: 10 }),
-  // phoneNumber: varchar("phone_number", { length: 10 }).notNull(),
+  address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
@@ -93,12 +93,14 @@ export const Rewards = pgTable("rewards", {
  * Join table for Users and Rewards (Many-to-Many relationship).
  */
 export const UserRewards = pgTable("user_rewards", {
+  id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id).notNull(),
   rewardId: integer("reward_id").references(() => Rewards.id).notNull(),
   redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
-}, (table) => ({
-  primaryKey: [table.userId, table.rewardId],
-}))
+})
+// }, (table) => ({
+//   primaryKey: [table.userId, table.rewardId],
+// }))
 
 /**
  * Reports table schema.

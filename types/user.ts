@@ -33,6 +33,7 @@ export interface User {
   id: number
   email: string
   profileImage: string | null
+  address: string | null
   name: string
   point: number
   score: number

@@ -67,13 +67,14 @@ export async function getUserById(userId: number) {
 }
 
 /**
- * Updates user's info: name, phoneNumber, and profileImage (all optional).
+ * Updates user's info: name, phoneNumber, profileImage, and address (all optional).
  */
 export async function updateUserInfo(
   userId: number,
   name?: string,
   phoneNumber?: string,
-  profileImage?: string
+  profileImage?: string,
+  address?: string
 ) {
   try {
     const [updatedUser] = await db
@@ -82,6 +83,7 @@ export async function updateUserInfo(
         ...(name ? { name } : {}),
         ...(phoneNumber ? { phoneNumber } : {}),
         ...(profileImage ? { profileImage } : {}),
+        ...(address !== undefined ? { address } : {}),
       })
       .where(eq(Users.id, userId))
       .returning()
@@ -807,6 +809,7 @@ export async function getActivityRedemptions(activityId: number) {
         userName: Users.name,
         userEmail: Users.email,
         userPhone: Users.phoneNumber,
+        userAddress: Users.address,
       })
       .from(UserRewards)
       .innerJoin(Rewards, eq(Rewards.id, UserRewards.rewardId))

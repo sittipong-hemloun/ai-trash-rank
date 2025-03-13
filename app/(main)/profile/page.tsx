@@ -1,5 +1,3 @@
-// File: /Users/sittiponghemloun/Developer/my_project/ai-trash-rank/app/profile/page.tsx
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -21,6 +19,7 @@ export default function ProfilePage() {
   // Local state for editing
   const [name, setName] = useState<string>("")
   const [phoneNumber, setPhoneNumber] = useState<string>("")
+  const [address, setAddress] = useState<string>("")
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState<boolean>(false)
 
@@ -31,6 +30,7 @@ export default function ProfilePage() {
     if (!loading && user) {
       setName(user.name || "")
       setPhoneNumber(user.phoneNumber || "")
+      setAddress(user.address || "")
       setProfileImage(user.profileImage || null)
     }
   }, [user, loading])
@@ -65,7 +65,7 @@ export default function ProfilePage() {
     if (!user) return
     try {
       setIsSaving(true)
-      const updated = await updateUserInfo(user.id, name, phoneNumber, profileImage ?? undefined)
+      const updated = await updateUserInfo(user.id, name, phoneNumber, profileImage ?? undefined, address)
       if (updated) {
         // Update local state (so header, etc. updates)
         setUser(updated)
@@ -130,6 +130,19 @@ export default function ProfilePage() {
             placeholder="เบอร์โทรศัพท์"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+        </div>
+
+        {/* Address */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            ที่อยู่
+          </label>
+          <Input
+            type="text"
+            placeholder="ที่อยู่"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
         </div>
 

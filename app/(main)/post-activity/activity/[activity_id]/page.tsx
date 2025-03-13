@@ -46,6 +46,7 @@ interface Redemption {
   rewardName: string;
   userName: string;
   userEmail: string;
+  userAddress: string | null;
   userPhone: string | null;
 }
 
@@ -142,6 +143,10 @@ export default function ActivityIndexPage() {
       toast.error("คุณต้องเข้าสู่ระบบเพื่อแลกของรางวัล");
       return;
     }
+    if (!user.address) {
+      toast.error("กรุณาเพิ่มที่อยู่ในโปรไฟล์ก่อนแลกของรางวัล");
+      return;
+    }
     if (user.point < reward.redeemPoint) {
       toast.error("คะแนนของคุณไม่เพียงพอสำหรับการแลกของรางวัลนี้");
       return;
@@ -211,6 +216,12 @@ export default function ActivityIndexPage() {
           ย้อนกลับ
         </button>
       </div>
+
+      {user && (
+        <p className="text-sm text-gray-600 mb-2">
+          ที่อยู่ของคุณ: {user.address ? user.address : "ไม่ได้ระบุ"}
+        </p>
+      )}
 
       <h3 className="text-xl text-black mb-2 font-semibold break-words">
         {activity?.name}
@@ -285,30 +296,34 @@ export default function ActivityIndexPage() {
           {redemptions.length === 0 ? (
             <p>ยังไม่มีการแลกของรางวัล</p>
           ) : (
-            <table className="min-w-full bg-white border">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border">ชื่อ</th>
-                  <th className="py-2 px-4 border">อีเมล</th>
-                  <th className="py-2 px-4 border">เบอร์โทรศัพท์</th>
-                  <th className="py-2 px-4 border">ของรางวัล</th>
-                  <th className="py-2 px-4 border">วันที่แลก</th>
-                </tr>
-              </thead>
-              <tbody>
-                {redemptions.map((item, index) => (
-                  <tr key={index}>
-                    <td className="py-2 px-4 border">{item.userName}</td>
-                    <td className="py-2 px-4 border">{item.userEmail}</td>
-                    <td className="py-2 px-4 border">{item.userPhone}</td>
-                    <td className="py-2 px-4 border">{item.rewardName}</td>
-                    <td className="py-2 px-4 border">
-                      {new Date(item.redeemedAt).toLocaleDateString()}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full bg-white border overflow-hidden rounded-md">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border">ชื่อ</th>
+                    <th className="py-2 px-4 border">อีเมล</th>
+                    <th className="py-2 px-4 border">เบอร์โทรศัพท์</th>
+                    <th className="py-2 px-4 border">ที่อยู่</th>
+                    <th className="py-2 px-4 border">ของรางวัล</th>
+                    <th className="py-2 px-4 border">วันที่แลก</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {redemptions.map((item, index) => (
+                    <tr key={index}>
+                      <td className="py-2 px-4 border">{item.userName}</td>
+                      <td className="py-2 px-4 border">{item.userEmail}</td>
+                      <td className="py-2 px-4 border">{item.userPhone}</td>
+                      <td className="py-2 px-4 border">{item.userAddress}</td>
+                      <td className="py-2 px-4 border">{item.rewardName}</td>
+                      <td className="py-2 px-4 border">
+                        {new Date(item.redeemedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
