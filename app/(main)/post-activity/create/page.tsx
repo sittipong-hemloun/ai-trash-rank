@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -10,7 +9,7 @@ import {
   createActivities,
   createPosts,
   createReward,
-  createPostImage
+  createPostImage,
 } from "@/utils/db/actions";
 import useUser from "@/hooks/useUser";
 
@@ -27,6 +26,7 @@ export default function CreatePostActivityPage() {
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
   const [additionalImagesPreview, setAdditionalImagesPreview] = useState<string[]>([]);
 
+  // Additional images for activity mode
   const [activityImages, setActivityImages] = useState<File[]>([]);
   const [activityImagesPreview, setActivityImagesPreview] = useState<string[]>([]);
 
@@ -38,6 +38,7 @@ export default function CreatePostActivityPage() {
 
   const { user, loading } = useUser();
 
+  // Convert File to Base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -47,6 +48,7 @@ export default function CreatePostActivityPage() {
     });
   };
 
+  // Upload a single featured image
   const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -57,10 +59,12 @@ export default function CreatePostActivityPage() {
     }
   };
 
+  // Upload multiple images for Post
   const handleAdditionalImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
     setAdditionalImages((prev) => [...prev, ...newFiles]);
+
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -73,12 +77,10 @@ export default function CreatePostActivityPage() {
     });
   };
 
-  const handleActivityImagesUpload = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // Upload multiple images for Activity
+  const handleActivityImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
-
     setActivityImages((prev) => [...prev, ...newFiles]);
 
     newFiles.forEach((file) => {
@@ -93,6 +95,7 @@ export default function CreatePostActivityPage() {
     });
   };
 
+  // Update reward form fields
   const updateReward = (
     index: number,
     field: "name" | "redeemPoint" | "amount",
@@ -119,6 +122,7 @@ export default function CreatePostActivityPage() {
     }
   };
 
+  // Handle form submission for either Post or Activity
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -127,11 +131,13 @@ export default function CreatePostActivityPage() {
     }
 
     try {
+      // Convert featured image if provided
       let featuredImageString: string | undefined;
       if (featuredImage) {
         featuredImageString = await fileToBase64(featuredImage);
       }
 
+      // Creating a POST
       if (mode === "post") {
         const post = await createPosts(
           user.id,
@@ -141,6 +147,7 @@ export default function CreatePostActivityPage() {
           content,
           featuredImageString
         );
+
         if (!Array.isArray(post)) {
           // Upload additional images if any
           if (additionalImages.length > 0) {
@@ -149,19 +156,20 @@ export default function CreatePostActivityPage() {
               await createPostImage(post.id, base64);
             }
           }
-          toast.success("Post created successfully!");
+          toast.success("สร้างโพสต์เรียบร้อย!");
           router.push("/post-activity");
         } else {
-          toast.error("Cannot create post!");
+          toast.error("ไม่สามารถสร้างโพสต์ได้!");
         }
       } else {
+        // Creating an ACTIVITY
         let multipleImagesBase64: string[] = [];
         if (activityImages.length) {
           const promises = activityImages.map((f) => fileToBase64(f));
           multipleImagesBase64 = await Promise.all(promises);
         }
 
-        const activity = await createActivities(
+        const newActivity = await createActivities(
           user.id,
           user.name,
           user.profileImage,
@@ -173,36 +181,42 @@ export default function CreatePostActivityPage() {
           multipleImagesBase64
         );
 
-        if (activity && !Array.isArray(activity) && "id" in activity) {
+        if (newActivity && !Array.isArray(newActivity) && "id" in newActivity) {
+          // Create rewards
           for (const reward of rewards) {
             if (reward.name.trim() !== "") {
               await createReward(
-                activity.id,
+                newActivity.id,
                 reward.name,
                 reward.redeemPoint,
                 reward.amount
               );
             }
           }
-          toast.success("Activity created successfully!");
+          toast.success("สร้างกิจกรรมเรียบร้อย!");
           router.push("/post-activity");
         } else {
-          toast.error("Cannot create activity!");
+          toast.error("ไม่สามารถสร้างกิจกรรมได้!");
         }
       }
     } catch (error) {
       console.error("Error creating item:", error);
-      toast.error("Cannot create item!");
+      toast.error("เกิดข้อผิดพลาดในการสร้างรายการ!");
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-gray-200 rounded-2xl">
-      <h1 className="text-2xl font-semibold mb-4 text-black">
-        เพิ่ม{mode === "post" ? "ข่าวสาร" : "กิจกรรม"}
-      </h1>
+    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          เพิ่ม{mode === "post" ? "ข่าวสาร" : "กิจกรรม"}
+        </h1>
+        <Link href="/post-activity">
+          <Button>ย้อนกลับ</Button>
+        </Link>
+      </div>
 
-      <div className="w-full space-x-4 mb-4">
+      <div className="flex items-center gap-2 mb-6">
         <Button
           variant={mode === "post" ? "default" : "outline"}
           onClick={() => setMode("post")}
@@ -215,45 +229,45 @@ export default function CreatePostActivityPage() {
         >
           เพิ่มกิจกรรม
         </Button>
-        <Link href="/post-activity">
-          <Button className="float-right">ย้อนกลับ</Button>
-        </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Title */}
         <div>
-          <label className="block text-sm mb-1 font-medium text-black">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             หัวข้อ
           </label>
           <input
-            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
           />
         </div>
 
+        {/* Content */}
         <div>
-          <label className="block text-sm mb-1 font-medium text-black">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             เนื้อหา
           </label>
           <textarea
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
             rows={4}
             required
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
           />
         </div>
 
-        <div className="flex flex-col">
-          <label className="block text-sm mb-1 font-medium text-black">
+        {/* Featured Image */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             รูปหลัก (Featured Image)
           </label>
           <label
             htmlFor="featured-image"
-            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
+            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 border border-gray-200 p-2"
           >
             อัปโหลดรูป
             <input
@@ -265,24 +279,24 @@ export default function CreatePostActivityPage() {
               accept="image/*"
             />
           </label>
-
           {featuredPreview && (
             <img
               src={featuredPreview}
               alt="Preview"
-              className="mt-2 w-full h-64 object-contain rounded"
+              className="mt-2 w-full h-64 object-contain rounded-md shadow-sm"
             />
           )}
         </div>
 
+        {/* Additional Images for post */}
         {mode === "post" && (
-          <div className="flex flex-col">
-            <label className="block text-sm mb-1 font-medium text-black">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               รูปรอง (Additional Images)
             </label>
             <label
               htmlFor="post-additional-images"
-              className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
+              className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 border border-gray-200 p-2"
             >
               เลือกรูปหลายรูป
               <input
@@ -303,7 +317,7 @@ export default function CreatePostActivityPage() {
                     key={idx}
                     src={previewUrl}
                     alt="preview additional"
-                    className="w-full h-64 object-contain rounded"
+                    className="w-full h-64 object-contain rounded-md shadow-sm"
                   />
                 ))}
               </div>
@@ -311,43 +325,46 @@ export default function CreatePostActivityPage() {
           </div>
         )}
 
+        {/* Activity-specific fields */}
         {mode === "activity" && (
           <>
+            {/* Start & End Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm mb-1 font-medium text-black">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   วันที่เริ่ม
                 </label>
                 <input
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
                   type="date"
                   required
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   max={endDate}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1 font-medium text-black">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   วันที่สิ้นสุด
                 </label>
                 <input
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
                   type="date"
                   required
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                 />
               </div>
             </div>
 
+            {/* Multiple Activity Images */}
             <div>
-              <label className="block text-sm mb-1 font-medium text-black">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 รูปภาพอื่น ๆ (หลายรูป)
               </label>
               <label
                 htmlFor="activity-images"
-                className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 text-sm p-2"
+                className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 border border-gray-200 p-2"
               >
                 เลือกรูปหลายรูป
                 <input
@@ -360,7 +377,6 @@ export default function CreatePostActivityPage() {
                   multiple
                 />
               </label>
-
               {activityImagesPreview.length > 0 && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {activityImagesPreview.map((previewUrl, idx) => (
@@ -368,53 +384,48 @@ export default function CreatePostActivityPage() {
                       key={idx}
                       src={previewUrl}
                       alt="preview"
-                      className="w-full h-64 object-contain rounded"
+                      className="w-full h-64 object-contain rounded-md shadow-sm"
                     />
                   ))}
                 </div>
               )}
             </div>
 
+            {/* Rewards */}
             <div>
-              <h3 className="text-lg font-semibold mb-2 text-black">
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">
                 ของรางวัล
               </h3>
               {rewards.map((reward, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <span>ชื่อ</span>
+                <div key={index} className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="text-gray-700">ชื่อ</span>
                   <input
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="text"
                     placeholder="ชื่อของรางวัล"
                     value={reward.name}
-                    onChange={(e) =>
-                      updateReward(index, "name", e.target.value)
-                    }
+                    onChange={(e) => updateReward(index, "name", e.target.value)}
                     required
+                    className="w-32 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                   />
-                  <span>คะแนน</span>
+                  <span className="text-gray-700">คะแนน</span>
                   <input
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
                     min="1"
                     placeholder="คะแนนที่ใช้แลก"
                     value={reward.redeemPoint}
-                    onChange={(e) =>
-                      updateReward(index, "redeemPoint", e.target.value)
-                    }
+                    onChange={(e) => updateReward(index, "redeemPoint", e.target.value)}
                     required
+                    className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                   />
-                  <span>จำนวน</span>
+                  <span className="text-gray-700">จำนวน</span>
                   <input
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                     type="number"
                     min="1"
                     placeholder="จำนวน"
                     value={reward.amount}
-                    onChange={(e) =>
-                      updateReward(index, "amount", e.target.value)
-                    }
+                    onChange={(e) => updateReward(index, "amount", e.target.value)}
                     required
+                    className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                   />
                   {rewards.length > 1 && (
                     <Button
@@ -434,12 +445,13 @@ export default function CreatePostActivityPage() {
           </>
         )}
 
+        {/* Submit Button */}
         {loading ? (
-          <Button type="submit" className="mt-4 w-full" disabled>
+          <Button type="submit" className="w-full" disabled>
             กำลังโหลด...
           </Button>
         ) : (
-          <Button type="submit" className="mt-4 w-full">
+          <Button type="submit" className="w-full">
             เพิ่ม
           </Button>
         )}

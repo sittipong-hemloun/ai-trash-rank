@@ -228,9 +228,9 @@ export default function EditActivityPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-gray-200 rounded-2xl">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-black">แก้ไขกิจกรรม</h1>
+    <div className="max-w-3xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">แก้ไขกิจกรรม</h1>
         <Button
           type="button"
           onClick={() => router.push(`/post-activity/activity/${activity?.id}`)}
@@ -238,14 +238,14 @@ export default function EditActivityPage() {
           ยกเลิก
         </Button>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* หัวข้อ */}
         <div>
-          <label className="block text-sm mb-1 font-medium text-black">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             หัวข้อ
           </label>
           <input
-            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -254,11 +254,11 @@ export default function EditActivityPage() {
         </div>
         {/* เนื้อหา */}
         <div>
-          <label className="block text-sm mb-1 font-medium text-black">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             เนื้อหา
           </label>
           <textarea
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
             rows={4}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -268,11 +268,11 @@ export default function EditActivityPage() {
         {/* วันที่เริ่มและสิ้นสุด */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm mb-1 font-medium text-black">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               วันที่เริ่ม
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -280,11 +280,11 @@ export default function EditActivityPage() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1 font-medium text-black">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               วันที่สิ้นสุด
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
@@ -294,12 +294,12 @@ export default function EditActivityPage() {
         </div>
         {/* อัปโหลดรูปหลัก */}
         <div className="flex flex-col">
-          <label className="block text-sm mb-1 font-medium text-black">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             อัปโหลดรูปหลัก
           </label>
           <label
             htmlFor="verification-image"
-            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 p-2"
+            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 border border-gray-200 p-2"
           >
             <span>อัปโหลดรูป</span>
             <input
@@ -316,7 +316,7 @@ export default function EditActivityPage() {
             <img
               src={preview}
               alt="Preview"
-              className="mt-2 w-full h-64 object-contain rounded"
+              className="mt-2 w-full h-64 object-contain rounded-md shadow-sm"
             />
           )}
         </div>
@@ -324,14 +324,14 @@ export default function EditActivityPage() {
         {/* แสดงภาพที่มีอยู่ใน DB */}
         {existingImages.length > 0 && (
           <div>
-            <p className="text-black font-semibold mt-4">รูปภาพปัจจุบัน</p>
+            <p className="text-gray-800 font-semibold mt-4">รูปภาพปัจจุบัน</p>
             <div className="grid grid-cols-3 gap-2 mt-2">
               {existingImages.map((img) => (
                 <img
                   key={img.id}
                   src={img.url}
                   alt="existing"
-                  className="w-full h-64 object-contain rounded"
+                  className="w-full h-64 object-contain rounded-md shadow-sm"
                 />
               ))}
             </div>
@@ -340,12 +340,12 @@ export default function EditActivityPage() {
 
         {/* เพิ่มภาพใหม่ ๆ หลายรูป */}
         <div>
-          <p className="text-black font-semibold mt-4">
+          <p className="text-gray-800 font-semibold mt-4">
             เพิ่มรูปภาพใหม่ (หลายรูป)
           </p>
           <label
             htmlFor="new-images"
-            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 p-2 text-sm"
+            className="relative cursor-pointer bg-white rounded-md text-center w-full font-medium text-green-600 hover:text-green-500 border border-gray-200 p-2 text-sm"
           >
             <span>เลือกไฟล์</span>
             <input
@@ -366,7 +366,7 @@ export default function EditActivityPage() {
                   key={idx}
                   src={previewUrl}
                   alt="preview new"
-                  className="w-full h-64 object-contain rounded"
+                  className="w-full h-64 object-contain rounded-md shadow-sm"
                 />
               ))}
             </div>
@@ -375,14 +375,14 @@ export default function EditActivityPage() {
 
         {/* ของรางวัล */}
         <div>
-          <h3 className="text-lg font-semibold mb-2 text-black">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">
             ของรางวัล (Reward)
           </h3>
           {rewards.map((reward, index) => (
             <div key={index} className="flex items-center space-x-2 mb-2">
-              <span>ชื่อ</span>
+              <span className="text-gray-700">ชื่อ</span>
               <input
-                className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                 type="text"
                 placeholder="ชื่อของรางวัล"
                 value={reward.name}
@@ -391,9 +391,9 @@ export default function EditActivityPage() {
                 }
                 required
               />
-              <span>คะแนน</span>
+              <span className="text-gray-700">คะแนน</span>
               <input
-                className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                 type="number"
                 min="1"
                 placeholder="คะแนนที่ใช้แลก"
@@ -403,9 +403,9 @@ export default function EditActivityPage() {
                 }
                 required
               />
-              <span>จำนวน</span>
+              <span className="text-gray-700">จำนวน</span>
               <input
-                className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                 type="number"
                 min="1"
                 placeholder="จำนวน"
@@ -430,7 +430,7 @@ export default function EditActivityPage() {
             เพิ่มของรางวัล
           </Button>
         </div>
-        <Button className="mt-4 w-full" type="submit">
+        <Button className="w-full mt-4" type="submit">
           บันทึกการแก้ไข
         </Button>
       </form>

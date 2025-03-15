@@ -44,12 +44,10 @@ export default function PostActivityPage() {
     fetchPost();
   }, [post_id]);
 
-  // ฟังก์ชันสำหรับแก้ไขโพสต์
   const handleEditPost = () => {
     router.push(`/post-activity/post/${post?.id}/edit`);
   };
 
-  // ฟังก์ชันสำหรับลบโพสต์
   const handleDeletePost = async () => {
     if (!post) return;
     const confirmDelete = confirm("คุณแน่ใจหรือไม่ที่จะลบโพสต์นี้?");
@@ -73,19 +71,19 @@ export default function PostActivityPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-gray-200 rounded-2xl">
-      <div className="flex items-center justify-between mb-4">
+    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-6">
         {user && post && user.id === post.userId ? (
-          <div className="flex space-x-2 mb-4">
+          <div className="flex space-x-2">
             <button
               onClick={handleEditPost}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
             >
               แก้ไขโพสต์
             </button>
             <button
               onClick={handleDeletePost}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
             >
               ลบโพสต์
             </button>
@@ -95,25 +93,36 @@ export default function PostActivityPage() {
         )}
         <button
           onClick={() => router.push("/post-activity")}
-          className="bg-green-500 text-white px-4 py-2 rounded-md ml-auto"
+          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors"
         >
           ย้อนกลับ
         </button>
       </div>
-      <h3 className="text-xl text-black mb-2 font-semibold break-words">
+
+      <h3 className="text-2xl text-gray-800 font-semibold break-words mb-4">
         {post?.name}
       </h3>
+
       {carouselImages.length > 0 && (
-        <Carousel showThumbs={false} autoPlay infiniteLoop>
-          {carouselImages.map((img) => (
-            <div key={img.id}>
-              <img src={img.url} alt="Post image" className="w-full h-64 object-contain rounded-md" />
-            </div>
-          ))}
-        </Carousel>
+        <div className="mb-4">
+          <Carousel showThumbs={false} autoPlay infiniteLoop>
+            {carouselImages.map((img) => (
+              <div key={img.id}>
+                <img
+                  src={img.url}
+                  alt="Post image"
+                  className="w-full h-64 object-contain rounded-md shadow-sm"
+                />
+              </div>
+            ))}
+          </Carousel>
+        </div>
       )}
-      <p className="mb-2 break-words">{post?.content}</p>
-      <p className="mb-2">
+
+      <p className="mb-4 text-gray-700 leading-relaxed break-words">
+        {post?.content}
+      </p>
+      <p className="text-sm text-gray-500">
         วันที่โพส: {post ? new Date(post.createdAt).toLocaleDateString() : ""}
       </p>
     </div>
