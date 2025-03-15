@@ -162,19 +162,13 @@ export default function PostActivityPage() {
       setShowComments((prev) => !prev);
     };
 
-    const handleShare = (event: React.MouseEvent) => {
-      event.stopPropagation();
-      const url = window.location.origin + `/post-activity/post/${post.id}`;
-      const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(shareUrl, "_blank");
-    };
-
     return (
       <div
         key={post.id}
         className="bg-white shadow rounded-lg p-4 mb-6 hover:shadow-lg transition-shadow"
       >
-        <div onClick={() => router.push(`/post-activity/post/${post.id}`)}>
+        <div onClick={() => router.push(`/post-activity/post/${post.id}`)}
+          className="cursor-pointer">
           <div className="flex items-center mb-4">
             <img
               src={post.userProfileImage || "/user.png"}
@@ -210,12 +204,6 @@ export default function PostActivityPage() {
             className="text-blue-500 hover:text-blue-600 text-sm"
           >
             {commentsCount > 0 ? `Comment (${commentsCount})` : "Comment"}
-          </button>
-          <button
-            onClick={handleShare}
-            className="text-blue-500 hover:text-blue-600 text-sm"
-          >
-            Share
           </button>
         </div>
         {showComments && (
@@ -261,11 +249,12 @@ export default function PostActivityPage() {
 
 
 
-  // Component for rendering an Activity card with likes and comments counts
   const ActivityCard = ({ activity }: { activity: Activity }) => {
     const [likesCount, setLikesCount] = useState(0);
     const [commentsCount, setCommentsCount] = useState(0);
-    const [commentInput, setCommentInput] = useState(""); // state for new comment
+    const [commentInput, setCommentInput] = useState(""); // state สำหรับคอมเมนต์ใหม่
+    const [showComments, setShowComments] = useState(false); // state สำหรับแสดง/ซ่อนคอมเมนต์
+    const [comments, setComments] = useState<Comment[]>([]); // เก็บรายการคอมเมนต์
 
     useEffect(() => {
       const fetchCounts = async () => {
@@ -274,6 +263,7 @@ export default function PostActivityPage() {
           const commentsData = await getComments("activity", activity.id);
           setLikesCount(likesData.length);
           setCommentsCount(commentsData.length);
+          setComments(commentsData); // กำหนด state สำหรับรายการคอมเมนต์
         } catch (error) {
           console.error("Error fetching counts:", error);
         }
@@ -300,81 +290,117 @@ export default function PostActivityPage() {
       }
     };
 
-    // ฟังก์ชันสำหรับส่งคอมเมนต์ในกิจกรรม
-    const handleCommentSubmit = async () => {
+    // ฟังก์ชันสำหรับสลับแสดง/ซ่อนคอมเมนต์
+    const toggleComments = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowComments((prev) => !prev);
+    };
+
+    // ฟังก์ชันสำหรับส่งคอมเมนต์
+    const handleCommentSubmit = async (event: React.FormEvent) => {
+      event.preventDefault();
       if (!currentUserId) {
         alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
         return;
       }
       if (!commentInput.trim()) return;
       try {
-        await addComment(currentUserId, user.name, user.profileImage, "activity", activity.id, commentInput);
+        await addComment(
+          currentUserId,
+          user.name,
+          user.profileImage,
+          "activity",
+          activity.id,
+          commentInput
+        );
         const commentsData = await getComments("activity", activity.id);
         setCommentsCount(commentsData.length);
+        setComments(commentsData);
         setCommentInput("");
       } catch (error) {
         console.error("Error adding comment:", error);
       }
     };
 
-    const handleShare = (event: React.MouseEvent) => {
-      event.stopPropagation();
-      const url = window.location.origin + `/post-activity/activity/${activity.id}`;
-      const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(shareUrl, "_blank");
-    };
-
     return (
       <div
         key={activity.id}
         className="bg-white shadow rounded-lg p-4 mb-6 cursor-pointer hover:shadow-lg transition-shadow"
-        onClick={() => router.push(`/post-activity/activity/${activity.id}`)}
       >
-        <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
-          <div className="ml-3">
-            <h3 className="font-semibold text-gray-900">{activity.name}</h3>
-            <p className="text-xs text-gray-500">
-              {new Date(activity.createdAt).toLocaleDateString()}
-            </p>
+        <div onClick={() => router.push(`/post-activity/activity/${activity.id}`)}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
+            <div className="ml-3">
+              <h3 className="font-semibold text-gray-900">{activity.name}</h3>
+              <p className="text-xs text-gray-500">
+                {new Date(activity.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
+          {activity.image && (
+            <img
+              src={activity.image}
+              alt={activity.name}
+              className="w-full h-auto object-cover rounded mb-4"
+            />
+          )}
+          <p className="text-gray-800 mb-4">กิจกรรม: {activity.name}</p>
+
         </div>
-        {activity.image && (
-          <img
-            src={activity.image}
-            alt={activity.name}
-            className="w-full h-auto object-cover rounded mb-4"
-          />
-        )}
-        <p className="text-gray-800 mb-4">กิจกรรม: {activity.name}</p>
         <div className="flex justify-around border-t pt-2">
-          <button onClick={handleLike} className="text-blue-500 hover:text-blue-600 text-sm">
+          <button
+            onClick={handleLike}
+            className="text-blue-500 hover:text-blue-600 text-sm"
+          >
             {likesCount > 0 ? `Like (${likesCount})` : "Like"}
           </button>
           <button
-            onClick={(e) => e.stopPropagation()}
+            onClick={toggleComments}
             className="text-blue-500 hover:text-blue-600 text-sm"
           >
             {commentsCount > 0 ? `Comment (${commentsCount})` : "Comment"}
           </button>
-          <button onClick={handleShare} className="text-blue-500 hover:text-blue-600 text-sm">
-            Share
-          </button>
         </div>
-        {/* ช่องสำหรับเพิ่มคอมเมนต์ */}
-        <form onSubmit={handleCommentSubmit} className="mt-4 flex space-x-2">
-          <input
-            type="text"
-            value={commentInput}
-            onChange={(e) => setCommentInput(e.target.value)}
-            placeholder="เขียนความคิดเห็น..."
-            className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring"
-          />
-          <Button type="submit">ส่ง</Button>
-        </form>
+        {showComments && (
+          <>
+            {/* แสดงรายการคอมเมนต์ */}
+            <div className="mt-4 space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex items-start space-x-2">
+                  <img
+                    src={comment.userProfileImage || "/user.png"}
+                    alt="User"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold">{comment.userName}</p>
+                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* ฟอร์มสำหรับเพิ่มคอมเมนต์ */}
+            <form onSubmit={handleCommentSubmit} className="mt-4 flex space-x-2">
+              <input
+                type="text"
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                placeholder="เขียนความคิดเห็น..."
+                className="flex-1 border rounded px-3 focus:outline-none focus:ring"
+              />
+              <Button type="submit">ส่ง</Button>
+            </form>
+          </>
+        )}
       </div>
     );
   };
+
 
   return (
     <div className="">
