@@ -35,6 +35,17 @@ export default function PostActivityPage() {
     userId: number;
   }
 
+  interface Comment {
+    id: number;
+    createdAt: Date;
+    userId: number;
+    userName: string;
+    userProfileImage: string | null;
+    content: string;
+    targetType: string;
+    targetId: number;
+  }
+
   const router = useRouter();
   const { user } = useUser(); // Get user from hook
   const currentUserId = user?.id; // Use the logged-in user's id
@@ -84,6 +95,9 @@ export default function PostActivityPage() {
   const PostCard = ({ post }: { post: Post }) => {
     const [likesCount, setLikesCount] = useState(0);
     const [commentsCount, setCommentsCount] = useState(0);
+    const [commentInput, setCommentInput] = useState("");
+    const [showComments, setShowComments] = useState(false);
+    const [comments, setComments] = useState<Comment[]>([]);
 
     useEffect(() => {
       const fetchCounts = async () => {
@@ -92,6 +106,7 @@ export default function PostActivityPage() {
           const commentsData = await getComments("post", post.id);
           setLikesCount(likesData.length);
           setCommentsCount(commentsData.length);
+          setComments(commentsData);
         } catch (error) {
           console.error("Error fetching counts:", error);
         }
@@ -117,25 +132,34 @@ export default function PostActivityPage() {
       }
     };
 
-    const handleComment = async (event: React.MouseEvent) => {
-      event.stopPropagation();
+    const handleCommentSubmit = async (event: React.FormEvent) => {
+      event.preventDefault();
       if (!currentUserId) {
         alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
         return;
       }
-      const comment = prompt("Enter your comment:");
-      if (comment) {
-        try {
-          await addComment(currentUserId,
-            user.name,
-            user.profileImage
-            , "post", post.id, comment);
-          const commentsData = await getComments("post", post.id);
-          setCommentsCount(commentsData.length);
-        } catch (error) {
-          console.error("Error adding comment:", error);
-        }
+      if (!commentInput.trim()) return;
+      try {
+        await addComment(
+          currentUserId,
+          user.name,
+          user.profileImage,
+          "post",
+          post.id,
+          commentInput
+        );
+        const commentsData = await getComments("post", post.id);
+        setCommentsCount(commentsData.length);
+        setComments(commentsData);
+        setCommentInput(""); // Clear input after submitting
+      } catch (error) {
+        console.error("Error adding comment:", error);
       }
+    };
+
+    const toggleComments = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowComments((prev) => !prev);
     };
 
     const handleShare = (event: React.MouseEvent) => {
@@ -152,7 +176,11 @@ export default function PostActivityPage() {
       >
         <div onClick={() => router.push(`/post-activity/post/${post.id}`)}>
           <div className="flex items-center mb-4">
-            <img src={post.userProfileImage || "/user.png"} alt="User" className="w-10 h-10 rounded-full" />
+            <img
+              src={post.userProfileImage || "/user.png"}
+              alt="User"
+              className="w-10 h-10 rounded-full"
+            />
             <div className="ml-3">
               <h3 className="font-semibold text-gray-900">{post.userName}</h3>
               <p className="text-xs text-gray-500">
@@ -177,21 +205,67 @@ export default function PostActivityPage() {
           >
             {likesCount > 0 ? `Like (${likesCount})` : "Like"}
           </button>
-          <button onClick={handleComment} className="text-blue-500 hover:text-blue-600 text-sm">
+          <button
+            onClick={toggleComments}
+            className="text-blue-500 hover:text-blue-600 text-sm"
+          >
             {commentsCount > 0 ? `Comment (${commentsCount})` : "Comment"}
           </button>
-          <button onClick={handleShare} className="text-blue-500 hover:text-blue-600 text-sm">
+          <button
+            onClick={handleShare}
+            className="text-blue-500 hover:text-blue-600 text-sm"
+          >
             Share
           </button>
         </div>
+        {showComments && (
+          <>
+            {/* Render all comments */}
+            <div className="mt-4 space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex items-start space-x-2">
+                  <img
+                    src={comment.userProfileImage || "/user.png"}
+                    alt="User"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold">{comment.userName}</p>
+                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Comment input form */}
+            <form
+              onSubmit={handleCommentSubmit}
+              className="mt-4 flex space-x-2"
+            >
+              <input
+                type="text"
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                placeholder="เขียนความคิดเห็น..."
+                className="flex-1 border rounded px-3 focus:outline-none focus:ring"
+              />
+              <Button type="submit">ส่ง</Button>
+            </form>
+          </>
+        )}
       </div>
     );
   };
+
+
 
   // Component for rendering an Activity card with likes and comments counts
   const ActivityCard = ({ activity }: { activity: Activity }) => {
     const [likesCount, setLikesCount] = useState(0);
     const [commentsCount, setCommentsCount] = useState(0);
+    const [commentInput, setCommentInput] = useState(""); // state for new comment
 
     useEffect(() => {
       const fetchCounts = async () => {
@@ -226,25 +300,20 @@ export default function PostActivityPage() {
       }
     };
 
-    const handleComment = async (event: React.MouseEvent) => {
-      event.stopPropagation();
+    // ฟังก์ชันสำหรับส่งคอมเมนต์ในกิจกรรม
+    const handleCommentSubmit = async () => {
       if (!currentUserId) {
         alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
         return;
       }
-      const comment = prompt("Enter your comment:");
-      if (comment) {
-        try {
-          await addComment(currentUserId,
-            user.name,
-            user.profileImage,
-
-            "activity", activity.id, comment);
-          const commentsData = await getComments("activity", activity.id);
-          setCommentsCount(commentsData.length);
-        } catch (error) {
-          console.error("Error adding comment:", error);
-        }
+      if (!commentInput.trim()) return;
+      try {
+        await addComment(currentUserId, user.name, user.profileImage, "activity", activity.id, commentInput);
+        const commentsData = await getComments("activity", activity.id);
+        setCommentsCount(commentsData.length);
+        setCommentInput("");
+      } catch (error) {
+        console.error("Error adding comment:", error);
       }
     };
 
@@ -282,13 +351,27 @@ export default function PostActivityPage() {
           <button onClick={handleLike} className="text-blue-500 hover:text-blue-600 text-sm">
             {likesCount > 0 ? `Like (${likesCount})` : "Like"}
           </button>
-          <button onClick={handleComment} className="text-blue-500 hover:text-blue-600 text-sm">
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-500 hover:text-blue-600 text-sm"
+          >
             {commentsCount > 0 ? `Comment (${commentsCount})` : "Comment"}
           </button>
           <button onClick={handleShare} className="text-blue-500 hover:text-blue-600 text-sm">
             Share
           </button>
         </div>
+        {/* ช่องสำหรับเพิ่มคอมเมนต์ */}
+        <form onSubmit={handleCommentSubmit} className="mt-4 flex space-x-2">
+          <input
+            type="text"
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
+            placeholder="เขียนความคิดเห็น..."
+            className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring"
+          />
+          <Button type="submit">ส่ง</Button>
+        </form>
       </div>
     );
   };
