@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -10,8 +11,10 @@ import {
   createPosts,
   createReward,
   createPostImage,
+  getUserRoles,
 } from "@/utils/db/actions";
 import useUser from "@/hooks/useUser";
+import { Loader2 } from "lucide-react";
 
 export default function CreatePostActivityPage() {
   const router = useRouter();
@@ -37,6 +40,19 @@ export default function CreatePostActivityPage() {
   >([{ name: "", redeemPoint: 1, amount: 1 }]);
 
   const { user, loading } = useUser();
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [checkingRoles, setCheckingRoles] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      getUserRoles(user.id).then((roles) => {
+        setUserRoles(roles);
+        setCheckingRoles(false);
+      });
+    } else {
+      setCheckingRoles(false);
+    }
+  }, [user]);
 
   // Convert File to Base64
   const fileToBase64 = (file: File): Promise<string> => {
@@ -130,6 +146,16 @@ export default function CreatePostActivityPage() {
       return;
     }
 
+    // If user tries to create Activity but doesn't have role coperate or admin, block
+    if (mode === "activity") {
+      const hasCoperate = userRoles.includes("coperate");
+      const hasAdmin = userRoles.includes("admin");
+      if (!hasCoperate && !hasAdmin) {
+        toast.error("คุณไม่มีสิทธิ์สร้างกิจกรรม (ต้องเป็น coperate หรือ admin เท่านั้น)");
+        return;
+      }
+    }
+
     try {
       // Convert featured image if provided
       let featuredImageString: string | undefined;
@@ -205,6 +231,15 @@ export default function CreatePostActivityPage() {
     }
   };
 
+  if (checkingRoles) {
+    // Show a simple loader while roles are being fetched
+    return (
+      <div className="flex justify-center items-center h-60">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-6">
@@ -223,12 +258,18 @@ export default function CreatePostActivityPage() {
         >
           เพิ่มข่าวสาร
         </Button>
-        <Button
-          variant={mode === "activity" ? "default" : "outline"}
-          onClick={() => setMode("activity")}
-        >
-          เพิ่มกิจกรรม
-        </Button>
+        {userRoles.includes("coperate") || userRoles.includes("admin") ? (
+          <Button
+            variant={mode === "activity" ? "default" : "outline"}
+            onClick={() => setMode("activity")}
+          >
+            เพิ่มกิจกรรม
+          </Button>
+        ) : (
+          <Button variant="outline" disabled>
+            เพิ่มกิจกรรมได้เฉพาะองค์กรเท่านั้น
+          </Button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

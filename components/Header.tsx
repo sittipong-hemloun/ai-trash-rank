@@ -98,7 +98,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       setLoading(false)
     }
     handleUserSync()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
@@ -353,8 +353,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="mx-2 md:mx-4 text-white">
             |
           </div>
-          <Link href="/profile">
-            <Button variant="ghost" className="text-white text-sm md:text-base">โปรไฟล์</Button>
+          <Link href="/coperate-register">
+            <Button variant="ghost" className="text-white text-sm md:text-base">สมัครสมาชิกองค์กร</Button>
           </Link>
         </div>
         {/* Right-side Icons and User Actions */}

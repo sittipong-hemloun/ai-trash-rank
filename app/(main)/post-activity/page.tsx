@@ -78,24 +78,27 @@ export default function PostActivityPage() {
     <div className="">
       <div className="max-w-2xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-semibold text-gray-900">ข่าวสารและกิจกรรม</h1>
-          <Link href="/post-activity/create">
-            <Button>เพิ่ม</Button>
-          </Link>
+          <h1 className="text-3xl font-semibold text-gray-900 text-white">ข่าวสารและกิจกรรม</h1>
         </div>
-        <div className="mb-6 flex space-x-4">
-          <Button
-            variant={activeTab === "posts" ? "default" : "outline"}
-            onClick={() => handleTabChange("posts")}
-          >
-            ข่าวสาร
-          </Button>
-          <Button
-            variant={activeTab === "activities" ? "default" : "outline"}
-            onClick={() => handleTabChange("activities")}
-          >
-            กิจกรรม
-          </Button>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex space-x-4">
+            <Button
+              variant={activeTab === "posts" ? "default" : "outline"}
+              onClick={() => handleTabChange("posts")}
+            >
+              ข่าวสาร
+            </Button>
+            <Button
+              variant={activeTab === "activities" ? "default" : "outline"}
+              onClick={() => handleTabChange("activities")}
+            >
+              กิจกรรม
+            </Button>
+          </div>
+
+          <Link href="/post-activity/create">
+            <Button className="bg-green-600 text-gray-100">เพิ่ม</Button>
+          </Link>
         </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-60">

@@ -1,5 +1,20 @@
 import { db } from './dbConfig'
-import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages, PostImages, Likes, Comments } from "./schema";
+import {
+  Users,
+  Reports,
+  Notifications,
+  Posts,
+  Activities,
+  Rewards,
+  Bins,
+  UserRewards,
+  ActivityImages,
+  PostImages,
+  Likes,
+  Comments,
+  UserRoles,
+  CoperateRegistrations,
+} from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
 // Helper function to extract numeric weight from a quantity string (e.g., "2 กก.")
@@ -9,11 +24,7 @@ function parseWeight(quantity: string): number {
 }
 
 /**
- * Creates a new user in the database.
- * @param email - User's email.
- * @param profileImage - URL to the user's profile image.
- * @param name - User's name.
- * @returns The created user or null if an error occurs.
+ * Creates a new user in the database with default role 'normal'.
  */
 export async function createUser(
   email: string,
@@ -26,6 +37,10 @@ export async function createUser(
       .values({ email, profileImage, name })
       .returning()
       .execute();
+
+    // assign default role "normal" to newly created user
+    await addUserRole(user.id, 'normal');
+
     return user;
   } catch (error) {
     console.error("Error creating user:", error);
@@ -36,7 +51,6 @@ export async function createUser(
 /**
  * Retrieves a user by their email.
  * @param email - User's email.
- * @returns The user or null if not found.
  */
 export async function getUserByEmail(email: string) {
   try {
@@ -55,7 +69,6 @@ export async function getUserByEmail(email: string) {
 /**
  * Retrieves a user by their ID.
  * @param userId - User's ID.
- * @returns The user or null if not found.
  */
 export async function getUserById(userId: number) {
   try {
@@ -115,9 +128,6 @@ export async function getAllUsers() {
 
 /**
  * Updates a user's points by adding the specified quantity.
- * @param userId - The ID of the user.
- * @param pointsToAdd - The number of points to add.
- * @returns The updated user or null if an error occurs.
  */
 export async function updateUserPoints(userId: number, pointsToAdd: number) {
   try {
@@ -138,9 +148,6 @@ export async function updateUserPoints(userId: number, pointsToAdd: number) {
 
 /**
  * Updates a user's score by adding the specified quantity.
- * @param userId - The ID of the user.
- * @param scoreToAdd - The number of score points to add.
- * @returns The updated user or null if an error occurs.
  */
 export async function updateUserScore(userId: number, scoreToAdd: number) {
   try {
@@ -161,14 +168,6 @@ export async function updateUserScore(userId: number, scoreToAdd: number) {
 
 /**
  * Creates a new trash report.
- * @param userId - The ID of the user creating the report.
- * @param location - Location of the trash.
- * @param trashType - Type of the trash.
- * @param quantity - Amount of the trash.
- * @param imageUrl - URL to the trash image.
- * @param verificationResult - Result of the trash verification.
- * @param coordinates - Coordinates in JSON string format.
- * @returns The created report or null if an error occurs.
  */
 export async function createReport(
   userId: number,
@@ -216,8 +215,6 @@ export async function createReport(
 
 /**
  * Retrieves reports by user ID.
- * @param userId - The ID of the user.
- * @returns An array of reports or an empty array if an error occurs.
  */
 export async function getReportsByUserId(userId: number) {
   try {
@@ -250,15 +247,13 @@ export async function getRecentReports(limit: number = 10) {
 
 /**
  * Retrieves recent trash collection tasks.
- * @param limit - The maximum number of tasks to retrieve.
- * @returns An array of tasks or an empty array if an error occurs.
  */
 export async function getTrashCollectionTasks(limit: number = 20) {
   try {
     const tasks = await db
       .select({
         id: Reports.id,
-        userId: Reports.userId, // Include the reporter's ID
+        userId: Reports.userId,
         location: Reports.location,
         trashType: Reports.trashType,
         quantity: Reports.quantity,
@@ -275,7 +270,7 @@ export async function getTrashCollectionTasks(limit: number = 20) {
 
     return tasks.map((task) => ({
       ...task,
-      date: task.date.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+      date: task.date.toISOString().split("T")[0],
     }));
   } catch (error) {
     console.error("Error fetching trash collection tasks:", error);
@@ -285,10 +280,6 @@ export async function getTrashCollectionTasks(limit: number = 20) {
 
 /**
  * Updates the status of a trash collection task.
- * @param reportId - The ID of the report/task.
- * @param newStatus - The new status to set.
- * @param collectorId - The ID of the collector (optional).
- * @returns The updated report or throws an error if the update fails.
  */
 export async function updateTaskStatus(
   reportId: number,
@@ -317,10 +308,6 @@ export async function updateTaskStatus(
 
 /**
  * Creates a new notification for a user.
- * @param userId - The ID of the user.
- * @param message - The notification message.
- * @param type - The type of notification.
- * @returns The created notification or null if an error occurs.
  */
 export async function createNotification(
   userId: number,
@@ -342,8 +329,6 @@ export async function createNotification(
 
 /**
  * Retrieves unread notifications for a user.
- * @param userId - The ID of the user.
- * @returns An array of unread notifications or an empty array if an error occurs.
  */
 export async function getUnreadNotifications(userId: number) {
   try {
@@ -362,7 +347,6 @@ export async function getUnreadNotifications(userId: number) {
 
 /**
  * Marks a notification as read.
- * @param notificationId - The ID of the notification to mark as read.
  */
 export async function markNotificationAsRead(notificationId: number) {
   try {
@@ -378,10 +362,6 @@ export async function markNotificationAsRead(notificationId: number) {
 
 /**
  * Creates a new bin in the database.
- * @param location - Location of the bin.
- * @param coordinates - Coordinates of the bin.
- * @param status - Status of the bin.
- * @returns The created bin or null if an error occurs.
  */
 export async function createBin(userId: number, location: string, coordinates: string, status: 'active' | 'inactive', type: string) {
   try {
@@ -395,7 +375,6 @@ export async function createBin(userId: number, location: string, coordinates: s
 
 /**
  * Retrieves all bins from the database.
- * @returns An array of bins or an empty array if an error occurs.
  */
 export async function getAllBins() {
   try {
@@ -506,9 +485,6 @@ export async function getActivityImagesByActivityId(activityId: number) {
 
 /**
  * Creates a new post image.
- * @param postId - The ID of the post.
- * @param url - The URL or base64 string of the image.
- * @returns The created post image record or null if an error occurs.
  */
 export async function createPostImage(postId: number, url: string) {
   try {
@@ -725,6 +701,9 @@ export async function deleteActivity(activityId: number) {
  */
 export async function deletePost(postId: number) {
   try {
+    // ลบ post_images ที่เกี่ยวข้อง
+    await db.delete(PostImages).where(eq(PostImages.postId, postId)).execute();
+    // จากนั้นลบ post
     await db.delete(Posts).where(eq(Posts.id, postId)).execute();
     return true;
   } catch (error) {
@@ -833,11 +812,6 @@ export async function getActivityRedemptions(activityId: number) {
 
 /**
  * Adds a like for a given target (post or activity).
- * Toggles the like: if already liked, it will unlike.
- * @param userId - The ID of the user liking.
- * @param targetType - The type of target ('post' or 'activity').
- * @param targetId - The ID of the target.
- * @returns An object indicating the action performed ('added' or 'removed') and the like record if added.
  */
 export async function addLike(userId: number, targetType: string, targetId: number) {
   try {
@@ -853,7 +827,6 @@ export async function addLike(userId: number, targetType: string, targetId: numb
         .delete(Likes)
         .where(and(eq(Likes.userId, userId), eq(Likes.targetType, targetType), eq(Likes.targetId, targetId)))
         .execute();
-      console.log("Like removed:", existingLikes[0]);
       return { action: "removed", like: existingLikes[0] };
     }
     const [like] = await db
@@ -861,7 +834,6 @@ export async function addLike(userId: number, targetType: string, targetId: numb
       .values({ userId, targetType, targetId })
       .returning()
       .execute();
-    console.log("Like added:", like);
     return { action: "added", like };
   } catch (error) {
     console.error("Error toggling like:", error);
@@ -871,9 +843,6 @@ export async function addLike(userId: number, targetType: string, targetId: numb
 
 /**
  * Retrieves likes for a given target.
- * @param targetType - The type of target ('post' or 'activity').
- * @param targetId - The ID of the target.
- * @returns An array of likes.
  */
 export async function getLikes(targetType: string, targetId: number) {
   try {
@@ -891,11 +860,6 @@ export async function getLikes(targetType: string, targetId: number) {
 
 /**
  * Adds a comment for a given target (post or activity).
- * @param userId - The ID of the user commenting.
- * @param targetType - The type of target ('post' or 'activity').
- * @param targetId - The ID of the target.
- * @param content - The comment content.
- * @returns The created comment record or null if an error occurs.
  */
 export async function addComment(userId: number,
   userName: string,
@@ -908,7 +872,9 @@ export async function addComment(userId: number,
         userId,
         userName,
         userProfileImage,
-        targetType, targetId, content
+        targetType,
+        targetId,
+        content
       })
       .returning()
       .execute();
@@ -921,9 +887,6 @@ export async function addComment(userId: number,
 
 /**
  * Retrieves comments for a given target.
- * @param targetType - The type of target ('post' or 'activity').
- * @param targetId - The ID of the target.
- * @returns An array of comments.
  */
 export async function getComments(targetType: string, targetId: number) {
   try {
@@ -937,5 +900,141 @@ export async function getComments(targetType: string, targetId: number) {
   } catch (error) {
     console.error("Error fetching comments:", error);
     return [];
+  }
+}
+
+/* ----------------------------------------------
+   NEW FUNCTIONS FOR MULTI-ROLE & COPERATE REG
+   ---------------------------------------------- */
+
+/**
+ * เพิ่ม Role ให้กับ User
+ */
+export async function addUserRole(userId: number, role: string) {
+  try {
+    // Check if user already has this role
+    const existing = await db
+      .select()
+      .from(UserRoles)
+      .where(and(eq(UserRoles.userId, userId), eq(UserRoles.role, role)))
+      .execute();
+    if (existing.length > 0) {
+      return existing[0]; // already has this role
+    }
+
+    const [newRole] = await db
+      .insert(UserRoles)
+      .values({ userId, role })
+      .returning()
+      .execute();
+    return newRole;
+  } catch (error) {
+    console.error("Error adding user role:", error);
+    return null;
+  }
+}
+
+/**
+ * ตรวจสอบว่า User มี role ที่กำหนดหรือไม่
+ */
+export async function userHasRole(userId: number, role: string): Promise<boolean> {
+  try {
+    const existing = await db
+      .select()
+      .from(UserRoles)
+      .where(and(eq(UserRoles.userId, userId), eq(UserRoles.role, role)))
+      .execute();
+    return existing.length > 0;
+  } catch (error) {
+    console.error("Error checking user role:", error);
+    return false;
+  }
+}
+
+/**
+ * ดึง role ทั้งหมดของ User
+ */
+export async function getUserRoles(userId: number): Promise<string[]> {
+  try {
+    const rows = await db
+      .select()
+      .from(UserRoles)
+      .where(eq(UserRoles.userId, userId))
+      .execute();
+    return rows.map(r => r.role);
+  } catch (error) {
+    console.error("Error fetching user roles:", error);
+    return [];
+  }
+}
+
+/* ---------------------------------------
+   Coperate Registration
+   --------------------------------------- */
+
+/**
+ * สร้างคำขอลงทะเบียนองค์กร (coperate)
+ */
+export async function createCoperateRegistration(
+  userId: number,
+  orgName: string,
+  orgType: string,
+  orgDetail: string,
+  orgImage: string
+) {
+  try {
+    console.log("Cop",CoperateRegistrations);
+    const [result] = await db
+      .insert(CoperateRegistrations)
+      .values({
+        userId,
+        orgName,
+        orgType,
+        orgDetail,
+        orgImage,
+        status: "pending",
+      })
+      .returning()
+      .execute();
+    return result;
+  } catch (error) {
+    console.error("Error creating coperate registration:", error);
+    return null;
+  }
+}
+
+/**
+ * ดึงคำขอลงทะเบียนองค์กรทั้งหมดตามสถานะ
+ */
+export async function getCoperateRegistrationsByStatus(status: string) {
+  try {
+    const results = await db
+      .select()
+      .from(CoperateRegistrations)
+      .where(eq(CoperateRegistrations.status, status))
+      .orderBy(desc(CoperateRegistrations.createdAt))
+      .execute();
+    return results;
+  } catch (error) {
+    console.error("Error fetching coperate registrations:", error);
+    return [];
+  }
+}
+
+/**
+ * อัปเดตสถานะคำขอลงทะเบียนองค์กร
+ */
+export async function updateCoperateRegistrationStatus(id: number, newStatus: string) {
+  try {
+    const [updated] = await db
+      .update(CoperateRegistrations)
+      .set({ status: newStatus })
+      .where(eq(CoperateRegistrations.id, id))
+      .returning()
+      .execute();
+    return updated;
+  } catch (error) {
+    console.error("Error updating coperate registration status:", error);
+    return null;
   }
 }

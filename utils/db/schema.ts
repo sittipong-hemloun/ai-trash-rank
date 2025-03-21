@@ -25,6 +25,17 @@ export const Users = pgTable("users", {
 })
 
 /**
+ * NEW: UserRoles table schema for multi-role support.
+ * A user can hold multiple roles, e.g. normal, coperate, admin.
+ */
+export const UserRoles = pgTable("user_roles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  role: varchar("role", { length: 50 }).notNull(),  // e.g. "normal", "coperate", "admin"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
  * Posts table schema.
  * Represents general posts such as news.
  */
@@ -98,9 +109,6 @@ export const UserRewards = pgTable("user_rewards", {
   rewardId: integer("reward_id").references(() => Rewards.id).notNull(),
   redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
 })
-// }, (table) => ({
-//   primaryKey: [table.userId, table.rewardId],
-// }))
 
 /**
  * Reports table schema.
@@ -168,5 +176,20 @@ export const Comments = pgTable("comments", {
   targetType: varchar("target_type", { length: 50 }).notNull(), // 'post' or 'activity'
   targetId: integer("target_id").notNull(),
   content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+/**
+ * NEW: CoperateRegistrations table
+ * Stores pending requests for coperate registration.
+ */
+export const CoperateRegistrations = pgTable("coperate_registrations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => Users.id).notNull(),
+  orgName: text("org_name"),
+  orgType: text("org_type"),
+  orgDetail: text("org_detail"),
+  orgImage: text("org_image"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, approved, rejected, etc.
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
