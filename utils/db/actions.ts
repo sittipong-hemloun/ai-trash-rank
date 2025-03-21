@@ -2,6 +2,12 @@ import { db } from './dbConfig'
 import { Users, Reports, Notifications, Posts, Activities, Rewards, Bins, UserRewards, ActivityImages, PostImages, Likes, Comments } from "./schema";
 import { eq, sql, and, desc } from "drizzle-orm";
 
+// Helper function to extract numeric weight from a quantity string (e.g., "2 กก.")
+function parseWeight(quantity: string): number {
+  const match = quantity.match(/([\d\.]+)/);
+  return match ? parseFloat(match[1]) : 1;
+}
+
 /**
  * Creates a new user in the database.
  * @param email - User's email.
@@ -189,16 +195,17 @@ export async function createReport(
       .returning()
       .execute();
 
-    // Award points for reporting trash
-    const pointsEarned = 10;
-    await updateUserPoints(userId, pointsEarned);
+    // Award points for reporting trash based on the weight (กิโลกรัม)
+    const weight = parseWeight(quantity)
+    const pointsEarned = Math.round(weight * 2)
+    await updateUserPoints(userId, pointsEarned)
 
     // Create a notification for the user
     await createNotification(
       userId,
       `คุณได้รับ ${pointsEarned} คะแนนจากการรายงานขยะ`,
       "รางวัล"
-    );
+    )
 
     return report;
   } catch (error) {

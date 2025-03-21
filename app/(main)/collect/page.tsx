@@ -48,6 +48,12 @@ export default function CollectPage() {
     null
   )
 
+  // Helper function to extract numeric weight from a quantity string (e.g., "2 กก.")
+  const parseWeight = (quantity: string): number => {
+    const match = quantity.match(/([\d\.]+)/)
+    return match ? parseFloat(match[1]) : 1
+  }
+
   /**
    * Handles the status change of a collection task.
    * @param taskId - The ID of the task to update.
@@ -232,9 +238,10 @@ export default function CollectPage() {
       if (parsedResult.trashIsCollected && parsedResult.confidence > 0.7) {
         await handleStatusChange(selectedTask.id, 'verified')
 
-        // Give some points & score
-        const earnedPoints = 50
-        const earnedScore = 20
+        // Calculate points and score based on trash weight extracted from task.quantity
+        const weight = parseWeight(selectedTask.quantity)
+        const earnedPoints = Math.round(weight * 5)
+        const earnedScore = Math.round(weight * 2)
 
         await updateUserPoints(user.id, earnedPoints)
         await updateUserScore(user.id, earnedScore)
