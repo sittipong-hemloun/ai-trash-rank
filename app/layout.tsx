@@ -5,7 +5,8 @@ import { useEffect, useState } from "react"
 import { Inter } from 'next/font/google'
 import "./globals.css"
 import { Toaster } from 'react-hot-toast'
-import { getUserByEmail } from '@/utils/db/actions'
+// import { getUserByEmail } from '@/utils/db/actions'
+import { SessionProvider } from "next-auth/react"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,26 +31,26 @@ export default function RootLayout({
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const fetchTotalEarnings = async () => {
-      try {
-        const userEmail = localStorage.getItem('userEmail')
-        if (userEmail) {
-          const user = await getUserByEmail(userEmail)
-          console.log('User from layout:', user)
+  // useEffect(() => {
+  //   const fetchTotalEarnings = async () => {
+  //     try {
+  //       const userEmail = localStorage.getItem('userEmail')
+  //       if (userEmail) {
+  //         const user = await getUserByEmail(userEmail)
+  //         console.log('User from layout:', user)
 
-          if (user) {
-            const userScore = user.score
-            console.log('User score from layout:', userScore)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching total earnings:', error)
-      }
-    }
+  //         if (user) {
+  //           const userScore = user.score
+  //           console.log('User score from layout:', userScore)
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching total earnings:', error)
+  //     }
+  //   }
 
-    fetchTotalEarnings()
-  }, [])
+  //   fetchTotalEarnings()
+  // }, [])
 
   return (
     <html lang="th">
@@ -63,19 +64,22 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={inter.className}>
-        {children}
-        <Toaster />
-        {!cookieConsent && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 9999
-          }} />
-        )}
+        <SessionProvider>
+
+          {children}
+          <Toaster />
+          {!cookieConsent && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              zIndex: 9999
+            }} />
+          )}
+        </SessionProvider>
       </body>
     </html>
   )

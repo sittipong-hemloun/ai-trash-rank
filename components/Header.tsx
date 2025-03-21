@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Web3Auth } from "@web3auth/modal"
-import { CHAIN_NAMESPACES, UserInfo, WEB3AUTH_NETWORK } from "@web3auth/base"
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
+// import { Web3Auth } from "@web3auth/modal"
+// import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base"
+// import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
 import {
   createUser,
   getUnreadNotifications,
@@ -22,30 +22,32 @@ import {
 } from "@/utils/db/actions"
 import Image from "next/image"
 import NotificationType from "@/types/noti"
-import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
+import useUser from "@/hooks/useUser"
 
-const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
+// const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
 
-const chainConfig = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0xaa36a7",
-  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-  displayName: "Ethereum Sepolia Testnet",
-  blockExplorerUrl: "https://sepolia.etherscan.io",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-}
+// const chainConfig = {
+//   chainNamespace: CHAIN_NAMESPACES.EIP155,
+//   chainId: "0xaa36a7",
+//   rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+//   displayName: "Ethereum Sepolia Testnet",
+//   blockExplorerUrl: "https://sepolia.etherscan.io",
+//   ticker: "ETH",
+//   tickerName: "Ethereum",
+//   logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+// }
 
-const privateKeyProvider = new EthereumPrivateKeyProvider({
-  config: { chainConfig },
-})
+// const privateKeyProvider = new EthereumPrivateKeyProvider({
+//   config: { chainConfig },
+// })
 
-const web3auth = new Web3Auth({
-  clientId,
-  web3AuthNetwork: WEB3AUTH_NETWORK.TESTNET, // Changed from SAPPHIRE_MAINNET to TESTNET
-  privateKeyProvider,
-})
+// // Change from WEB3AUTH_NETWORK.TESTNET to WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+// const web3auth = new Web3Auth({
+//   clientId,
+//   web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+//   privateKeyProvider,
+// })
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -55,50 +57,87 @@ interface HeaderProps {
  * Header component containing navigation and user actions.
  */
 export default function Header({ onMenuClick }: HeaderProps) {
-  const [loggedIn, setLoggedIn] = useState(false)
+  const { user: userInfo } = useUser()
+  const { data: session } = useSession()
+  // const [, setLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  // const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [notifications, setNotifications] = useState<NotificationType[]>([])
   const [point, setPoint] = useState(0)
-  const router = useRouter()
 
-  console.log('User info:', userInfo)
+  // console.log('User info:', user)
+
+  useEffect(() => {
+    async function handleUserSync() {
+      if (session?.user?.email) {
+        try {
+          // 1) Create or update user in DB
+          await createUser(
+            session.user.email,
+            session.user.image ?? 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+            session.user.name ?? 'ไม่ระบุตัวตน'
+          )
+          // 2) Retrieve user from DB to get points
+          const dbUser = await getUserByEmail(session.user.email)
+          if (dbUser?.point) {
+            setPoint(dbUser.point)
+          }
+        } catch (error) {
+          console.error("Error syncing user with DB:", error)
+        }
+      }
+      // const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
+      // const userDBProfileImage = userFromDB?.profileImage || ""
+      // setUserInfo({
+      //   ...userFromDB,
+      //   profileImage: userDBProfileImage,
+      // } as UserInfo)
+
+
+
+      setLoading(false)
+    }
+    handleUserSync()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+
 
   /**
    * Initializes Web3Auth and fetches user information if already connected.
    */
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setLoggedIn(true)
-        const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
-        const userDBProfileImage = userFromDB?.profileImage || ""
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       setLoggedIn(true)
+  //       const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
+  //       const userDBProfileImage = userFromDB?.profileImage || ""
 
-        setUserInfo({
-          ...userFromDB,
-          profileImage: userDBProfileImage,
-        } as UserInfo)
-        if (userFromDB) {
-          localStorage.setItem('userEmail', userFromDB.email)
-          try {
-            await createUser(
-              userFromDB.email,
-              userFromDB.profileImage || "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Chill_guy_original_artwork.jpg/220px-Chill_guy_original_artwork.jpg",
-              userFromDB.name || 'ไม่ระบุตัวตน'
-            )
-          } catch (error) {
-            console.error("Error creating user:", error)
-          }
-        }
-      } catch (error) {
-        console.error("Error initializing Web3Auth:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  //       setUserInfo({
+  //         ...userFromDB,
+  //         profileImage: userDBProfileImage,
+  //       } as UserInfo)
+  //       if (userFromDB) {
+  //         localStorage.setItem('userEmail', userFromDB.email)
+  //         try {
+  //           await createUser(
+  //             userFromDB.email,
+  //             userFromDB.profileImage || "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Chill_guy_original_artwork.jpg/220px-Chill_guy_original_artwork.jpg",
+  //             userFromDB.name || 'ไม่ระบุตัวตน'
+  //           )
+  //         } catch (error) {
+  //           console.error("Error creating user:", error)
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error initializing Web3Auth:", error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
 
-    init()
-  }, [])
+  //   init()
+  // }, [])
 
   /**
    * Fetches unread notifications periodically.
@@ -152,85 +191,89 @@ export default function Header({ onMenuClick }: HeaderProps) {
   /**
    * Handles user login using Web3Auth.
    */
-  const login = async () => {
-    if (!web3auth) {
-      console.log("Web3Auth not initialized yet")
-      return
-    }
-    try {
-      await web3auth.connect()
-      setLoggedIn(true)
-      console.log('Logged in')
+  // const login = async () => {
+  //   if (!web3auth) {
+  //     console.log("Web3Auth not initialized yet")
+  //     return
+  //   }
+  //   try {
+  //     await web3auth.connect()
+  //     setLoggedIn(true)
+  //     console.log('Logged in')
 
-      const user = await web3auth.getUserInfo()
-      console.log("User info:", user)
-      setUserInfo({
-        ...user,
-        verifier: user.verifier || "",
-      } as UserInfo)
+  //     const user = await web3auth.getUserInfo()
+  //     console.log("User info:", user)
+  //     // setUserInfo({
+  //     //   ...user,
+  //     //   verifier: user.verifier || "",
+  //     // } as UserInfo)
 
-      if (user.email) {
-        localStorage.setItem('userEmail', user.email)
-        try {
-          await createUser(
-            user.email,
-            user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
-            user.name || 'ไม่ระบุตัวตน'
-          )
-        } catch (error) {
-          console.error("Error creating user:", error)
-          // Optionally handle the error
-        }
-      }
-    } catch (error) {
-      console.error("Error during login:", error)
-    }
-  }
+  //     if (user.email) {
+  //       localStorage.setItem('userEmail', user.email)
+  //       try {
+  //         await createUser(
+  //           user.email,
+  //           user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+  //           user.name || 'ไม่ระบุตัวตน'
+  //         )
+  //       } catch (error) {
+  //         console.error("Error creating user:", error)
+  //         // Optionally handle the error
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during login:", error)
+  //   }
+  // }
 
   /**
    * Handles user logout using Web3Auth.
    */
+  // const logout = async () => {
+  //   try {
+  //     localStorage.removeItem('userEmail')
+  //     setLoggedIn(false)
+  //     setUserInfo(null)
+  //     router.push('/')
+  //   } catch (error) {
+  //     console.error("Error during logout:", error)
+  //   }
+  // }
   const logout = async () => {
-    try {
-      localStorage.removeItem('userEmail')
-      setLoggedIn(false)
-      setUserInfo(null)
-      router.push('/')
-    } catch (error) {
-      console.error("Error during logout:", error)
-    }
+    await signOut(({ callbackUrl: '/' }))
+    // setUserInfo(null)
   }
 
   /**
    * Fetches user information if connected.
    */
-  const getUserInfo = async () => {
-    if (web3auth.connected) {
-      const user = await web3auth.getUserInfo()
-      const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
-      const userDBProfileImage = userFromDB?.profileImage || ""
-      if (user) {
-        setUserInfo({
-          ...user,
-          profileImage: userDBProfileImage,
-          verifier: user.verifier || "",
-        } as UserInfo)
-        if (user.email) {
-          localStorage.setItem('userEmail', user.email)
-          try {
-            await createUser(
-              user.email,
-              user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
-              user.name || 'ไม่ระบุตัวตน'
-            )
-          } catch (error) {
-            console.error("Error creating user:", error)
-            // Optionally handle the error
-          }
-        }
-      }
-    }
-  }
+  // const getUserInfo = async () => {
+  //   if (web3auth.connected) {
+  //     const user = await web3auth.getUserInfo()
+  //     const userFromDB = await getUserByEmail(localStorage.getItem('userEmail') || "")
+  //     const userDBProfileImage = userFromDB?.profileImage || ""
+  //     if (user) {
+  //       setUserInfo({
+  //         ...user,
+  //         profileImage: userDBProfileImage,
+  //         verifier: user.verifier || "",
+  //       } as UserInfo)
+  //       if (user.email) {
+  //         localStorage.setItem('userEmail', user.email)
+  //         try {
+  //           await createUser(
+  //             user.email,
+  //             user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+  //             user.name || 'ไม่ระบุตัวตน'
+  //           )
+  //         } catch (error) {
+  //           console.error("Error creating user:", error)
+  //           // Optionally handle the error
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   if (loading) {
     return <header className="bg-green-950 shadow-2xl sticky top-0 z-50 border-b border-black">
@@ -358,10 +401,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </div>
 
           {/* Login/Logout Button */}
-          {!loggedIn ? (
-            <Button onClick={login} className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base">
-              เข้าสู่ระบบ
-            </Button>
+          {!session?.user ? (
+            // <Button onClick={login} className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base">
+            //   เข้าสู่ระบบ
+            // </Button>
+            <div className="flex items-center">
+            </div>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -376,7 +421,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={getUserInfo}>
+                <DropdownMenuItem>
                   {userInfo ? userInfo.name : "Fetch User Info"}
                 </DropdownMenuItem>
                 <DropdownMenuItem>

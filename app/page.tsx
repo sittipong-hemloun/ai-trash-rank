@@ -6,35 +6,37 @@ import Link from 'next/link'
 import { getRecentReports, getAllUsers, createUser } from '@/utils/db/actions'
 import Image from 'next/image'
 import LogoImg from '@/public/logo.png'
-import { Web3Auth } from "@web3auth/modal"
-import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base"
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
+// import { Web3Auth } from "@web3auth/modal"
+// import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base"
+// import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
+import { useSession, signIn } from 'next-auth/react'
 
-const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
+// const clientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID || ""
 
-const chainConfig = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0xaa36a7",
-  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-  displayName: "Ethereum Sepolia Testnet",
-  blockExplorerUrl: "https://sepolia.etherscan.io",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-}
+// const chainConfig = {
+//   chainNamespace: CHAIN_NAMESPACES.EIP155,
+//   chainId: "0xaa36a7",
+//   rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+//   displayName: "Ethereum Sepolia Testnet",
+//   blockExplorerUrl: "https://sepolia.etherscan.io",
+//   ticker: "ETH",
+//   tickerName: "Ethereum",
+//   logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+// }
 
-const privateKeyProvider = new EthereumPrivateKeyProvider({
-  config: { chainConfig },
-})
+// const privateKeyProvider = new EthereumPrivateKeyProvider({
+//   config: { chainConfig },
+// })
 
-const web3auth = new Web3Auth({
-  clientId,
-  web3AuthNetwork: WEB3AUTH_NETWORK.TESTNET, // Changed from SAPPHIRE_MAINNET to TESTNET
-  privateKeyProvider,
-})
+// const web3auth = new Web3Auth({
+//   clientId,
+//   web3AuthNetwork: WEB3AUTH_NETWORK.TESTNET, // Changed from SAPPHIRE_MAINNET to TESTNET
+//   privateKeyProvider,
+// })
 
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { data: session } = useSession()
+  // const [, setLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [impactData, setImpactData] = useState({
     trashCollected: 0,
@@ -89,59 +91,114 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        console.log(web3auth.connected)
-        if (web3auth.connected) {
-          if (!localStorage.getItem('userEmail')) {
-            await web3auth.logout()
-            console.log('Logged out')
-            console.log(web3auth.connected)
-            window.location.reload()
-          }
-        } else {
-          if (localStorage.getItem('userEmail')) {
-            setLoggedIn(true)
-          } else {
-            setIsLoading(false)
-          }
+    async function checkAndCreateUser() {
+      if (session?.user?.email) {
+        // Create user in your DB if doesn't exist
+        try {
+          await createUser(
+            session.user.email,
+            session.user.image || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+            session.user.name || 'ไม่ระบุตัวตน'
+          )
+        } catch (error) {
+          console.error('Error creating user:', error)
         }
+      }
+    }
+    checkAndCreateUser()
+  }, [session])
+
+  useEffect(() => {
+    async function fetchImpactData() {
+      try {
+        const reports = await getRecentReports()
+        const totalUsers = (await getAllUsers()).reduce((total) => total + 1, 0)
+        const reportsStatusIsSuccess = reports.filter((report) => report.status === 'verified')
+        const trashCollected = reportsStatusIsSuccess.reduce((total, task) => {
+          // remove "กก ." from quantity
+          const amount = parseFloat(task.quantity.replace(/ กก\./g, ''))
+          return total + amount
+        }, 0)
+
+        setImpactData({
+          trashCollected: Math.round(trashCollected * 10) / 10,
+          reportsSubmitted: reports.length,
+          totalUsers,
+        })
       } catch (error) {
-        console.error("Error initializing Web3Auth:", error)
+        console.error("Error fetching impact data:", error)
+        setImpactData({
+          trashCollected: 0,
+          reportsSubmitted: 0,
+          totalUsers: 0,
+        })
       }
     }
 
-    init()
+    fetchImpactData()
+  }, [])
+
+  // Just an example loader or mimic
+  useEffect(() => {
     setIsLoading(false)
   }, [])
 
-  const login = async () => {
-    // if Adapter is already initialized then make it not initialized
-    if (web3auth.connected) {
-      await web3auth.logout()
-    }
 
-    console.log(web3auth.connected)
-    await web3auth.initModal()
-    try {
-      console.log("Web3Auth connected:", web3auth.connected)
-      await web3auth.connect()
-      console.log('Logged in')
-      const user = await web3auth.getUserInfo()
-      console.log("User info:", user)
-      if (user.email) {
-        localStorage.setItem('userEmail', user.email)
-        await createUser(
-          user.email,
-          user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
-          user.name || 'ไม่ระบุตัวตน'
-        )
-        setLoggedIn(true)
-      }
-    } catch (error) {
-      console.error("Error during login:", error)
-    }
-  }
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       console.log(web3auth.connected)
+  //       if (web3auth.connected) {
+  //         if (!localStorage.getItem('userEmail')) {
+  //           await web3auth.logout()
+  //           console.log('Logged out')
+  //           console.log(web3auth.connected)
+  //           window.location.reload()
+  //         }
+  //       } else {
+  //         if (localStorage.getItem('userEmail')) {
+  //           setLoggedIn(true)
+  //         } else {
+  //           setIsLoading(false)
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error initializing Web3Auth:", error)
+  //     }
+  //   }
+
+  //   init()
+  //   setIsLoading(false)
+  // }, [])
+
+  // const login = async () => {
+  //   console.log("Logging in...")
+  //   // if Adapter is already initialized then make it not initialized
+  //   if (web3auth.connected) {
+  //     await web3auth.logout()
+  //   }
+
+  //   console.log(web3auth.connected)
+  //   await web3auth.initModal()
+  //   try {
+  //     console.log("Web3Auth connected:", web3auth.connected)
+  //     await web3auth.connect()
+  //     console.log('Logged in')
+  //     const user = await web3auth.getUserInfo()
+  //     console.log("User info:", user)
+  //     if (user.email) {
+  //       localStorage.setItem('userEmail', user.email)
+  //       await createUser(
+  //         user.email,
+  //         user.profileImage || 'https://i.pinimg.com/736x/3c/f6/ef/3cf6ef8b32bdb41c8b350f15ee5ac4a5.jpg',
+  //         user.name || 'ไม่ระบุตัวตน'
+  //       )
+  //       setLoggedIn(true)
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during login:", error)
+  //   }
+  // }
 
   // const handleInstallClick = () => {
   //   if (deferredPrompt) {
@@ -156,6 +213,11 @@ export default function Home() {
   //     });
   //   }
   // };
+
+  const login = async () => {
+    await signIn('google')
+  }
+
 
   // useEffect(() => {
   //   const handler = () => setIsInstalled(true);
@@ -203,44 +265,27 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Call to Action Buttons */}
+          {/* Call to Action */}
           <div className="flex flex-col items-center md:flex-row md:justify-center gap-6">
-            {/* Install PWA Button for Mobile Devices */}
-            {/* {!isInstalled && (
-              <div className="md:hidden">
-                <button
-                  onClick={handleInstallClick}
-                  className="flex items-center bg-slate-600 hover:bg-slate-700 text-white text-lg py-3 px-6 rounded-full shadow-md transition transform hover:scale-105"
-                >
-                  ติดตั้งแอป
-                  <Download className="ml-2 h-5 w-5" />
-                </button>
-              </div>
-            )} */}
-
-            {/* Login or Report Button */}
             {isLoading ? (
-              <Button className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium transition-all"
-                disabled={true}
-              >
+              <Button disabled className="bg-green-600 text-white text-lg py-6 px-10 rounded-full font-medium">
                 กำลังโหลด...
               </Button>
+            ) : session?.user?.email ? (
+              <Link href="/report">
+                <Button className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105">
+                  รายงานขยะ
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             ) : (
-              <>
-                {!loggedIn ? (
-                  <Button onClick={login} className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105">
-                    เข้าสู่ระบบ
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                ) : (
-                  <Link href="/report">
-                    <Button className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105">
-                      รายงานขยะ
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                )}
-              </>
+              <Button
+                onClick={login}
+                className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105"
+              >
+                เข้าสู่ระบบด้วย Google
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             )}
           </div>
         </section>
